@@ -11,9 +11,9 @@ export default function ActivitiesHome() {
       <h1 className="text-2xl font-bold">Activities</h1>
       {data.map((activity) => (
         <Link key={activity.id} to={`/activities/${activity.id}`}>
-          <Card>
-            <CardHeader><CardTitle className="text-lg">{activity.title || activity.name || `Activity #${activity.id}`}</CardTitle></CardHeader>
-            <CardContent><p className="text-sm text-muted-foreground">{activity.description || 'No description'}</p></CardContent>
+          <Card className="mb-3 hover:bg-accent">
+            <CardHeader><CardTitle>{activity.title || activity.name || `Activity #${activity.id}`}</CardTitle></CardHeader>
+            <CardContent><p className="text-sm text-muted-foreground line-clamp-2">{activity.description || 'No description'}</p></CardContent>
           </Card>
         </Link>
       ))}

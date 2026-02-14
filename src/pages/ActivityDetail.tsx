@@ -10,14 +10,14 @@ export default function ActivityDetail() {
   const [inviteOpen, setInviteOpen] = useState(false);
   const { data } = useQuery({ queryKey: ['activity', id], queryFn: () => getActivityDetail(id) });
 
-  if (!data) return <p className="p-8 text-center">Loading...</p>;
+  if (!data) return <div className="p-4">Loading...</div>;
 
   return (
     <div className="space-y-4 p-4 pb-24">
       <h1 className="text-2xl font-bold">{data.title || data.name}</h1>
       <p className="text-muted-foreground">{data.description}</p>
       <Button onClick={() => setInviteOpen(true)}>Invite creator</Button>
-      <InviteExperienceSheet open={inviteOpen} onOpenChange={setInviteOpen} activityId={data.id} />
+      <InviteExperienceSheet open={inviteOpen} onOpenChange={setInviteOpen} activityId={Number(id)} />
     </div>
   );
 }

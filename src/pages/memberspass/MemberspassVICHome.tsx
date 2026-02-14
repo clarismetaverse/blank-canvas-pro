@@ -12,13 +12,13 @@ export default function MemberspassVICHome() {
   const [selected, setSelected] = useState<Creator | null>(null);
 
   return (
-    <div className="space-y-6 p-4 pb-24">
-      <Helmet><title>VIC – Very Important Creator</title></Helmet>
-      <h1 className="text-3xl font-bold">Very Important Creator</h1>
-      <p className="text-muted-foreground">Discover creators and invite them to experiences.</p>
-      <div className="grid gap-3 sm:grid-cols-2">
+    <div className="space-y-4 p-4 pb-24">
+      <Helmet><title>VIC Home</title></Helmet>
+      <h1 className="text-2xl font-bold">Very Important Creator</h1>
+      <p className="text-sm text-muted-foreground">Discover creators and invite them to experiences.</p>
+      <div className="space-y-3">
         {data.map((creator, idx) => (
-          <motion.div key={creator.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.05 }}>
+          <motion.div key={creator.id} initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.04 }}>
             <CreatorCard creator={creator} onClick={() => setSelected(creator)} />
           </motion.div>
         ))}

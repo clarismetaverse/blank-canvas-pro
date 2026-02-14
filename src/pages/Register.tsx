@@ -22,30 +22,18 @@ export default function Register() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
+    <div className="flex min-h-screen items-center justify-center p-6">
+      <Card className="w-full max-w-md">
         <CardHeader><CardTitle>Create account</CardTitle></CardHeader>
         <CardContent>
-          <form onSubmit={onSubmit} className="space-y-4">
-            <div className="space-y-1">
-              <Label>Name</Label>
-              <Input value={name} onChange={(e) => setName(e.target.value)} required />
-            </div>
-            <div className="space-y-1">
-              <Label>Email</Label>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </div>
-            <div className="space-y-1">
-              <Label>Password</Label>
-              <Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-            </div>
-            <div className="space-y-1">
-              <Label>Confirm password</Label>
-              <Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required />
-            </div>
+          <form className="space-y-4" onSubmit={onSubmit}>
+            <div className="space-y-2"><Label>Name</Label><Input value={name} onChange={(e) => setName(e.target.value)} required /></div>
+            <div className="space-y-2"><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
+            <div className="space-y-2"><Label>Password</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
+            <div className="space-y-2"><Label>Confirm password</Label><Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required /></div>
             <Button className="w-full">Register</Button>
           </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">Already registered? <Link to="/login" className="text-primary underline">Login</Link></p>
+          <p className="mt-4 text-sm text-muted-foreground">Already registered? <Link className="text-primary" to="/login">Login</Link></p>
         </CardContent>
       </Card>
     </div>

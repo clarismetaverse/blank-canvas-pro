@@ -10,7 +10,7 @@ export default function ActivitiesInvite() {
       <h1 className="text-2xl font-bold">Invite to activity</h1>
       <div className="space-y-2">
         {data.map((activity) => (
-          <Link key={activity.id} to={`/activities/${activity.id}`} className="block rounded-md bg-card p-3 text-card-foreground hover:ring-1 hover:ring-primary">
+          <Link key={activity.id} className="block rounded-md border p-3 hover:bg-accent" to={`/activities/${activity.id}`}>
             {activity.title || activity.name || `Activity #${activity.id}`}
           </Link>
         ))}

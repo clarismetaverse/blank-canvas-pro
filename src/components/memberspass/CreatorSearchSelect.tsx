@@ -19,11 +19,11 @@ export function CreatorSearchSelect({ onSelect }: { onSelect: (creator: Creator)
   }, [query]);
 
   return (
-    <div className="space-y-2">
-      <Input placeholder="Search creators…" value={query} onChange={(e) => setQuery(e.target.value)} />
-      <div className="max-h-48 space-y-1 overflow-y-auto">
+    <div className="space-y-3">
+      <Input placeholder="Search creator" value={query} onChange={(e) => setQuery(e.target.value)} />
+      <div className="space-y-2">
         {results.map((creator) => (
-          <button key={creator.id} className="w-full rounded-md px-3 py-2 text-left text-sm hover:bg-accent" onClick={() => onSelect(creator)}>
+          <button key={creator.id} className="w-full rounded-md border p-2 text-left hover:bg-accent" onClick={() => onSelect(creator)}>
             {creator.name}
           </button>
         ))}

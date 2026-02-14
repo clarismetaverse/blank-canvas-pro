@@ -27,25 +27,16 @@ export default function Login() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-4">
-      <Card className="w-full max-w-sm">
+    <div className="flex min-h-screen items-center justify-center p-6">
+      <Card className="w-full max-w-md">
         <CardHeader><CardTitle>Login VIC</CardTitle></CardHeader>
         <CardContent>
-          <form onSubmit={onSubmit} className="space-y-4">
-            <div className="space-y-1">
-              <Label>Email</Label>
-              <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            </div>
-            <div className="space-y-1">
-              <Label>Password</Label>
-              <div className="relative">
-                <Input type={show ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required />
-                <button type="button" className="absolute right-2 top-2 text-muted-foreground" onClick={() => setShow((s) => !s)}>{show ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}</button>
-              </div>
-            </div>
+          <form className="space-y-4" onSubmit={onSubmit}>
+            <div className="space-y-2"><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
+            <div className="space-y-2"><Label>Password</Label><div className="relative"><Input type={show ? 'text' : 'password'} value={password} onChange={(e) => setPassword(e.target.value)} required /><button type="button" className="absolute right-3 top-2.5" onClick={() => setShow((s) => !s)}>{show ? <EyeOff size={16} /> : <Eye size={16} />}</button></div></div>
             <Button className="w-full" disabled={loading}>{loading ? 'Accessing...' : 'Login'}</Button>
           </form>
-          <p className="mt-4 text-center text-sm text-muted-foreground">No account? <Link to="/register" className="text-primary underline">Register</Link></p>
+          <p className="mt-4 text-sm text-muted-foreground">No account? <Link className="text-primary" to="/register">Register</Link></p>
         </CardContent>
       </Card>
     </div>

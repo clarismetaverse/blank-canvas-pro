@@ -24,7 +24,7 @@ export function InviteExperienceSheet({ open, onOpenChange, activityId }: { open
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
-        <div className="space-y-4 pt-6">
+        <div className="space-y-4">
           <SheetTitle>Invite Creator</SheetTitle>
           <CreatorSearchSelect onSelect={setSelected} />
           <Button className="w-full" disabled={!selected || loading} onClick={onInvite}>

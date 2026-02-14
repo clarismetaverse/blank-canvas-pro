@@ -7,9 +7,9 @@ export function CreatorProfileSheet({ creator, open, onOpenChange }: { creator: 
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent>
         {creator && (
-          <div className="space-y-4 pt-6">
+          <div className="space-y-4">
             <SheetTitle>{creator.name}</SheetTitle>
-            <Avatar className="h-20 w-20">
+            <Avatar className="h-16 w-16">
               <AvatarImage src={creator.avatar} />
               <AvatarFallback>{creator.name.slice(0, 1)}</AvatarFallback>
             </Avatar>
