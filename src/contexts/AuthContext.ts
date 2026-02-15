@@ -1,8 +1,11 @@
 export interface User {
-  id?: number;
-  name?: string;
+  id: number;
+  Name: string;
   email?: string;
-  Profile_pic?: { url?: string } | null;
+  Diamonds?: number;
+  Invites?: number;
+  bio?: string;
+  Picture?: { url?: string } | null;
   [key: string]: unknown;
 }
 
