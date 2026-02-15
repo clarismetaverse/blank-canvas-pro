@@ -144,13 +144,6 @@ export default function MemberspassVICHome() {
             </span>
           </div>
 
-          <button
-            type="button"
-            onClick={() => navigate("/memberspass/vic/activities")}
-            className="w-full rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(0,0,0,0.18)]"
-          >
-            Create activity
-          </button>
 
           <CreatorSearchSelect
             value={query}
