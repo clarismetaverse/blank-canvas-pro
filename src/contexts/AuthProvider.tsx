@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await fetch(`${API_BASE}/auth_vic_login`, {
+    const response = await fetch(`${API_BASE}/user_login_Upgrade`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -48,10 +48,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   const register = async (name: string, email: string, password: string) => {
-    const response = await fetch(`${API_BASE}/auth/vic/signup`, {
+    const response = await fetch(`${API_BASE}/auth/signup`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ Name: name, email, password }),
+      body: JSON.stringify({ name, email, password }),
     });
     if (!response.ok) throw new Error('Register failed');
     await login(email, password);
