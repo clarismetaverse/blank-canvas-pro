@@ -2,6 +2,7 @@ import { createContext, useCallback, useEffect, useMemo, useState } from "react"
 import { useNavigate } from "react-router-dom";
 import type { AuthContextType, User } from "./AuthContext";
 import { UNAUTHORIZED_EVENT, apiFetch, getAuthToken, setAuthToken } from "@/services";
+import { fetchVicProfile } from "@/services/vic";
 
 interface AuthResponse {
   auth_token?: string;
@@ -14,10 +15,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const hydrateUser = useCallback(async () => {
-    const profile = await apiFetch<User>("/user_turbo");
-    setUser(profile);
-  }, []);
+  const hydrateUser = useCallback(async (token: string | null) => {
+    if (!token) {
+      setUser(null);
+      return false;
+    }
+
+    const profile = await fetchVicProfile(token);
+    if (!profile) {
+      setAuthToken(null);
+      setUser(null);
+      navigate("/login", { replace: true });
+      return false;
+    }
+
+    setUser(profile as User);
+    return true;
+  }, [navigate]);
 
   const logout = useCallback(() => {
     setAuthToken(null);
@@ -34,7 +48,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        await hydrateUser();
+        await hydrateUser(token);
       } catch {
         setAuthToken(null);
         setUser(null);
@@ -70,7 +84,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     setAuthToken(data.auth_token);
-    await hydrateUser();
+    await hydrateUser(data.auth_token);
   }, [hydrateUser]);
 
   const register = useCallback(async (name: string, email: string, password: string) => {
