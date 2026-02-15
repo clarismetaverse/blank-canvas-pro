@@ -13,11 +13,11 @@ import { Button } from '@/components/ui/button';
 function ProtectedLayout({ children }: { children: React.ReactNode }) {
   const { logout } = useAuth();
   return (
-    <div className="min-h-screen bg-background">
-      <header className="sticky top-0 z-40 border-b bg-background/80 px-4 py-3 backdrop-blur">
+    <div className="min-h-screen bg-[#FAFAFA]">
+      <header className="sticky top-0 z-40 border-b border-neutral-200 bg-white/90 px-4 py-3 backdrop-blur">
         <div className="mx-auto flex max-w-xl items-center justify-between">
-          <span className="font-semibold">VIC</span>
-          <Button variant="ghost" size="sm" onClick={logout}>Logout</Button>
+          <span className="text-sm font-semibold text-neutral-900">VIC</span>
+          <button onClick={logout} className="rounded-full border border-neutral-200 bg-white px-3 py-1 text-xs font-medium text-neutral-600 hover:text-neutral-900">Logout</button>
         </div>
       </header>
       <main className="mx-auto max-w-xl">{children}</main>
