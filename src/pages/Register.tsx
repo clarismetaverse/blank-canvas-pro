@@ -22,20 +22,21 @@ export default function Register() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center p-6">
-      <Card className="w-full max-w-md">
-        <CardHeader><CardTitle>Create account</CardTitle></CardHeader>
-        <CardContent>
-          <form className="space-y-4" onSubmit={onSubmit}>
-            <div className="space-y-2"><Label>Name</Label><Input value={name} onChange={(e) => setName(e.target.value)} required /></div>
-            <div className="space-y-2"><Label>Email</Label><Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
-            <div className="space-y-2"><Label>Password</Label><Input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
-            <div className="space-y-2"><Label>Confirm password</Label><Input type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required /></div>
-            <Button className="w-full">Register</Button>
-          </form>
-          <p className="mt-4 text-sm text-muted-foreground">Already registered? <Link className="text-primary" to="/login">Login</Link></p>
-        </CardContent>
-      </Card>
+    <div className="flex min-h-screen items-center justify-center bg-[#FAFAFA] p-6">
+      <div className="w-full max-w-md space-y-6 rounded-3xl border border-neutral-200 bg-white p-8 shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
+        <div className="space-y-1">
+          <h1 className="text-2xl font-semibold text-neutral-900">Create account</h1>
+          <p className="text-sm text-neutral-500">Join VIC</p>
+        </div>
+        <form className="space-y-4" onSubmit={onSubmit}>
+          <div className="space-y-2"><Label className="text-xs font-medium text-neutral-600">Name</Label><Input className="rounded-xl border-neutral-200 bg-[#FAFAFA] text-neutral-900 placeholder:text-neutral-400 focus-visible:ring-neutral-400" value={name} onChange={(e) => setName(e.target.value)} required /></div>
+          <div className="space-y-2"><Label className="text-xs font-medium text-neutral-600">Email</Label><Input className="rounded-xl border-neutral-200 bg-[#FAFAFA] text-neutral-900 placeholder:text-neutral-400 focus-visible:ring-neutral-400" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required /></div>
+          <div className="space-y-2"><Label className="text-xs font-medium text-neutral-600">Password</Label><Input className="rounded-xl border-neutral-200 bg-[#FAFAFA] text-neutral-900 placeholder:text-neutral-400 focus-visible:ring-neutral-400" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required /></div>
+          <div className="space-y-2"><Label className="text-xs font-medium text-neutral-600">Confirm password</Label><Input className="rounded-xl border-neutral-200 bg-[#FAFAFA] text-neutral-900 placeholder:text-neutral-400 focus-visible:ring-neutral-400" type="password" value={confirm} onChange={(e) => setConfirm(e.target.value)} required /></div>
+          <button type="submit" className="w-full rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-semibold text-white shadow-[0_12px_24px_rgba(0,0,0,0.18)]">Register</button>
+        </form>
+        <p className="text-center text-sm text-neutral-500">Already registered? <Link className="font-medium text-neutral-900 hover:underline" to="/login">Login</Link></p>
+      </div>
     </div>
   );
 }
