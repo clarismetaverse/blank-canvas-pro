@@ -15,7 +15,7 @@ function ProtectedLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#FAFAFA]">
       <main className="mx-auto max-w-xl pb-20">{children}</main>
-      <BottomNavigation logout={logout} />
+      <BottomNavigation />
     </div>
   );
 }
