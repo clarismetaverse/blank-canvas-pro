@@ -56,7 +56,7 @@ export interface XanoError {
   [key: string]: unknown;
 }
 
-const API = (import.meta.env.VITE_XANO_API || "https://xbut-eryu-hhsg.f2.xano.io/api:vGd6XDW3").replace(/\/$/, "");
+const API = ((import.meta as any).env?.VITE_XANO_API || "https://xbut-eryu-hhsg.f2.xano.io/api:vGd6XDW3").replace(/\/$/, "");
 export function getAuthToken(): string {
   try {
     if (typeof window !== "undefined") {
@@ -91,7 +91,7 @@ export async function request<T>(path: string, options: RequestInit = {}) {
   if (!headers.has("Authorization")) {
     let token = getAuthToken();
     if (!token) {
-      token = import.meta.env.VITE_XANO_TOKEN || "";
+      token = (import.meta as any).env?.VITE_XANO_TOKEN || "";
     }
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);
