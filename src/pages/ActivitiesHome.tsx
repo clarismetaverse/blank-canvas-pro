@@ -241,7 +241,30 @@ export default function ActivitiesHome() {
           className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-[0_12px_32px_rgba(0,0,0,0.06)]"
         >
           <h2 className="text-2xl font-semibold tracking-tight text-neutral-900">Create a moment</h2>
-          <p className="mt-2 text-sm text-neutral-500">Pick a template or build your own.</p>
+          <p className="mt-2 text-sm text-neutral-500">Pick a type to get started.</p>
+          <div className="mt-4 flex flex-col gap-2">
+            {[
+              { label: "Create a local activity", activityName: "Local Activity" },
+              { label: "Create a Trip", activityName: "Trip" },
+              { label: "Bali Activity", activityName: "Bali Activity", city: "Bali" },
+            ].map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() =>
+                  navigate(inviteRoute, {
+                    state: {
+                      activityName: item.activityName,
+                      city: item.city || "",
+                    },
+                  })
+                }
+                className="w-full rounded-2xl border border-neutral-200 bg-[#FAFAFA] px-4 py-3 text-left text-sm font-semibold text-neutral-800 shadow-[0_4px_12px_rgba(0,0,0,0.04)] transition hover:bg-neutral-100"
+              >
+                {item.label}
+              </button>
+            ))}
+          </div>
         </motion.section>
 
         <motion.section
