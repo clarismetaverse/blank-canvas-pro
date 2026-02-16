@@ -15,7 +15,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const hydrateUser = useCallback(async (token: string | null) => {
+  const hydrateUser = useCallback(async (token: string | null, isBootstrap = false) => {
     if (!token) {
       setUser(null);
       return false;
@@ -25,7 +25,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!profile) {
       setAuthToken(null);
       setUser(null);
-      navigate("/login", { replace: true });
+      if (isBootstrap) {
+        navigate("/login", { replace: true });
+      }
       return false;
     }
 
@@ -48,7 +50,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        await hydrateUser(token);
+        await hydrateUser(token, true);
       } catch {
         setAuthToken(null);
         setUser(null);
@@ -84,7 +86,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     setAuthToken(data.auth_token);
-    await hydrateUser(data.auth_token);
+    const success = await hydrateUser(data.auth_token, false);
+    if (!success) {
+      throw new Error("Failed to load profile after login");
+    }
   }, [hydrateUser]);
 
   const register = useCallback(async (name: string, email: string, password: string) => {
