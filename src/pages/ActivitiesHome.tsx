@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, ChevronLeft, Mail } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { fetchTrips, createEvent, type InviteLite, type TripActivity } from "@/services/activities";
+import InviteExperienceSheet from "@/components/vic/InviteExperienceSheet";
 type ActivitySeed = {
   title: string;
   city?: string;
@@ -101,6 +102,7 @@ export default function ActivitiesHome() {
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<ActivityFormState>({ name: "", city: "", date: "", tags: [] });
   const [myActivities, setMyActivities] = useState<TripActivity[]>([]);
+  const [inviteSheetOpen, setInviteSheetOpen] = useState(false);
 
   useEffect(() => {
     const loadTrips = async () => {
@@ -244,21 +246,14 @@ export default function ActivitiesHome() {
           <p className="mt-2 text-sm text-neutral-500">Pick a type to get started.</p>
           <div className="mt-4 flex flex-col gap-2">
             {[
-              { label: "Create a local activity", activityName: "Local Activity" },
-              { label: "Create a Trip", activityName: "Trip" },
-              { label: "Bali Activity", activityName: "Bali Activity", city: "Bali" },
+              { label: "Create a local activity" },
+              { label: "Create a Trip" },
+              { label: "Bali Activity" },
             ].map((item) => (
               <button
                 key={item.label}
                 type="button"
-                onClick={() =>
-                  navigate(inviteRoute, {
-                    state: {
-                      activityName: item.activityName,
-                      city: item.city || "",
-                    },
-                  })
-                }
+                onClick={() => setInviteSheetOpen(true)}
                 className="w-full rounded-2xl border border-neutral-200 bg-[#FAFAFA] px-4 py-3 text-left text-sm font-semibold text-neutral-800 shadow-[0_4px_12px_rgba(0,0,0,0.04)] transition hover:bg-neutral-100"
               >
                 {item.label}
@@ -452,6 +447,12 @@ export default function ActivitiesHome() {
           </>
         )}
       </AnimatePresence>
+
+      <InviteExperienceSheet
+        open={inviteSheetOpen}
+        onClose={() => setInviteSheetOpen(false)}
+        creator={null}
+      />
     </div>
   );
 }
