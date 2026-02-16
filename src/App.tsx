@@ -42,7 +42,7 @@ export default function App() {
           }
         />
         <Route
-          path="/activities/:id"
+          path="/activities/:activityId"
           element={
             <ProtectedLayout>
               <ActivityDetail />
