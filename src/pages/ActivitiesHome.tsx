@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, ChevronLeft, Mail } from "lucide-react";
+import { Check, ChevronLeft, Mail, MapPin, Plane, Palmtree, ChevronRight } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { fetchTrips, createEvent, type InviteLite, type TripActivity } from "@/services/activities";
 import InviteExperienceSheet from "@/components/vic/InviteExperienceSheet";
@@ -246,17 +246,21 @@ export default function ActivitiesHome() {
           <p className="mt-2 text-sm text-neutral-500">Pick a type to get started.</p>
           <div className="mt-4 flex flex-col gap-2">
             {[
-              { label: "Create a local activity" },
-              { label: "Create a Trip" },
-              { label: "Bali Activity" },
+              { label: "Create a local activity", icon: MapPin },
+              { label: "Create a Trip", icon: Plane },
+              { label: "Bali Activity", icon: Palmtree },
             ].map((item) => (
               <button
                 key={item.label}
                 type="button"
                 onClick={() => setInviteSheetOpen(true)}
-                className="w-full rounded-2xl border border-neutral-200 bg-[#FAFAFA] px-4 py-3 text-left text-sm font-semibold text-neutral-800 shadow-[0_4px_12px_rgba(0,0,0,0.04)] transition hover:bg-neutral-100"
+                className="flex w-full items-center gap-3 rounded-2xl border border-neutral-200 bg-white px-4 py-3.5 text-left text-sm font-semibold text-neutral-800 shadow-[0_4px_12px_rgba(0,0,0,0.04)] transition active:scale-[0.98] hover:bg-neutral-50"
               >
-                {item.label}
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-600">
+                  <item.icon className="h-4.5 w-4.5" />
+                </span>
+                <span className="flex-1">{item.label}</span>
+                <ChevronRight className="h-4 w-4 text-neutral-400" />
               </button>
             ))}
           </div>
