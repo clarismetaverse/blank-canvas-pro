@@ -215,3 +215,26 @@ export async function createEvent(payload: CreateEventPayload): Promise<CreateEv
     body: JSON.stringify(payload),
   });
 }
+
+export type EventTemp = {
+  id: number;
+  created_at: number;
+  Name: string;
+  cities_id: number | null;
+  Date_start: string | null;
+  Date_end: string | null;
+  Tags: string[];
+  Type: "local" | "trip" | "bali";
+  Cover: {
+    url: string;
+    name?: string;
+    mime?: string;
+    size?: number;
+    meta?: { width?: number; height?: number };
+  } | null;
+};
+
+export async function fetchEventTemps(): Promise<EventTemp[]> {
+  const { request } = await import("@/services/xano");
+  return request<EventTemp[]>("/event_temp");
+}
