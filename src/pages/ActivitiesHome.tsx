@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, ChevronLeft, Mail, MapPin, Plane, Palmtree, ChevronRight } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { fetchTrips, createEvent, type InviteLite, type TripActivity } from "@/services/activities";
+import { fetchTrips, createEvent, fetchEventTemps, type InviteLite, type TripActivity, type EventTemp } from "@/services/activities";
 import InviteExperienceSheet from "@/components/vic/InviteExperienceSheet";
 type ActivitySeed = {
   title: string;
@@ -103,14 +103,36 @@ export default function ActivitiesHome() {
   const [form, setForm] = useState<ActivityFormState>({ name: "", city: "", date: "", tags: [] });
   const [myActivities, setMyActivities] = useState<TripActivity[]>([]);
   const [inviteSheetOpen, setInviteSheetOpen] = useState(false);
+  const [events, setEvents] = useState<EventTemp[]>([]);
+  const [activeFilter, setActiveFilter] = useState<"local" | "trip" | "bali" | null>(null);
+  const [loadingEvents, setLoadingEvents] = useState(false);
+
+  const filteredEvents = useMemo(
+    () => (activeFilter ? events.filter((e) => e.Type === activeFilter) : []),
+    [events, activeFilter]
+  );
 
   useEffect(() => {
     const loadTrips = async () => {
       const trips = await fetchTrips();
       setMyActivities(trips);
     };
-
     void loadTrips();
+  }, []);
+
+  useEffect(() => {
+    const load = async () => {
+      setLoadingEvents(true);
+      try {
+        const data = await fetchEventTemps();
+        setEvents(data);
+      } catch (err) {
+        console.error("Failed to fetch events:", err);
+      } finally {
+        setLoadingEvents(false);
+      }
+    };
+    void load();
   }, []);
 
   const inviteRoute = useMemo(
@@ -169,26 +191,93 @@ export default function ActivitiesHome() {
           <h2 className="text-2xl font-semibold tracking-tight text-neutral-900">Create a moment</h2>
           <p className="mt-2 text-sm text-neutral-500">Pick a type to get started.</p>
           <div className="mt-4 flex flex-col gap-2">
-            {[
-              { label: "Create a local activity", icon: MapPin },
-              { label: "Create a Trip", icon: Plane },
-              { label: "Bali Activity", icon: Palmtree },
-            ].map((item) => (
-              <button
-                key={item.label}
-                type="button"
-                onClick={() => setInviteSheetOpen(true)}
-                className="flex w-full items-center gap-3 rounded-2xl border border-neutral-200 bg-white px-4 py-3.5 text-left text-sm font-semibold text-neutral-800 shadow-[0_4px_12px_rgba(0,0,0,0.04)] transition active:scale-[0.98] hover:bg-neutral-50"
-              >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-600">
-                  <item.icon className="h-4.5 w-4.5" />
-                </span>
-                <span className="flex-1">{item.label}</span>
-                <ChevronRight className="h-4 w-4 text-neutral-400" />
-              </button>
-            ))}
+            {([
+              { label: "Create a local activity", icon: MapPin, type: "local" as const },
+              { label: "Create a Trip", icon: Plane, type: "trip" as const },
+              { label: "Bali Activity", icon: Palmtree, type: "bali" as const },
+            ]).map((item) => {
+              const isActive = activeFilter === item.type;
+              return (
+                <button
+                  key={item.label}
+                  type="button"
+                  onClick={() => setActiveFilter(isActive ? null : item.type)}
+                  className={`flex w-full items-center gap-3 rounded-2xl border px-4 py-3.5 text-left text-sm font-semibold shadow-[0_4px_12px_rgba(0,0,0,0.04)] transition active:scale-[0.98] ${
+                    isActive
+                      ? "border-neutral-900 bg-neutral-900 text-white"
+                      : "border-neutral-200 bg-white text-neutral-800 hover:bg-neutral-50"
+                  }`}
+                >
+                  <span className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${isActive ? "bg-white/20 text-white" : "bg-neutral-100 text-neutral-600"}`}>
+                    <item.icon className="h-4.5 w-4.5" />
+                  </span>
+                  <span className="flex-1">{item.label}</span>
+                  <ChevronRight className={`h-4 w-4 ${isActive ? "text-white/60" : "text-neutral-400"}`} />
+                </button>
+              );
+            })}
           </div>
         </motion.section>
+
+        {activeFilter && (
+          <motion.section
+            initial={{ opacity: 0, y: 10, filter: "blur(6px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={easeOut}
+            className="space-y-3"
+          >
+            <div className="mb-1 px-1">
+              <h2 className="text-sm font-semibold text-neutral-900">
+                {activeFilter === "local" ? "Local activities" : activeFilter === "trip" ? "Trips" : "Bali activities"}
+              </h2>
+            </div>
+            {loadingEvents ? (
+              <p className="px-1 text-xs text-neutral-400">Loading…</p>
+            ) : filteredEvents.length === 0 ? (
+              <p className="px-1 text-xs text-neutral-400">No events found.</p>
+            ) : (
+              <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pt-1">
+                {filteredEvents.map((event) => (
+                  <button
+                    key={event.id}
+                    type="button"
+                    onClick={() => navigate(`/activities/${event.id}`)}
+                    className="relative h-52 w-[78%] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 text-left shadow-[0_18px_38px_rgba(10,10,20,0.16)]"
+                  >
+                    {event.Cover?.url ? (
+                      <img src={event.Cover.url} alt={event.Name} className="h-full w-full object-cover" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-neutral-100">
+                        <span className="text-xs text-neutral-400">No cover</span>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/55" />
+                    <div className="absolute left-4 top-4">
+                      <span className="inline-flex rounded-full border border-neutral-200 bg-white/90 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-neutral-700">
+                        {event.Type}
+                      </span>
+                    </div>
+                    <div className="absolute bottom-4 left-4 right-4">
+                      <p className="text-base font-semibold text-white">{event.Name}</p>
+                      {event.Date_start && (
+                        <p className="text-xs text-white/80">{event.Date_start}</p>
+                      )}
+                      {event.Tags?.length > 0 && (
+                        <div className="mt-1.5 flex flex-wrap gap-1">
+                          {event.Tags.slice(0, 3).map((tag) => (
+                            <span key={tag} className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-medium text-white">
+                              {tag}
+                            </span>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </motion.section>
+        )}
 
         {myActivities.length > 0 && (
           <motion.section initial={{ opacity: 0, y: 8, filter: "blur(6px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={easeOut}>
