@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarDays, ChevronLeft, Diamond, LogOut, Mail, Sparkles } from "lucide-react";
+import { CalendarDays, ChevronLeft, Diamond, LogOut, Mail, Pencil, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -88,57 +88,45 @@ export default function VicProfile() {
                   <div className="absolute -right-20 -bottom-24 h-72 w-72 rounded-full bg-[#7C5CFF]/10 blur-3xl" />
                 </div>
 
-                <div className="relative flex items-start gap-4">
-                  <div className="relative">
-                    <div className="absolute -inset-2 rounded-full bg-black/5 blur-md" />
-                    {avatarUrl ? (
-                      <img
-                        src={avatarUrl}
-                        alt={displayName}
-                        className="relative h-16 w-16 rounded-full object-cover ring-4 ring-white shadow-[0_16px_40px_rgba(0,0,0,0.18)]"
-                      />
-                    ) : (
-                      <div className="relative flex h-16 w-16 items-center justify-center rounded-full bg-neutral-100 text-sm font-semibold text-neutral-700 ring-4 ring-white shadow-[0_16px_40px_rgba(0,0,0,0.14)]">
-                        {initials(displayName)}
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="min-w-0 flex-1">
-                    <h2 className="truncate text-xl font-semibold text-neutral-900">{displayName}</h2>
-                    <p className="mt-1 flex items-center gap-2 text-sm text-neutral-500">
-                      <Sparkles className="h-4 w-4 text-neutral-400" />
-                      {subtitle}
-                    </p>
-
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <span className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-800 shadow-[0_10px_25px_rgba(0,0,0,0.05)]">
-                        <Diamond className="h-3.5 w-3.5 text-[#FF5A7A]" />
-                        {diamonds.toLocaleString()} Diamonds
-                      </span>
-                      <span className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-800 shadow-[0_10px_25px_rgba(0,0,0,0.05)]">
-                        <CalendarDays className="h-3.5 w-3.5 text-neutral-500" />
-                        {invites.toLocaleString()} Invites
-                      </span>
+                <div className="relative -mx-5 -mt-5">
+                  {avatarUrl ? (
+                    <img
+                      src={avatarUrl}
+                      alt={displayName}
+                      className="h-72 w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-72 w-full items-center justify-center bg-neutral-100 text-3xl font-semibold text-neutral-400">
+                      {initials(displayName)}
                     </div>
-                  </div>
-                </div>
-
-                <div className="relative mt-5 grid grid-cols-2 gap-3">
+                  )}
                   <button
                     type="button"
                     onClick={() => window.alert("Edit profile endpoint coming soon.")}
-                    className="rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold text-neutral-900 shadow-[0_12px_30px_rgba(0,0,0,0.06)] transition-transform active:scale-[0.99]"
+                    className="absolute bottom-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-neutral-700 shadow-[0_8px_20px_rgba(0,0,0,0.12)] backdrop-blur active:scale-95"
+                    aria-label="Edit profile"
                   >
-                    Edit profile
+                    <Pencil className="h-4 w-4" />
                   </button>
-                  <button
-                    type="button"
-                    onClick={() => navigate("/activities")}
-                    className="rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-semibold text-white shadow-[0_16px_40px_rgba(0,0,0,0.18)] transition-transform active:scale-[0.99]"
-                  >
-                    Planned activities
-                  </button>
+                </div>
+
+                <div className="mt-4">
+                  <h2 className="truncate text-xl font-semibold text-neutral-900">{displayName}</h2>
+                  <p className="mt-1 flex items-center gap-2 text-sm text-neutral-500">
+                    <Sparkles className="h-4 w-4 text-neutral-400" />
+                    {subtitle}
+                  </p>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <span className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-800 shadow-[0_10px_25px_rgba(0,0,0,0.05)]">
+                      <Diamond className="h-3.5 w-3.5 text-[#FF5A7A]" />
+                      {diamonds.toLocaleString()} Diamonds
+                    </span>
+                    <span className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-800 shadow-[0_10px_25px_rgba(0,0,0,0.05)]">
+                      <CalendarDays className="h-3.5 w-3.5 text-neutral-500" />
+                      {invites.toLocaleString()} Invites
+                    </span>
+                  </div>
                 </div>
               </motion.section>
 
