@@ -3,6 +3,7 @@ import MemberspassVICHome from "@/pages/memberspass/MemberspassVICHome";
 import ActivitiesHome from "@/pages/ActivitiesHome";
 import ActivityDetail from "@/pages/ActivityDetail";
 import ActivitiesInvite from "@/pages/ActivitiesInvite";
+import VicProfile from "@/pages/VicProfile";
 import Login from "@/pages/Login";
 import Register from "@/pages/Register";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -53,6 +54,14 @@ export default function App() {
           element={
             <ProtectedLayout>
               <ActivitiesInvite />
+            </ProtectedLayout>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedLayout>
+              <VicProfile />
             </ProtectedLayout>
           }
         />
