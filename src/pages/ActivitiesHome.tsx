@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, ChevronLeft, Mail } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { fetchTrips, type InviteLite, type TripActivity } from "@/services/activities";
+import { fetchTrips, createEvent, type InviteLite, type TripActivity } from "@/services/activities";
 type ActivitySeed = {
   title: string;
   city?: string;
@@ -98,6 +98,7 @@ export default function ActivitiesHome() {
   const location = useLocation();
 
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<ActivityFormState>({ name: "", city: "", date: "", tags: [] });
   const [myActivities, setMyActivities] = useState<TripActivity[]>([]);
 
@@ -392,19 +393,35 @@ export default function ActivitiesHome() {
 
               <button
                 type="button"
-                onClick={() =>
-                  navigate(inviteRoute, {
-                    state: {
-                      activityName: form.name.trim(),
-                      city: form.city.trim(),
-                      date: form.date.trim(),
-                      tags: form.tags,
-                    },
-                  })
-                }
-                className="mt-5 w-full rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-semibold text-white"
+                disabled={submitting || !form.name.trim()}
+                onClick={async () => {
+                  setSubmitting(true);
+                  try {
+                    await createEvent({
+                      Name: form.name.trim(),
+                      cities_id: null,
+                      Date: form.date.trim() || null,
+                      Tags: form.tags,
+                      Cover: null,
+                    });
+                    setSheetOpen(false);
+                    navigate(inviteRoute, {
+                      state: {
+                        activityName: form.name.trim(),
+                        city: form.city.trim(),
+                        date: form.date.trim(),
+                        tags: form.tags,
+                      },
+                    });
+                  } catch (err) {
+                    console.error("Failed to create event:", err);
+                  } finally {
+                    setSubmitting(false);
+                  }
+                }}
+                className="mt-5 w-full rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
               >
-                Continue
+                {submitting ? "Creating…" : "Continue"}
               </button>
             </motion.section>
           </>

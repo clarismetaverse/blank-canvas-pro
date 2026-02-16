@@ -189,3 +189,29 @@ const placeholderTrips: TripActivity[] = [
 export async function fetchTrips(): Promise<TripActivity[]> {
   return Promise.resolve(placeholderTrips);
 }
+
+export type CreateEventPayload = {
+  Name: string;
+  cities_id?: number | null;
+  Date?: string | null;
+  Tags?: string[];
+  Cover?: string | null;
+};
+
+export type CreateEventResponse = {
+  id: number;
+  created_at: number;
+  Name: string;
+  cities_id: number | null;
+  Date: string | null;
+  Tags: string[];
+  Cover: string | null;
+};
+
+export async function createEvent(payload: CreateEventPayload): Promise<CreateEventResponse> {
+  const { request } = await import("@/services/xano");
+  return request<CreateEventResponse>("/event_temp", {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
+}
