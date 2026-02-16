@@ -160,6 +160,36 @@ export default function ActivitiesHome() {
       </header>
 
       <main className="mx-auto w-full max-w-md space-y-6 px-4 pb-16 pt-5">
+        <motion.section
+          initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ ...easeOut, delay: 0.05 }}
+          className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-[0_12px_32px_rgba(0,0,0,0.06)]"
+        >
+          <h2 className="text-2xl font-semibold tracking-tight text-neutral-900">Create a moment</h2>
+          <p className="mt-2 text-sm text-neutral-500">Pick a type to get started.</p>
+          <div className="mt-4 flex flex-col gap-2">
+            {[
+              { label: "Create a local activity", icon: MapPin },
+              { label: "Create a Trip", icon: Plane },
+              { label: "Bali Activity", icon: Palmtree },
+            ].map((item) => (
+              <button
+                key={item.label}
+                type="button"
+                onClick={() => setInviteSheetOpen(true)}
+                className="flex w-full items-center gap-3 rounded-2xl border border-neutral-200 bg-white px-4 py-3.5 text-left text-sm font-semibold text-neutral-800 shadow-[0_4px_12px_rgba(0,0,0,0.04)] transition active:scale-[0.98] hover:bg-neutral-50"
+              >
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-600">
+                  <item.icon className="h-4.5 w-4.5" />
+                </span>
+                <span className="flex-1">{item.label}</span>
+                <ChevronRight className="h-4 w-4 text-neutral-400" />
+              </button>
+            ))}
+          </div>
+        </motion.section>
+
         {myActivities.length > 0 && (
           <motion.section initial={{ opacity: 0, y: 8, filter: "blur(6px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={easeOut}>
             <div className="mb-3 px-1">
@@ -197,7 +227,6 @@ export default function ActivitiesHome() {
                       );
                     })()}
                   </div>
-
                   <div className="absolute bottom-4 left-4 right-4 space-y-2.5">
                     <div>
                       <p className="text-base font-semibold text-white">{activity.title}</p>
@@ -235,36 +264,6 @@ export default function ActivitiesHome() {
             </div>
           </motion.section>
         )}
-
-        <motion.section
-          initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ ...easeOut, delay: 0.05 }}
-          className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-[0_12px_32px_rgba(0,0,0,0.06)]"
-        >
-          <h2 className="text-2xl font-semibold tracking-tight text-neutral-900">Create a moment</h2>
-          <p className="mt-2 text-sm text-neutral-500">Pick a type to get started.</p>
-          <div className="mt-4 flex flex-col gap-2">
-            {[
-              { label: "Create a local activity", icon: MapPin },
-              { label: "Create a Trip", icon: Plane },
-              { label: "Bali Activity", icon: Palmtree },
-            ].map((item) => (
-              <button
-                key={item.label}
-                type="button"
-                onClick={() => setInviteSheetOpen(true)}
-                className="flex w-full items-center gap-3 rounded-2xl border border-neutral-200 bg-white px-4 py-3.5 text-left text-sm font-semibold text-neutral-800 shadow-[0_4px_12px_rgba(0,0,0,0.04)] transition active:scale-[0.98] hover:bg-neutral-50"
-              >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-600">
-                  <item.icon className="h-4.5 w-4.5" />
-                </span>
-                <span className="flex-1">{item.label}</span>
-                <ChevronRight className="h-4 w-4 text-neutral-400" />
-              </button>
-            ))}
-          </div>
-        </motion.section>
 
         <motion.section
           initial={{ opacity: 0, y: 12, filter: "blur(8px)" }}
