@@ -3,11 +3,13 @@ import { Calendar, ChevronRight, MoonStar, Ship, Sparkles, User, Utensils, Waves
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { CreatorLite } from "@/services/creatorSearch";
+import { fetchEventTemps, type EventTemp } from "@/services/activities";
 
 type InviteExperienceSheetProps = {
   open: boolean;
   onClose: () => void;
   creator: CreatorLite | null;
+  filterType?: "local" | "trip" | "bali";
 };
 
 type ExperienceItem = {
@@ -103,7 +105,7 @@ const activityIcons = {
   "night-out": MoonStar,
 } as const;
 
-export default function InviteExperienceSheet({ open, onClose, creator }: InviteExperienceSheetProps) {
+export default function InviteExperienceSheet({ open, onClose, creator, filterType }: InviteExperienceSheetProps) {
   const navigate = useNavigate();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeTripId, setActiveTripId] = useState<string | null>(null);
@@ -118,8 +120,28 @@ export default function InviteExperienceSheet({ open, onClose, creator }: Invite
   const [isStickyHeader, setIsStickyHeader] = useState(false);
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const activitiesSectionRef = useRef<HTMLElement | null>(null);
+  const [filteredEvents, setFilteredEvents] = useState<EventTemp[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(false);
 
   const creatorName = creator?.name || "Creator";
+
+  useEffect(() => {
+    if (!open || !filterType) return;
+    let isMounted = true;
+    const load = async () => {
+      setEventsLoading(true);
+      try {
+        const all = await fetchEventTemps();
+        if (isMounted) setFilteredEvents(all.filter((e) => e.Type === filterType));
+      } catch {
+        if (isMounted) setFilteredEvents([]);
+      } finally {
+        if (isMounted) setEventsLoading(false);
+      }
+    };
+    void load();
+    return () => { isMounted = false; };
+  }, [open, filterType]);
 
   useEffect(() => {
     let isMounted = true;
@@ -518,6 +540,59 @@ export default function InviteExperienceSheet({ open, onClose, creator }: Invite
                   transition={{ duration: 0.3, ease: "easeOut" }}
                   className="space-y-6 px-5 pb-24 pt-6"
                 >
+                  {filterType && (
+                    <section className="space-y-3">
+                      <p className="text-base font-semibold text-neutral-900">
+                        {filterType === "local" ? "Local activities" : filterType === "trip" ? "Trips" : "Bali activities"}
+                      </p>
+                      {eventsLoading ? (
+                        <div className="space-y-3">
+                          {Array.from({ length: 2 }).map((_, i) => (
+                            <div key={`ev-skel-${i}`} className="h-48 w-full animate-pulse rounded-3xl bg-neutral-200/80" />
+                          ))}
+                        </div>
+                      ) : filteredEvents.length === 0 ? (
+                        <p className="text-xs text-neutral-400">No events found.</p>
+                      ) : (
+                        <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2">
+                          {filteredEvents.map((event) => (
+                            <button
+                              key={event.id}
+                              type="button"
+                              onClick={() => navigate(`/activities/${event.id}`)}
+                              className="relative h-48 w-[80%] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 text-left shadow-lg"
+                            >
+                              {event.Cover?.url ? (
+                                <img src={event.Cover.url} alt={event.Name} className="h-full w-full object-cover" />
+                              ) : (
+                                <div className="flex h-full w-full items-center justify-center bg-neutral-100">
+                                  <span className="text-xs text-neutral-400">No cover</span>
+                                </div>
+                              )}
+                              <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/60" />
+                              <div className="absolute left-3 top-3">
+                                <span className="inline-flex rounded-full border border-neutral-200 bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-neutral-700">
+                                  {event.Type}
+                                </span>
+                              </div>
+                              <div className="absolute bottom-3 left-3 right-3">
+                                <p className="text-sm font-semibold text-white">{event.Name}</p>
+                                {event.Date_start && <p className="text-[11px] text-white/80">{event.Date_start}</p>}
+                                {event.Tags?.length > 0 && (
+                                  <div className="mt-1 flex flex-wrap gap-1">
+                                    {event.Tags.slice(0, 3).map((tag) => (
+                                      <span key={tag} className="rounded-full bg-white/20 px-1.5 py-0.5 text-[9px] font-medium text-white">{tag}</span>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </section>
+                  )}
+
                   <section className="space-y-4">
                     <div className="flex items-center justify-between">
                       <p className="text-base font-semibold text-neutral-900">Upcoming trips</p>
