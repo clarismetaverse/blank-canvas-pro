@@ -540,62 +540,11 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                   transition={{ duration: 0.3, ease: "easeOut" }}
                   className="space-y-6 px-5 pb-24 pt-6"
                 >
-                  {filterType && (
-                    <section className="space-y-3">
+                  <section className="space-y-4">
+                    <div className="flex items-center justify-between">
                       <p className="text-base font-semibold text-neutral-900">
                         {filterType === "local" ? "Local activities" : filterType === "trip" ? "Trips" : "Bali activities"}
                       </p>
-                      {eventsLoading ? (
-                        <div className="space-y-3">
-                          {Array.from({ length: 2 }).map((_, i) => (
-                            <div key={`ev-skel-${i}`} className="h-48 w-full animate-pulse rounded-3xl bg-neutral-200/80" />
-                          ))}
-                        </div>
-                      ) : filteredEvents.length === 0 ? (
-                        <p className="text-xs text-neutral-400">No events found.</p>
-                      ) : (
-                        <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2">
-                          {filteredEvents.map((event) => (
-                            <button
-                              key={event.id}
-                              type="button"
-                              onClick={() => navigate(`/activities/${event.id}`)}
-                              className="relative h-48 w-[80%] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 text-left shadow-lg"
-                            >
-                              {event.Cover?.url ? (
-                                <img src={event.Cover.url} alt={event.Name} className="h-full w-full object-cover" />
-                              ) : (
-                                <div className="flex h-full w-full items-center justify-center bg-neutral-100">
-                                  <span className="text-xs text-neutral-400">No cover</span>
-                                </div>
-                              )}
-                              <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/60" />
-                              <div className="absolute left-3 top-3">
-                                <span className="inline-flex rounded-full border border-neutral-200 bg-white/90 px-2 py-0.5 text-[10px] font-semibold text-neutral-700">
-                                  {event.Type}
-                                </span>
-                              </div>
-                              <div className="absolute bottom-3 left-3 right-3">
-                                <p className="text-sm font-semibold text-white">{event.Name}</p>
-                                {event.Date_start && <p className="text-[11px] text-white/80">{event.Date_start}</p>}
-                                {event.Tags?.length > 0 && (
-                                  <div className="mt-1 flex flex-wrap gap-1">
-                                    {event.Tags.slice(0, 3).map((tag) => (
-                                      <span key={tag} className="rounded-full bg-white/20 px-1.5 py-0.5 text-[9px] font-medium text-white">{tag}</span>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            </button>
-                          ))}
-                        </div>
-                      )}
-                    </section>
-                  )}
-
-                  <section className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <p className="text-base font-semibold text-neutral-900">Upcoming trips</p>
                       <button
                         type="button"
                         className="rounded-full bg-neutral-100 p-2 text-neutral-700"
@@ -606,50 +555,50 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                       </button>
                     </div>
                     <div className="space-y-4">
-                      {upcomingLoading
-                        ? Array.from({ length: 3 }).map((_, index) => (
-                            <div
-                              key={`upcoming-skeleton-${index}`}
-                              className="min-h-[280px] w-full animate-pulse rounded-3xl bg-neutral-200/80"
-                            />
-                          ))
-                        : upcomingItems.map((item) => {
-                            const isSelected = selectedId === item.id;
-                            return (
-                              <button
-                                key={item.id}
-                                type="button"
-                                onClick={() => {
-                                  setSelectedId(item.id);
-                                  setActiveTripId(item.id);
-                                }}
-                                className={`relative min-h-[280px] w-full overflow-hidden rounded-3xl text-left text-white shadow-lg transition active:scale-[0.99] ${
-                                  isSelected ? "ring-2 ring-[#FF5A7A]/50" : ""
-                                }`}
-                              >
-                                <motion.div layoutId={`trip-card-${item.id}`} className="absolute inset-0">
-                                  {item.imageUrl ? (
-                                    <img src={item.imageUrl} alt={item.title} className="absolute inset-0 h-full w-full object-cover" />
-                                  ) : (
-                                    <div className="absolute inset-0 bg-neutral-900" />
-                                  )}
-                                  <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent" />
-                                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                                </motion.div>
-                                <div className="relative flex h-full flex-col justify-end p-6">
-                                  <div className="space-y-1">
-                                    <p className="text-2xl font-semibold text-white">{item.title}</p>
-                                    {item.subtitle && <p className="text-sm text-white/75">{item.subtitle}</p>}
+                      {eventsLoading ? (
+                        Array.from({ length: 3 }).map((_, i) => (
+                          <div key={`ev-skel-${i}`} className="min-h-[280px] w-full animate-pulse rounded-3xl bg-neutral-200/80" />
+                        ))
+                      ) : filteredEvents.length === 0 ? (
+                        <p className="text-xs text-neutral-400">No events found.</p>
+                      ) : (
+                        filteredEvents.map((event) => (
+                          <button
+                            key={event.id}
+                            type="button"
+                            onClick={() => navigate(`/activities/${event.id}`)}
+                            className="relative min-h-[280px] w-full overflow-hidden rounded-3xl text-left text-white shadow-lg transition active:scale-[0.99]"
+                          >
+                            <div className="absolute inset-0">
+                              {event.Cover?.url ? (
+                                <img src={event.Cover.url} alt={event.Name} className="absolute inset-0 h-full w-full object-cover" />
+                              ) : (
+                                <div className="absolute inset-0 bg-neutral-900" />
+                              )}
+                              <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent" />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                            </div>
+                            <div className="relative flex h-full min-h-[280px] flex-col justify-end p-6">
+                              <div className="absolute left-4 top-4">
+                                <span className="inline-flex rounded-full border border-white/30 bg-white/20 px-2.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
+                                  {event.Type}
+                                </span>
+                              </div>
+                              <div className="space-y-1">
+                                <p className="text-2xl font-semibold text-white">{event.Name}</p>
+                                {event.Date_start && <p className="text-sm text-white/75">{event.Date_start}</p>}
+                                {event.Tags?.length > 0 && (
+                                  <div className="mt-1 flex flex-wrap gap-1">
+                                    {event.Tags.slice(0, 3).map((tag) => (
+                                      <span key={tag} className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">{tag}</span>
+                                    ))}
                                   </div>
-                                  {isSelected && (
-                                    <span className="mt-4 inline-flex w-fit rounded-full bg-white/95 px-3 py-1 text-xs font-semibold text-neutral-900">
-                                      Selected
-                                    </span>
-                                  )}
-                                </div>
-                              </button>
-                            );
-                          })}
+                                )}
+                              </div>
+                            </div>
+                          </button>
+                        ))
+                      )}
                     </div>
                   </section>
                 </motion.div>
