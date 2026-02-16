@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarDays, ChevronLeft, Diamond, LogOut, Mail, Pencil, Sparkles } from "lucide-react";
+import { CalendarDays, ChevronLeft, Diamond, Images, LogOut, Mail, Pencil, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -100,14 +100,24 @@ export default function VicProfile() {
                       {initials(displayName)}
                     </div>
                   )}
-                  <button
-                    type="button"
-                    onClick={() => window.alert("Edit profile endpoint coming soon.")}
-                    className="absolute bottom-3 right-3 inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-neutral-700 shadow-[0_8px_20px_rgba(0,0,0,0.12)] backdrop-blur active:scale-95"
-                    aria-label="Edit profile"
-                  >
-                    <Pencil className="h-4 w-4" />
-                  </button>
+                  <div className="absolute bottom-3 right-3 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={() => window.alert("Gallery coming soon.")}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-neutral-700 shadow-[0_8px_20px_rgba(0,0,0,0.12)] backdrop-blur active:scale-95"
+                      aria-label="Gallery"
+                    >
+                      <Images className="h-4 w-4" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => window.alert("Edit profile endpoint coming soon.")}
+                      className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/90 text-neutral-700 shadow-[0_8px_20px_rgba(0,0,0,0.12)] backdrop-blur active:scale-95"
+                      aria-label="Edit profile"
+                    >
+                      <Pencil className="h-4 w-4" />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mt-4">
