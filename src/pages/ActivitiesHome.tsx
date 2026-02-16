@@ -330,7 +330,7 @@ export default function ActivitiesHome() {
               animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
               exit={{ opacity: 0, y: 14, filter: "blur(8px)" }}
               transition={easeOut}
-              className="fixed inset-x-0 bottom-0 z-40 mx-auto w-full max-w-md rounded-t-3xl border border-neutral-200 bg-white px-4 pb-6 pt-4"
+              className="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-md rounded-t-3xl border border-neutral-200 bg-white px-4 pb-20 pt-4"
             >
               <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-neutral-200" />
               <h3 className="text-base font-semibold text-neutral-900">Create activity</h3>
