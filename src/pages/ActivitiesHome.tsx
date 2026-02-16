@@ -274,13 +274,15 @@ export default function ActivitiesHome() {
             ))}
           </div>
 
-          <button
-            type="button"
-            onClick={() => openCreateSheet()}
-            className="w-full rounded-full border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold text-neutral-800 shadow-[0_8px_20px_rgba(0,0,0,0.06)]"
-          >
-            Create custom
-          </button>
+          <div className="flex">
+            <button
+              type="button"
+              onClick={() => openCreateSheet()}
+              className="rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-semibold text-neutral-800 shadow-[0_4px_12px_rgba(0,0,0,0.06)]"
+            >
+              + New incoming event
+            </button>
+          </div>
         </motion.section>
 
         <motion.section
