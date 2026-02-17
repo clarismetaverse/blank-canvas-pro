@@ -367,7 +367,7 @@ export default function ActivitiesHome() {
                   <button
                     key={template.id}
                     type="button"
-                    onClick={() => openCreateSheet({ title: template.Name, city: "", tags: template.Tags || [], imageUrl: coverUrl })}
+                    onClick={() => navigate(`/activities/${template.id}`)}
                     className="relative h-56 w-[76%] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 text-left shadow-[0_14px_34px_rgba(0,0,0,0.12)]"
                   >
                     <img src={coverUrl} alt={template.Name} className="h-full w-full object-cover" />
