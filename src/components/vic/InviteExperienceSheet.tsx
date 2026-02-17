@@ -271,26 +271,30 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
   );
 
   const selectedLocalBooking = selectedLocalItem ? getLocalBookingState(selectedLocalItem.id) : null;
-  const selectedDate = selectedLocalItem?.dateLabel ?? "";
-  const selectedTime = selectedLocalBooking?.time ?? "";
-  const selectedGuests = selectedLocalBooking?.guests ?? 0;
-  const canInvite = Boolean(selectedDate) && Boolean(selectedTime) && selectedGuests >= 1;
-  const canSelectTable =
-    Boolean(selectedLocalItem) &&
-    canInvite &&
-    !selectedLocalBooking?.loading &&
-    !selectedLocalBooking?.success;
-
-  const [invitePulse, setInvitePulse] = useState(false);
-
-  useEffect(() => {
-    if (!canInvite) {
-      return;
+  const venueShortName = useMemo(() => {
+    const raw = selectedLocalItem?.title?.trim() ?? "";
+    const base = raw.split(" - ")[0].split(" | ")[0].trim();
+    if (!base) {
+      return "";
     }
-    setInvitePulse(true);
-    const timeout = window.setTimeout(() => setInvitePulse(false), 1200);
-    return () => window.clearTimeout(timeout);
-  }, [canInvite]);
+    return base.length > 18 ? `${base.slice(0, 18).trim()}…` : base;
+  }, [selectedLocalItem?.title]);
+
+  const tablePreviewLabel = useMemo(() => {
+    if (!selectedLocalItem) {
+      return "";
+    }
+    const pax = selectedLocalBooking?.guests ?? 0;
+    const name = venueShortName || "Venue";
+    if (!pax) {
+      return name;
+    }
+    return `${pax} pax • ${name}`;
+  }, [selectedLocalItem, selectedLocalBooking?.guests, venueShortName]);
+
+  const hasSelectedTable = Boolean(selectedLocalBooking?.success);
+  const canInviteModels = hasSelectedTable;
+
 
 
   const updateLocalBooking = (activityId: string, updater: (prev: LocalBookingState) => LocalBookingState) => {
@@ -825,6 +829,23 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                                       </label>
 
                                       <div className="space-y-2">
+                                        <AnimatePresence initial={false}>
+                                          {hasSelectedTable && (
+                                            <motion.div
+                                              initial={{ opacity: 0, y: -6, filter: "blur(6px)" }}
+                                              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                                              exit={{ opacity: 0, y: -6, filter: "blur(6px)" }}
+                                              transition={{ duration: 0.28, ease: "easeOut" }}
+                                              className="flex items-center justify-between rounded-2xl border border-neutral-200 bg-white px-3 py-2"
+                                            >
+                                              <span className="text-xs font-semibold text-neutral-900">{tablePreviewLabel}</span>
+                                              <span className="rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-800">
+                                                Table locked
+                                              </span>
+                                            </motion.div>
+                                          )}
+                                        </AnimatePresence>
+
                                         <button
                                           type="button"
                                           onClick={() => void submitLocalBooking(item)}
@@ -835,8 +856,45 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                                               : "bg-neutral-200 text-neutral-500"
                                           }`}
                                         >
-                                          {booking.loading ? "Selecting…" : booking.success ? "Selected ✓" : "Select"}
+                                          {booking.loading ? "Selecting…" : booking.success ? "Selected ✓" : "Select table"}
                                         </button>
+
+                                        <motion.button
+                                          type="button"
+                                          onClick={handleInvite}
+                                          disabled={!canInviteModels}
+                                          whileTap={{ scale: canInviteModels ? 0.99 : 1 }}
+                                          animate={{
+                                            opacity: canInviteModels ? 1 : 0.45,
+                                            boxShadow: canInviteModels
+                                              ? "0 18px 40px rgba(255,56,92,0.20)"
+                                              : "0 1px 2px rgba(0,0,0,0.06)",
+                                          }}
+                                          transition={{ duration: 0.28, ease: "easeOut" }}
+                                          className={`relative w-full overflow-hidden rounded-full px-4 py-3 text-sm font-semibold text-white ${
+                                            canInviteModels ? "cursor-pointer" : "cursor-not-allowed"
+                                          }`}
+                                          style={{
+                                            background:
+                                              "radial-gradient(1200px 240px at 20% 0%, rgba(255,255,255,0.30), rgba(255,255,255,0.0) 55%), linear-gradient(135deg, #FF385C 0%, #C81E5A 45%, #7A1E54 100%)",
+                                          }}
+                                        >
+                                          <span className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-white/25 blur-2xl" />
+                                          <span className="pointer-events-none absolute -left-10 -bottom-10 h-24 w-24 rounded-full bg-white/15 blur-2xl" />
+
+                                          <span className="relative inline-flex items-center justify-center gap-2">
+                                            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/20">
+                                              <Sparkles className="h-4 w-4 text-white/90" />
+                                            </span>
+                                            Invite models
+                                            <ChevronRight className="h-4 w-4 text-white/90" />
+                                          </span>
+                                        </motion.button>
+
+                                        <p className={`text-center text-xs ${canInviteModels ? "text-emerald-600" : "text-neutral-500"}`}>
+                                          {canInviteModels ? "Ready — invite models to this table." : "Select a table to unlock invites."}
+                                        </p>
+
                                         {booking.success && (
                                           <button
                                             type="button"
@@ -860,42 +918,6 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                 </motion.div>
               )}
             </AnimatePresence>
-            <div className="sticky bottom-0 inset-x-0 z-20 mt-2 border-t border-neutral-200 bg-white/90 px-4 pb-5 pt-3 backdrop-blur-md">
-              <div className="flex gap-3">
-                <motion.button
-                  type="button"
-                  onClick={handleInvite}
-                  disabled={!canInvite}
-                  animate={{ opacity: canInvite ? 1 : 0.4, boxShadow: invitePulse ? "0 0 0 6px rgba(16, 185, 129, 0.12)" : "0 1px 2px rgba(0,0,0,0.06)" }}
-                  transition={{ duration: 0.28, ease: "easeOut" }}
-                  className={`flex h-11 flex-1 items-center justify-center gap-2 rounded-full border border-neutral-200 bg-white text-sm font-semibold text-neutral-900 transition hover:shadow-sm ${
-                    canInvite ? "" : "cursor-not-allowed shadow-none"
-                  }`}
-                >
-                  <Users className="h-4 w-4" />
-                  Invite models
-                </motion.button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (selectedLocalItem) {
-                      void submitLocalBooking(selectedLocalItem);
-                    }
-                  }}
-                  disabled={!canSelectTable}
-                  className={`h-11 flex-1 rounded-full text-sm font-semibold text-white transition active:scale-[0.99] ${
-                    canSelectTable
-                      ? "bg-neutral-900 shadow-[0_12px_28px_rgba(0,0,0,0.25)]"
-                      : "cursor-not-allowed bg-neutral-300"
-                  }`}
-                >
-                  Select table
-                </button>
-              </div>
-              <p className={`mt-2 text-center text-xs ${canInvite ? "text-emerald-600" : "text-neutral-500"}`}>
-                {canInvite ? "You're ready — start inviting models." : "Plan a table to start inviting."}
-              </p>
-            </div>
           </motion.div>
 
           <AnimatePresence>
