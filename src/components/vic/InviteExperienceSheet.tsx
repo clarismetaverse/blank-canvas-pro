@@ -2,8 +2,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Calendar, Check, ChevronDown, ChevronRight, Minus, MoonStar, Plus, Ship, Sparkles, User, Users, Utensils, Waves, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import LocalActivityInviteModelsModal, { type InviteableModel } from "@/features/activities/LocalActivityInviteModelsModal";
 import type { CreatorLite } from "@/services/creatorSearch";
+import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityInviteModelsModal";
 import { fetchEventTemps, type EventTemp } from "@/services/activities";
 import { requestVicBooking, type BookingStatus } from "@/services/vicBookings";
 
@@ -145,7 +145,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
   const [localBookings, setLocalBookings] = useState<Record<string, LocalBookingState>>({});
   const [bookingToastVisible, setBookingToastVisible] = useState(false);
   const [inviteModelsOpen, setInviteModelsOpen] = useState(false);
-  const [invitedModels, setInvitedModels] = useState<Record<string, InviteableModel[]>>({});
+  const [invitedModels, setInvitedModels] = useState<Record<string, CreatorLite[]>>({});
 
   const creatorName = creator?.name || "Creator";
 
@@ -281,6 +281,10 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
   const invitesBudget = 8;
   const invitedForSelected = selectedLocalItem ? (invitedModels[selectedLocalItem.id] ?? []) : [];
   const invitedCount = invitedForSelected.length;
+  const cityName = useMemo(() => {
+    if (typeof window === "undefined") return "your city";
+    return localStorage.getItem("owner_city") || "your city";
+  }, []);
 
   const venueShortName = useMemo(() => {
     const raw = selectedLocalItem?.title?.trim() ?? "";
@@ -925,6 +929,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                 open={inviteModelsOpen}
                 onClose={() => setInviteModelsOpen(false)}
                 venueLabel={tablePreviewLabel}
+                cityName={cityName}
                 maxInvites={invitesBudget}
                 initialSelected={invitedForSelected}
                 onConfirm={(selected) => {

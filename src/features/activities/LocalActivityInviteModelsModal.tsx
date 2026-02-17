@@ -1,22 +1,18 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Check, ChevronRight, Search, Sparkles, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
-
-export type InviteableModel = {
-  id: number;
-  name: string;
-  ig?: string;
-  avatarUrl?: string | null;
-  tier?: "vip" | "top" | "pro" | "standard";
-};
+import type { CreatorLite } from "@/services/creatorSearch";
+import { searchCreators } from "@/services/creatorSearch";
+import { fetchNewInTown } from "@/services/newInTown";
 
 type Props = {
   open: boolean;
   onClose: () => void;
   venueLabel?: string;
+  cityName?: string;
   maxInvites?: number;
-  initialSelected?: InviteableModel[];
-  onConfirm: (selected: InviteableModel[]) => void;
+  initialSelected?: CreatorLite[];
+  onConfirm: (selected: CreatorLite[]) => void;
 };
 
 const backdrop = {
@@ -31,22 +27,12 @@ const sheet = {
   exit: { y: "10%", opacity: 0, scale: 0.99 },
 };
 
-const tierLabel = (tier?: InviteableModel["tier"]) => {
-  if (!tier) return null;
-  if (tier === "vip") return "VIP";
-  if (tier === "top") return "Top";
-  if (tier === "pro") return "Pro";
-  return null;
-};
-
 function useDebounced<T>(value: T, delay = 260) {
   const [debounced, setDebounced] = useState(value);
-
   useEffect(() => {
     const t = window.setTimeout(() => setDebounced(value), delay);
     return () => window.clearTimeout(t);
   }, [value, delay]);
-
   return debounced;
 }
 
@@ -54,6 +40,7 @@ export default function LocalActivityInviteModelsModal({
   open,
   onClose,
   venueLabel,
+  cityName = "your city",
   maxInvites = 8,
   initialSelected = [],
   onConfirm,
@@ -61,19 +48,50 @@ export default function LocalActivityInviteModelsModal({
   const [q, setQ] = useState("");
   const dq = useDebounced(q, 260);
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<InviteableModel[]>([]);
-  const [selected, setSelected] = useState<Map<number, InviteableModel>>(new Map());
+  const [newInTownLoading, setNewInTownLoading] = useState(false);
+  const [newInTown, setNewInTown] = useState<CreatorLite[]>([]);
+  const [results, setResults] = useState<CreatorLite[]>([]);
+  const [selected, setSelected] = useState<Map<number, CreatorLite>>(new Map());
   const inputRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     if (!open) return;
 
-    const m = new Map<number, InviteableModel>();
-    initialSelected.forEach((x) => m.set(x.id, x));
+    const m = new Map<number, CreatorLite>();
+    initialSelected.forEach((x) => m.set(Number(x.id), x));
     setSelected(m);
+
     setQ("");
     setResults([]);
     window.setTimeout(() => inputRef.current?.focus(), 50);
+
+    let active = true;
+    const load = async () => {
+      setNewInTownLoading(true);
+      try {
+        const items = await fetchNewInTown();
+        if (!active) return;
+        const pageBase = 500000;
+        const mapped: CreatorLite[] = items.map((item, index) => ({
+          id: pageBase + index + 1,
+          name: item.name,
+          IG_account: item.IG_account,
+          Tiktok_account: (item as { Tiktok_account?: string }).Tiktok_account,
+          Profile_pic: item.Profile_pic,
+        }));
+        setNewInTown(mapped);
+      } catch {
+        if (active) setNewInTown([]);
+      } finally {
+        if (active) setNewInTownLoading(false);
+      }
+    };
+
+    void load();
+
+    return () => {
+      active = false;
+    };
   }, [open, initialSelected]);
 
   useEffect(() => {
@@ -87,20 +105,6 @@ export default function LocalActivityInviteModelsModal({
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
 
-  const selectedCount = selected.size;
-  const invitesLeft = Math.max(0, maxInvites - selectedCount);
-  const canAddMore = selectedCount < maxInvites;
-
-  const displayResults = useMemo(() => {
-    const out: InviteableModel[] = [];
-    selected.forEach((v) => out.push(v));
-    const selectedIds = new Set(out.map((x) => x.id));
-    results.forEach((r) => {
-      if (!selectedIds.has(r.id)) out.push(r);
-    });
-    return out;
-  }, [results, selected]);
-
   useEffect(() => {
     if (!open) return;
 
@@ -112,35 +116,12 @@ export default function LocalActivityInviteModelsModal({
     }
 
     let cancelled = false;
-
     const run = async () => {
       setLoading(true);
       try {
-        const res = await fetch("https://xbut-eryu-hhsg.f2.xano.io/api:vGd6XDW3/search/user_turbo", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ q: query }),
-        });
-        if (!res.ok) throw new Error("Search failed");
-
-        const data = (await res.json()) as Array<Record<string, unknown>>;
+        const found = await searchCreators(query);
         if (cancelled) return;
-
-        const mapped: InviteableModel[] = (data ?? []).slice(0, 40).map((u) => ({
-          id: Number(u.id),
-          name: (u.name as string) ?? (u.Name as string) ?? (u.username as string) ?? "Creator",
-          ig: (u.IG_account as string) ?? (u.ig as string) ?? (u.instagram as string) ?? undefined,
-          avatarUrl:
-            ((u.Profile_pic as { url?: string } | undefined)?.url ??
-              (u.profile_pic as { url?: string } | undefined)?.url ??
-              (u.avatar as { url?: string } | undefined)?.url ??
-              null) as string | null,
-          tier: ((u.tier as InviteableModel["tier"]) ?? ((u.vip as boolean) ? "vip" : undefined)) as
-            | InviteableModel["tier"]
-            | undefined,
-        }));
-
-        setResults(mapped);
+        setResults((found ?? []).slice(0, 40));
       } catch {
         if (!cancelled) setResults([]);
       } finally {
@@ -154,15 +135,35 @@ export default function LocalActivityInviteModelsModal({
     };
   }, [dq, open]);
 
-  const toggle = (m: InviteableModel) => {
+  const selectedCount = selected.size;
+  const invitesLeft = Math.max(0, maxInvites - selectedCount);
+  const canAddMore = selectedCount < maxInvites;
+
+  const baseList = useMemo(() => {
+    if (dq.trim().length >= 2) return results;
+    return newInTown;
+  }, [dq, results, newInTown]);
+
+  const displayList = useMemo(() => {
+    const out: CreatorLite[] = [];
+    selected.forEach((v) => out.push(v));
+    const ids = new Set(out.map((x) => Number(x.id)));
+    baseList.forEach((r) => {
+      if (!ids.has(Number(r.id))) out.push(r);
+    });
+    return out;
+  }, [baseList, selected]);
+
+  const toggle = (c: CreatorLite) => {
+    const id = Number(c.id);
     setSelected((prev) => {
       const next = new Map(prev);
-      if (next.has(m.id)) {
-        next.delete(m.id);
+      if (next.has(id)) {
+        next.delete(id);
         return next;
       }
       if (!canAddMore) return next;
-      next.set(m.id, m);
+      next.set(id, c);
       return next;
     });
   };
@@ -171,6 +172,9 @@ export default function LocalActivityInviteModelsModal({
     onConfirm(Array.from(selected.values()));
     onClose();
   };
+
+  const headerTitle = dq.trim().length >= 2 ? "Search results" : `New in ${cityName}`;
+  const showSkeletons = newInTownLoading && dq.trim().length < 2 && !newInTown.length;
 
   return (
     <AnimatePresence>
@@ -200,9 +204,7 @@ export default function LocalActivityInviteModelsModal({
                     Premium invites
                   </p>
                   <p className="mt-2 text-xl font-semibold">Invite models</p>
-                  <p className="mt-1 text-xs text-white/65">
-                    {venueLabel ? `For ${venueLabel}` : "Select the right people for this table."}
-                  </p>
+                  <p className="mt-1 text-xs text-white/65">{venueLabel ? `For ${venueLabel}` : "Select the right people for this table."}</p>
                 </div>
                 <button
                   type="button"
@@ -220,7 +222,7 @@ export default function LocalActivityInviteModelsModal({
                   ref={inputRef}
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder="Search by name or IG..."
+                  placeholder="Search by name or IG…"
                   className="w-full bg-transparent text-sm text-white placeholder:text-white/40 focus:outline-none"
                 />
                 {loading && <span className="text-[11px] font-semibold text-white/55">Searching…</span>}
@@ -241,27 +243,34 @@ export default function LocalActivityInviteModelsModal({
               </div>
             </div>
 
+            <div className="px-5 pb-2">
+              <p className="text-xs font-semibold text-white/70">{headerTitle}</p>
+            </div>
+
             <div className="max-h-[56vh] overflow-y-auto px-4 pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-              {dq.trim().length < 2 ? (
-                <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
-                  <p className="text-sm font-semibold text-white/90">Start typing</p>
-                  <p className="mt-1 text-xs text-white/60">Use at least 2 characters to search.</p>
+              {showSkeletons ? (
+                <div className="space-y-3">
+                  {Array.from({ length: 5 }).map((_, i) => (
+                    <div key={`sk-${i}`} className="h-[78px] w-full animate-pulse rounded-3xl border border-white/10 bg-white/5" />
+                  ))}
                 </div>
-              ) : displayResults.length === 0 && !loading ? (
+              ) : displayList.length === 0 && !loading ? (
                 <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
                   <p className="text-sm font-semibold text-white/90">No results</p>
                   <p className="mt-1 text-xs text-white/60">Try a different keyword.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {displayResults.map((m) => {
-                    const isSelected = selected.has(m.id);
-                    const badge = tierLabel(m.tier);
+                  {displayList.map((m) => {
+                    const id = Number(m.id);
+                    const isSelected = selected.has(id);
                     const disabled = !isSelected && !canAddMore;
+                    const avatarUrl = m?.Profile_pic?.url;
+                    const ig = m?.IG_account;
 
                     return (
                       <button
-                        key={m.id}
+                        key={id}
                         type="button"
                         onClick={() => toggle(m)}
                         disabled={disabled}
@@ -269,28 +278,21 @@ export default function LocalActivityInviteModelsModal({
                           isSelected
                             ? "border-[#FF385C]/35 bg-gradient-to-br from-white/10 to-white/5"
                             : "border-white/10 bg-white/5 hover:bg-white/7"
-                        } ${disabled ? "cursor-not-allowed opacity-50" : ""}`}
+                        } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
                       >
                         <div className="h-11 w-11 overflow-hidden rounded-2xl border border-white/10 bg-white/10">
-                          {m.avatarUrl ? (
-                            <img src={m.avatarUrl} alt={m.name} className="h-full w-full object-cover" />
+                          {avatarUrl ? (
+                            <img src={avatarUrl} alt={m.name ?? "Creator"} className="h-full w-full object-cover" />
                           ) : (
                             <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-white/70">
-                              {m.name.slice(0, 1).toUpperCase()}
+                              {(m.name ?? "C").slice(0, 1).toUpperCase()}
                             </div>
                           )}
                         </div>
 
                         <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <p className="truncate text-sm font-semibold text-white/90">{m.name}</p>
-                            {badge && (
-                              <span className="shrink-0 rounded-full border border-white/15 bg-white/10 px-2 py-0.5 text-[10px] font-semibold text-white/80">
-                                {badge}
-                              </span>
-                            )}
-                          </div>
-                          {m.ig && <p className="truncate text-xs text-white/55">@{m.ig.replace(/^@/, "")}</p>}
+                          <p className="truncate text-sm font-semibold text-white/90">{m.name ?? "Creator"}</p>
+                          {ig && <p className="truncate text-xs text-white/55">@{ig.replace(/^@/, "")}</p>}
                         </div>
 
                         <div className="flex items-center gap-2">
@@ -301,8 +303,7 @@ export default function LocalActivityInviteModelsModal({
                             </span>
                           ) : (
                             <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold text-white/80">
-                              Add
-                              <ChevronRight className="h-3.5 w-3.5" />
+                              Add <ChevronRight className="h-3.5 w-3.5" />
                             </span>
                           )}
                         </div>
@@ -332,9 +333,7 @@ export default function LocalActivityInviteModelsModal({
                 </button>
               </div>
 
-              <p className="mt-2 text-center text-[11px] text-white/55">
-                Invitations will be linked to this table and sent by VIC.
-              </p>
+              <p className="mt-2 text-center text-[11px] text-white/55">Invitations will be linked to this table.</p>
             </div>
           </motion.div>
         </motion.div>
