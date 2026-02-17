@@ -14,7 +14,7 @@ type Props = {
   guests: number;
   invited: CreatorLite[];
   onRemoveInvite?: (creatorId: number) => void;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   loading?: boolean;
 };
 
