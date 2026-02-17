@@ -274,13 +274,13 @@ export default function LocalActivityInviteModelsModal({
                         type="button"
                         onClick={() => toggle(m)}
                         disabled={disabled}
-                        className={`group flex w-full items-center gap-3 rounded-3xl border px-3 py-3 text-left transition ${
+                        className={`group flex w-full items-center gap-4 rounded-3xl border px-4 py-5 text-left transition ${
                           isSelected
                             ? "border-[#FF385C]/35 bg-gradient-to-br from-white/10 to-white/5"
                             : "border-white/10 bg-white/5 hover:bg-white/7"
                         } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
                       >
-                        <div className="h-11 w-11 overflow-hidden rounded-2xl border border-white/10 bg-white/10">
+                        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-white/10">
                           {avatarUrl ? (
                             <img src={avatarUrl} alt={m.name ?? "Creator"} className="h-full w-full object-cover" />
                           ) : (
