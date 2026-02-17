@@ -209,35 +209,6 @@ export default function CreatorProfileSheet({
                     </div>
 
                     <div className="mt-6">
-                      <h3 className="text-sm font-semibold text-neutral-900">Close Friends Gallery</h3>
-                      <div className="mt-3 grid grid-cols-3 gap-3">
-                        {closeFriendsImages.map((image) => (
-                          <div key={image.id} className="space-y-2">
-                            <div className="relative aspect-square w-full overflow-hidden rounded-2xl bg-neutral-200">
-                              {image.src ? (
-                                <img
-                                  src={image.src}
-                                  alt="Close friends"
-                                  className="h-full w-full object-cover blur-[2px] scale-105"
-                                />
-                              ) : (
-                                <div className="h-full w-full bg-gradient-to-br from-neutral-300 via-neutral-200 to-neutral-100" />
-                              )}
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-black/10 to-transparent" />
-                              <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="flex items-center gap-2 rounded-full bg-white/20 px-3 py-1 text-[11px] font-semibold text-white backdrop-blur-md">
-                                  <Lock className="h-3.5 w-3.5" />
-                                  Locked
-                                </div>
-                              </div>
-                            </div>
-                            <p className="text-[11px] font-medium text-neutral-500">Close friends only</p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    <div className="mt-6">
                       <h3 className="text-sm font-semibold text-neutral-900">Socials</h3>
                       <div className="mt-3 space-y-2">
                         {[
