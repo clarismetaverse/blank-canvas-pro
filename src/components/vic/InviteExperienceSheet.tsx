@@ -3,6 +3,7 @@ import { Calendar, Check, ChevronDown, ChevronRight, Minus, MoonStar, Plus, Ship
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { CreatorLite } from "@/services/creatorSearch";
+import ConfirmInvitesModal from "@/features/activities/ConfirmInvitesModal";
 import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityInviteModelsModal";
 import { fetchEventTemps, type EventTemp } from "@/services/activities";
 import { requestVicBooking, type BookingStatus } from "@/services/vicBookings";
@@ -145,6 +146,9 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
   const [localBookings, setLocalBookings] = useState<Record<string, LocalBookingState>>({});
   const [bookingToastVisible, setBookingToastVisible] = useState(false);
   const [inviteModelsOpen, setInviteModelsOpen] = useState(false);
+  const [confirmInvitesOpen, setConfirmInvitesOpen] = useState(false);
+  const [confirmLoading, setConfirmLoading] = useState(false);
+  const [pendingInvites, setPendingInvites] = useState<CreatorLite[]>([]);
   const [invitedModels, setInvitedModels] = useState<Record<string, CreatorLite[]>>({});
 
   const creatorName = creator?.name || "Creator";
@@ -933,10 +937,49 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                 maxInvites={invitesBudget}
                 initialSelected={invitedForSelected}
                 onConfirm={(selected) => {
-                  setInvitedModels((prev) => ({ ...prev, [selectedLocalItem.id]: selected }));
-                  setBookingToastVisible(true);
-                  window.setTimeout(() => setBookingToastVisible(false), 1500);
+                  setPendingInvites(selected);
+                  setInviteModelsOpen(false);
+                  setConfirmInvitesOpen(true);
                 }}
+              />
+            )}
+            {selectedLocalItem && (
+              <ConfirmInvitesModal
+                open={confirmInvitesOpen}
+                onClose={() => {
+                  if (!confirmLoading) {
+                    setConfirmInvitesOpen(false);
+                  }
+                }}
+                onBack={() => {
+                  if (!confirmLoading) {
+                    setConfirmInvitesOpen(false);
+                    setInviteModelsOpen(true);
+                  }
+                }}
+                tablePreviewLabel={tablePreviewLabel}
+                coverUrl={selectedLocalItem.coverUrl}
+                dateLabel={selectedDate || "Date TBD"}
+                timeLabel={selectedTime || "Time TBD"}
+                guests={selectedGuests}
+                invited={pendingInvites}
+                onRemoveInvite={(creatorId) => {
+                  setPendingInvites((prev) => prev.filter((creator) => Number(creator.id) !== creatorId));
+                }}
+                onConfirm={() => {
+                  if (confirmLoading) {
+                    return;
+                  }
+                  setConfirmLoading(true);
+                  window.setTimeout(() => {
+                    setInvitedModels((prev) => ({ ...prev, [selectedLocalItem.id]: pendingInvites }));
+                    setConfirmInvitesOpen(false);
+                    setConfirmLoading(false);
+                    setBookingToastVisible(true);
+                    window.setTimeout(() => setBookingToastVisible(false), 1500);
+                  }, 650);
+                }}
+                loading={confirmLoading}
               />
             )}
           </motion.div>
