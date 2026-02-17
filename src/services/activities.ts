@@ -226,8 +226,11 @@ export type EventTemp = {
   Tags: string[];
   Type: "local" | "trip" | "bali";
   Cover: {
+    access?: string;
+    path?: string;
     url: string;
     name?: string;
+    type?: string;
     mime?: string;
     size?: number;
     meta?: { width?: number; height?: number };

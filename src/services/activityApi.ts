@@ -10,7 +10,7 @@ export type ActivityPayload = {
   Starting_Day: string | null;
   Return: string | null;
   VICS: number[];
-  Tripcover: string | null;
+  Tripcover: Record<string, unknown> | null;
   ParticipantsMinimumNumber: number;
   ActivitiesList: string;
   InvitedUsers: number[];

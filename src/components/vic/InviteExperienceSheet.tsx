@@ -36,6 +36,7 @@ type LocalActivityItem = {
   title: string;
   dateLabel?: string;
   coverUrl: string;
+  coverObject: Record<string, unknown> | null;
   tag: string;
   supportCount: number;
 };
@@ -282,6 +283,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
         title: event.Name,
         dateLabel: event.Date_start || undefined,
         coverUrl: event.Cover?.url || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80",
+        coverObject: event.Cover ? (event.Cover as unknown as Record<string, unknown>) : null,
         tag: event.Type || "local",
         supportCount: 40 + (event.id % 25),
       })),
@@ -375,7 +377,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
           Starting_Day: item.dateLabel || null,
           Return: null,
           VICS: [],
-          Tripcover: item.coverUrl || null,
+          Tripcover: item.coverObject || null,
           ParticipantsMinimumNumber: current.guests,
           ActivitiesList: current.notes.trim(),
           InvitedUsers: [],
@@ -1039,7 +1041,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                           Starting_Day: selectedLocalItem.dateLabel || null,
                           Return: null,
                           VICS: [],
-                          Tripcover: selectedLocalItem.coverUrl || null,
+                          Tripcover: selectedLocalItem.coverObject || null,
                           ParticipantsMinimumNumber: bookingState.guests,
                           ActivitiesList: bookingState.notes.trim(),
                           InvitedUsers: [],
