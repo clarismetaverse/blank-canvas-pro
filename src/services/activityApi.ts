@@ -1,6 +1,4 @@
-import { request } from "@/services/xano";
-
-const ACTIVITY_API_BASE = "https://xbut-eryu-hhsg.f2.xano.io/api:bwh6Xc5O";
+import { xanoFetch } from "@/services/xanoClient";
 
 export type ActivityStatus = "draft" | "active" | "reserved" | "confirmed" | "cancelled";
 
@@ -24,12 +22,14 @@ export type Activity = ActivityPayload & {
   id: number;
   created_at?: number;
   updated_at?: number;
+  ModelsList?: Array<{ id?: number; name?: string; Profile_pic?: { url?: string } | null }>;
+  InvitedUsersExpanded?: Array<{ id?: number; name?: string; Profile_pic?: { url?: string } | null }>;
 };
 
 export async function createActivity(payload: ActivityPayload): Promise<Activity> {
-  return request<Activity>(`${ACTIVITY_API_BASE}/activity`, {
+  return xanoFetch<Activity>("/activity", {
     method: "POST",
-    body: JSON.stringify(payload),
+    body: payload,
   });
 }
 
@@ -37,11 +37,11 @@ export async function patchActivity(
   activityId: number,
   patch: Partial<Omit<ActivityPayload, "event_temp_id" | "host">>
 ): Promise<Activity> {
-  return request<Activity>(`${ACTIVITY_API_BASE}/activity/patch`, {
+  return xanoFetch<Activity>("/activity/patch", {
     method: "PATCH",
-    body: JSON.stringify({
+    body: {
       trip_id: activityId,
       ...patch,
-    }),
+    },
   });
 }
