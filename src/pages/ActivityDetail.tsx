@@ -8,7 +8,9 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, MessageCircle, Search, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchTrips, type InviteLite, type InviteStatus, type TripActivity } from "@/services/activities";
+import type { InviteLite, InviteStatus, TripActivity } from "@/services/activities";
+import { fetchMyActivities } from "@/services/activitiesMe";
+import type { Activity, ActivityStatus } from "@/services/activityApi";
 
 const easeOut = { duration: 0.3, ease: "easeOut" };
 
@@ -232,17 +234,63 @@ export default function ActivityDetail() {
   });
 
   useEffect(() => {
+    const PLACEHOLDER_COVER =
+      "https://images.unsplash.com/photo-1519677100203-a0e668c92439?auto=format&fit=crop&w=1200&q=80";
+
+    const toInviteStatus = (status?: ActivityStatus): InviteStatus => {
+      if (status === "confirmed") return "accepted";
+      if (status === "cancelled") return "rejected";
+      return "invited";
+    };
+
+    const mapToTrip = (a: Activity): TripActivity => {
+      const expanded =
+        a.ModelsList && a.ModelsList.length > 0 ? a.ModelsList : a.InvitedUsersExpanded ?? [];
+
+      const invites: InviteLite[] = expanded.map((user, i) => ({
+        id: String(user.id ?? `${a.id}-${i}`),
+        status: toInviteStatus(a.status),
+        creator: {
+          name: user.name || "Invited creator",
+          avatarUrl: user.Profile_pic?.url || "https://i.pravatar.cc/100?img=65",
+          ig: "",
+        },
+      }));
+
+      return {
+        id: String(a.id),
+        title: a.Name || "Untitled",
+        subtitle: a.Destination || "Local",
+        coverUrl:
+          a.Tripcover && typeof a.Tripcover === "object" && "url" in a.Tripcover
+            ? String((a.Tripcover as { url?: string }).url || PLACEHOLDER_COVER)
+            : PLACEHOLDER_COVER,
+        dateLabel: a.Starting_Day || "",
+        locationLabel: a.Destination || "Local",
+        notes: a.ActivitiesList || "",
+        invites,
+      };
+    };
+
     const load = async () => {
-      const trips = await fetchTrips();
-      const selected = trips.find((trip) => trip.id === activityId) ?? null;
-      setActivity(selected);
-      if (selected) {
+      try {
+        const activities = await fetchMyActivities();
+        const raw = activities.find((a) => String(a.id) === activityId) ?? null;
+        if (!raw) {
+          setActivity(null);
+          return;
+        }
+        const mapped = mapToTrip(raw);
+        setActivity(mapped);
         setEditForm({
-          title: selected.title,
-          dateLabel: selected.dateLabel,
-          locationLabel: selected.locationLabel,
-          notes: selected.notes,
+          title: mapped.title,
+          dateLabel: mapped.dateLabel,
+          locationLabel: mapped.locationLabel,
+          notes: mapped.notes,
         });
+      } catch (err) {
+        console.error("Failed to load activity detail", err);
+        setActivity(null);
       }
     };
 
