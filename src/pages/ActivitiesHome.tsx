@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, Mail, MapPin, Plane, Palmtree, ChevronRight, UserRound } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { createEvent, type InviteLite, type TripActivity } from "@/services/activities";
+import { createEvent, fetchEventTemps, type EventTemp, type InviteLite, type TripActivity } from "@/services/activities";
 import { fetchMyActivities } from "@/services/activitiesMe";
 import type { Activity, ActivityStatus } from "@/services/activityApi";
 import InviteExperienceSheet from "@/components/vic/InviteExperienceSheet";
@@ -140,6 +140,8 @@ export default function ActivitiesHome() {
   const [myActivitiesLoading, setMyActivitiesLoading] = useState(true);
   const [inviteSheetOpen, setInviteSheetOpen] = useState(false);
   const [inviteFilterType, setInviteFilterType] = useState<"local" | "trip" | "bali">("local");
+  const [eventTemps, setEventTemps] = useState<EventTemp[]>([]);
+  const [eventTempsLoading, setEventTempsLoading] = useState(true);
 
   useEffect(() => {
     const loadActivities = async () => {
@@ -156,7 +158,22 @@ export default function ActivitiesHome() {
         setMyActivitiesLoading(false);
       }
     };
+
+    const loadEventTemps = async () => {
+      setEventTempsLoading(true);
+      try {
+        const temps = await fetchEventTemps();
+        setEventTemps(temps.filter((t) => t.Name));
+      } catch (error) {
+        console.error("Failed to load event temps", error);
+        setEventTemps([]);
+      } finally {
+        setEventTempsLoading(false);
+      }
+    };
+
     void loadActivities();
+    void loadEventTemps();
   }, []);
 
   const inviteRoute = useMemo(
@@ -335,24 +352,37 @@ export default function ActivitiesHome() {
             <h2 className="text-sm font-semibold text-neutral-900">Incoming events</h2>
           </div>
           <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2">
-            {cinematicTemplates.map((template) => (
-              <button
-                key={template.title}
-                type="button"
-                onClick={() => openCreateSheet(template)}
-                className="relative h-56 w-[76%] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 text-left shadow-[0_14px_34px_rgba(0,0,0,0.12)]"
-              >
-                <img src={template.imageUrl} alt={template.title} className="h-full w-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-black/10" />
-                <span className="absolute right-4 top-4 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-neutral-800">
-                  Template
-                </span>
-                <div className="absolute bottom-4 left-4">
-                  <p className="text-lg font-semibold text-white">{template.title}</p>
-                  <p className="text-xs text-white/80">{template.city}</p>
-                </div>
-              </button>
-            ))}
+            {eventTempsLoading ? (
+              [0, 1].map((i) => (
+                <div key={i} className="h-56 w-[76%] shrink-0 animate-pulse rounded-3xl border border-neutral-200 bg-neutral-200/70" />
+              ))
+            ) : eventTemps.length === 0 ? (
+              <div className="w-full rounded-2xl border border-dashed border-neutral-200 bg-white px-4 py-6 text-center text-sm text-neutral-500">
+                No event templates yet
+              </div>
+            ) : (
+              eventTemps.map((template) => {
+                const coverUrl = template.Cover?.url || "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1400&q=80";
+                return (
+                  <button
+                    key={template.id}
+                    type="button"
+                    onClick={() => openCreateSheet({ title: template.Name, city: "", tags: template.Tags || [], imageUrl: coverUrl })}
+                    className="relative h-56 w-[76%] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 text-left shadow-[0_14px_34px_rgba(0,0,0,0.12)]"
+                  >
+                    <img src={coverUrl} alt={template.Name} className="h-full w-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-black/10" />
+                    <span className="absolute right-4 top-4 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-neutral-800">
+                      {template.Type || "Template"}
+                    </span>
+                    <div className="absolute bottom-4 left-4">
+                      <p className="text-lg font-semibold text-white">{template.Name}</p>
+                      {template.Date_start && <p className="text-xs text-white/80">{template.Date_start}</p>}
+                    </div>
+                  </button>
+                );
+              })
+            )}
           </div>
 
           <div className="flex">
