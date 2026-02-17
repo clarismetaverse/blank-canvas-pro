@@ -280,7 +280,7 @@ export default function LocalActivityInviteModelsModal({
                             : "border-white/10 bg-white/5 hover:bg-white/7"
                         } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
                       >
-                        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-2xl border border-white/10 bg-white/10">
+                        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/10">
                           {avatarUrl ? (
                             <img src={avatarUrl} alt={m.name ?? "Creator"} className="h-full w-full object-cover" />
                           ) : (
@@ -292,7 +292,7 @@ export default function LocalActivityInviteModelsModal({
 
                         <div className="min-w-0 flex-1">
                           <p className="truncate text-sm font-semibold text-white/90">{m.name ?? "Creator"}</p>
-                          {ig && <p className="truncate text-xs text-white/55">@{ig.replace(/^@/, "")}</p>}
+                          <p className="truncate text-xs text-white/55">Model • Available</p>
                         </div>
 
                         <div className="flex items-center gap-2">
