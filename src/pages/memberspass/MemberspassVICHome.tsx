@@ -85,14 +85,7 @@ export default function MemberspassVICHome() {
       try {
         const items = await fetchNewInTown();
         if (!active) return;
-        const pageBase = 1000;
-        const mapped = items.map((item, index) => ({
-          id: pageBase + index + 1,
-          name: item.name,
-          IG_account: item.IG_account,
-          Profile_pic: item.Profile_pic,
-        }));
-        setNewInTown(mapped);
+        setNewInTown(items);
       } finally {
         if (active) setNewInTownLoading(false);
       }

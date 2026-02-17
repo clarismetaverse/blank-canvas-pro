@@ -71,15 +71,7 @@ export default function LocalActivityInviteModelsModal({
       try {
         const items = await fetchNewInTown();
         if (!active) return;
-        const pageBase = 500000;
-        const mapped: CreatorLite[] = items.map((item, index) => ({
-          id: pageBase + index + 1,
-          name: item.name,
-          IG_account: item.IG_account,
-          Tiktok_account: (item as { Tiktok_account?: string }).Tiktok_account,
-          Profile_pic: item.Profile_pic,
-        }));
-        setNewInTown(mapped);
+        setNewInTown(items);
       } catch {
         if (active) setNewInTown([]);
       } finally {

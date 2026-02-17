@@ -6,7 +6,9 @@ import type { CreatorLite } from "@/services/creatorSearch";
 import ConfirmInvitesModal from "@/features/activities/ConfirmInvitesModal";
 import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityInviteModelsModal";
 import { fetchEventTemps, type EventTemp } from "@/services/activities";
+import { createActivity, patchActivity } from "@/services/activityApi";
 import { requestVicBooking, type BookingStatus } from "@/services/vicBookings";
+import { fetchUserTurbo } from "@/services/xano";
 
 type InviteExperienceSheetProps = {
   open: boolean;
@@ -43,6 +45,7 @@ type LocalBookingState = {
   time: string;
   notes: string;
   loading: boolean;
+  activityId?: number | null;
   success: null | { bookingId: string; status: BookingStatus };
 };
 
@@ -150,8 +153,30 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
   const [confirmLoading, setConfirmLoading] = useState(false);
   const [pendingInvites, setPendingInvites] = useState<CreatorLite[]>([]);
   const [invitedModels, setInvitedModels] = useState<Record<string, CreatorLite[]>>({});
+  const [hostId, setHostId] = useState<number>(0);
 
   const creatorName = creator?.name || "Creator";
+
+  useEffect(() => {
+    let active = true;
+
+    const loadHost = async () => {
+      try {
+        const me = await fetchUserTurbo();
+        if (!active) return;
+        setHostId(Number(me?.id) > 0 ? Number(me.id) : 0);
+      } catch {
+        if (active) setHostId(0);
+      }
+    };
+
+    void loadHost();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
 
   useEffect(() => {
     if (!open || !filterType) return;
@@ -269,6 +294,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
       time: "",
       notes: "",
       loading: false,
+      activityId: null,
       success: null,
     };
 
@@ -315,6 +341,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
         time: "",
         notes: "",
         loading: false,
+        activityId: null,
         success: null,
       };
       return {
@@ -339,7 +366,28 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
         time: current.time,
         notes: current.notes.trim() || undefined,
       });
-      updateLocalBooking(item.id, (prev) => ({ ...prev, loading: false, success: response }));
+
+      let activityId = current.activityId ?? null;
+      if (!activityId) {
+        const created = await createActivity({
+          Name: item.title || "",
+          Destination: cityName || "",
+          Starting_Day: item.dateLabel || null,
+          Return: null,
+          VICS: [],
+          Tripcover: item.coverUrl || null,
+          ParticipantsMinimumNumber: current.guests,
+          ActivitiesList: current.notes.trim(),
+          InvitedUsers: [],
+          event_temp_id: Number(item.id) || 0,
+          host: hostId,
+          status: "draft",
+          ModelLimit: 0,
+        });
+        activityId = Number(created.id) || null;
+      }
+
+      updateLocalBooking(item.id, (prev) => ({ ...prev, loading: false, success: response, activityId }));
       setBookingToastVisible(true);
       window.setTimeout(() => setBookingToastVisible(false), 2000);
     } catch {
@@ -967,17 +1015,68 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                   setPendingInvites((prev) => prev.filter((creator) => Number(creator.id) !== creatorId));
                 }}
                 onConfirm={() => {
-                  if (confirmLoading) {
+                  if (confirmLoading || !selectedLocalItem) {
                     return;
                   }
-                  setConfirmLoading(true);
-                  window.setTimeout(() => {
-                    setInvitedModels((prev) => ({ ...prev, [selectedLocalItem.id]: pendingInvites }));
-                    setConfirmInvitesOpen(false);
-                    setConfirmLoading(false);
-                    setBookingToastVisible(true);
-                    window.setTimeout(() => setBookingToastVisible(false), 1500);
-                  }, 650);
+
+                  const run = async () => {
+                    setConfirmLoading(true);
+                    try {
+                      const bookingState = getLocalBookingState(selectedLocalItem.id);
+                      const invitedIds = Array.from(
+                        new Set(
+                          pendingInvites
+                            .map((creator) => Number(creator.id))
+                            .filter((id) => Number.isFinite(id) && id > 0)
+                        )
+                      );
+
+                      let activityId = bookingState.activityId ?? null;
+                      if (!activityId) {
+                        const created = await createActivity({
+                          Name: selectedLocalItem.title || "",
+                          Destination: cityName || "",
+                          Starting_Day: selectedLocalItem.dateLabel || null,
+                          Return: null,
+                          VICS: [],
+                          Tripcover: selectedLocalItem.coverUrl || null,
+                          ParticipantsMinimumNumber: bookingState.guests,
+                          ActivitiesList: bookingState.notes.trim(),
+                          InvitedUsers: [],
+                          event_temp_id: Number(selectedLocalItem.id) || 0,
+                          host: hostId,
+                          status: "draft",
+                          ModelLimit: 0,
+                        });
+                        activityId = Number(created.id) || null;
+                      }
+
+                      if (!activityId) {
+                        throw new Error("Missing activity id");
+                      }
+
+                      await patchActivity(activityId, {
+                        InvitedUsers: invitedIds,
+                        ModelLimit: invitedIds.length,
+                        ParticipantsMinimumNumber: bookingState.guests,
+                        Starting_Day: selectedLocalItem.dateLabel || null,
+                        ActivitiesList: bookingState.notes.trim(),
+                        status: "active",
+                      });
+
+                      updateLocalBooking(selectedLocalItem.id, (prev) => ({ ...prev, activityId }));
+                      setInvitedModels((prev) => ({ ...prev, [selectedLocalItem.id]: pendingInvites }));
+                      setConfirmInvitesOpen(false);
+                      setBookingToastVisible(true);
+                      window.setTimeout(() => setBookingToastVisible(false), 1500);
+                    } catch {
+                      // keep modal open for retry
+                    } finally {
+                      setConfirmLoading(false);
+                    }
+                  };
+
+                  void run();
                 }}
                 loading={confirmLoading}
               />
