@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { Check, ChevronLeft, Mail, MapPin, Plane, Palmtree, ChevronRight } from "lucide-react";
+import { ChevronLeft, Mail, MapPin, Plane, Palmtree, ChevronRight, UserRound } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { fetchTrips, createEvent, type InviteLite, type TripActivity } from "@/services/activities";
+import { createEvent, type InviteLite, type TripActivity } from "@/services/activities";
+import { fetchMyActivities } from "@/services/activitiesMe";
+import type { Activity, ActivityStatus } from "@/services/activityApi";
 import InviteExperienceSheet from "@/components/vic/InviteExperienceSheet";
 type ActivitySeed = {
   title: string;
@@ -80,17 +82,49 @@ const suggestedLocalActivities: ActivitySeed[] = [
 ];
 
 const easeOut = { duration: 0.35, ease: "easeOut" as const };
+const ACTIVITY_PLACEHOLDER_COVER =
+  "https://images.unsplash.com/photo-1519677100203-a0e668c92439?auto=format&fit=crop&w=1200&q=80";
 
-const getInvitePreview = (invites: InviteLite[]) => {
-  const accepted = invites.filter((invite) => invite.status === "accepted");
-  const invited = invites.filter((invite) => invite.status === "invited");
-  const hasAccepted = accepted.length > 0;
-  const source = hasAccepted ? accepted : invited;
+const statusLabelMap: Record<ActivityStatus, string> = {
+  draft: "Draft",
+  active: "Invited",
+  reserved: "Reserved",
+  confirmed: "Accepted",
+  cancelled: "Cancelled",
+};
+
+const toInviteStatus = (status?: ActivityStatus): InviteLite["status"] => {
+  if (status === "confirmed") return "accepted";
+  if (status === "cancelled") return "rejected";
+  return "invited";
+};
+
+const mapActivityToTrip = (activity: Activity): TripActivity => {
+  const invitedExpanded =
+    activity.ModelsList && activity.ModelsList.length > 0 ? activity.ModelsList : activity.InvitedUsersExpanded ?? [];
+
+  const invites: InviteLite[] = invitedExpanded.slice(0, 3).map((user, index) => ({
+    id: String(user.id ?? `${activity.id}-${index}`),
+    status: toInviteStatus(activity.status),
+    creator: {
+      name: user.name || "Invited creator",
+      avatarUrl: user.Profile_pic?.url || "https://i.pravatar.cc/100?img=65",
+      ig: "",
+    },
+  }));
 
   return {
-    hasAccepted,
-    preview: source.slice(0, 4),
-    overflow: Math.max(source.length - 4, 0),
+    id: String(activity.id),
+    title: activity.Name || "Untitled",
+    subtitle: activity.Destination || "Local",
+    coverUrl:
+      activity.Tripcover && typeof activity.Tripcover === "object" && "url" in activity.Tripcover
+        ? String((activity.Tripcover as { url?: string }).url || ACTIVITY_PLACEHOLDER_COVER)
+        : ACTIVITY_PLACEHOLDER_COVER,
+    dateLabel: activity.Starting_Day || "",
+    locationLabel: activity.Destination || "Local",
+    notes: activity.ActivitiesList || "",
+    invites,
   };
 };
 
@@ -102,15 +136,27 @@ export default function ActivitiesHome() {
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState<ActivityFormState>({ name: "", city: "", date: "", tags: [] });
   const [myActivities, setMyActivities] = useState<TripActivity[]>([]);
+  const [myActivitiesRaw, setMyActivitiesRaw] = useState<Activity[]>([]);
+  const [myActivitiesLoading, setMyActivitiesLoading] = useState(true);
   const [inviteSheetOpen, setInviteSheetOpen] = useState(false);
   const [inviteFilterType, setInviteFilterType] = useState<"local" | "trip" | "bali">("local");
 
   useEffect(() => {
-    const loadTrips = async () => {
-      const trips = await fetchTrips();
-      setMyActivities(trips);
+    const loadActivities = async () => {
+      setMyActivitiesLoading(true);
+      try {
+        const activities = await fetchMyActivities();
+        setMyActivitiesRaw(activities);
+        setMyActivities(activities.map(mapActivityToTrip));
+      } catch (error) {
+        console.error("Failed to load activities/me", error);
+        setMyActivitiesRaw([]);
+        setMyActivities([]);
+      } finally {
+        setMyActivitiesLoading(false);
+      }
     };
-    void loadTrips();
+    void loadActivities();
   }, []);
 
   const inviteRoute = useMemo(
@@ -193,58 +239,65 @@ export default function ActivitiesHome() {
           </div>
         </motion.section>
 
-        {myActivities.length > 0 && (
-          <motion.section initial={{ opacity: 0, y: 8, filter: "blur(6px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={easeOut}>
-            <div className="mb-3 px-1">
-              <h2 className="text-sm font-semibold text-neutral-900">Your activities</h2>
-            </div>
+        <motion.section initial={{ opacity: 0, y: 8, filter: "blur(6px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={easeOut}>
+          <div className="mb-3 px-1">
+            <h2 className="text-sm font-semibold text-neutral-900">Your activities</h2>
+          </div>
+          {myActivitiesLoading ? (
             <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pt-1">
-              {myActivities.map((activity) => (
-                <button
-                  key={activity.id}
-                  type="button"
-                  onClick={() =>
-                    navigate(
-                      location.pathname.startsWith("/memberspass/vic/activities")
-                        ? `/memberspass/vic/activities/${activity.id}`
-                        : `/activities/${activity.id}`
-                    )
-                  }
-                  className="relative h-52 w-[78%] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 text-left shadow-[0_18px_38px_rgba(10,10,20,0.16)]"
-                >
-                  <img src={activity.coverUrl} alt={activity.title} className="h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/55" />
-                  <div className="absolute left-4 top-4">
-                    {(() => {
-                      const statusAccepted = activity.invites.some((invite) => invite.status === "accepted");
-                      return (
-                        <span
-                          className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wide ${
-                            statusAccepted
-                              ? "border-emerald-200 bg-emerald-50/95 text-emerald-700"
-                              : "border-neutral-200 bg-white/90 text-neutral-700"
-                          }`}
-                        >
-                          {statusAccepted ? "Accepted" : "Invited"}
-                        </span>
-                      );
-                    })()}
-                  </div>
-                  <div className="absolute bottom-4 left-4 right-4 space-y-2.5">
-                    <div>
-                      <p className="text-base font-semibold text-white">{activity.title}</p>
-                      <p className="text-xs text-white/80">{activity.subtitle}</p>
+              {[0, 1].map((item) => (
+                <div key={item} className="h-52 w-[78%] shrink-0 animate-pulse rounded-3xl border border-neutral-200 bg-neutral-200/70" />
+              ))}
+            </div>
+          ) : myActivities.length === 0 ? (
+            <div className="rounded-2xl border border-dashed border-neutral-200 bg-white px-4 py-6 text-center text-sm text-neutral-500">
+              No activities yet
+            </div>
+          ) : (
+            <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pt-1">
+              {myActivities.map((activity, index) => {
+                const raw = myActivitiesRaw[index];
+                const statusLabel = raw?.status ? statusLabelMap[raw.status] : "Invited";
+                const statusAccepted = raw?.status === "confirmed";
+
+                return (
+                  <button
+                    key={activity.id}
+                    type="button"
+                    onClick={() =>
+                      navigate(
+                        location.pathname.startsWith("/memberspass/vic/activities")
+                          ? `/memberspass/vic/activities/${activity.id}`
+                          : `/activities/${activity.id}`
+                      )
+                    }
+                    className="relative h-52 w-[78%] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 text-left shadow-[0_18px_38px_rgba(10,10,20,0.16)]"
+                  >
+                    <img src={activity.coverUrl} alt={activity.title} className="h-full w-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/55" />
+                    <div className="absolute left-4 top-4">
+                      <span
+                        className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wide ${
+                          statusAccepted
+                            ? "border-emerald-200 bg-emerald-50/95 text-emerald-700"
+                            : "border-neutral-200 bg-white/90 text-neutral-700"
+                        }`}
+                      >
+                        {statusLabel}
+                      </span>
                     </div>
-                    {(() => {
-                      const { hasAccepted, preview, overflow } = getInvitePreview(activity.invites);
-                      const StatusIcon = hasAccepted ? Check : Mail;
-                      return (
-                        <div className="flex items-center gap-2">
-                          <span className="rounded-full border border-white/40 bg-black/25 p-1 text-white">
-                            <StatusIcon className="h-3 w-3" />
-                          </span>
+                    <div className="absolute bottom-4 left-4 right-4 space-y-2.5">
+                      <div>
+                        <p className="text-base font-semibold text-white">{activity.title}</p>
+                        <p className="text-xs text-white/80">{activity.subtitle}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="rounded-full border border-white/40 bg-black/25 p-1 text-white">
+                          {activity.invites.length > 0 ? <Mail className="h-3 w-3" /> : <UserRound className="h-3 w-3" />}
+                        </span>
+                        {activity.invites.length > 0 ? (
                           <div className="flex items-center -space-x-2">
-                            {preview.map((invite) => (
+                            {activity.invites.map((invite) => (
                               <img
                                 key={invite.id}
                                 src={invite.creator.avatarUrl}
@@ -252,21 +305,23 @@ export default function ActivitiesHome() {
                                 className="h-7 w-7 rounded-full border border-white/80 object-cover"
                               />
                             ))}
-                            {overflow > 0 && (
+                            {(raw?.InvitedUsers?.length ?? 0) > activity.invites.length && (
                               <span className="flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-black/45 text-[10px] font-semibold text-white">
-                                +{overflow}
+                                +{(raw?.InvitedUsers?.length ?? 0) - activity.invites.length}
                               </span>
                             )}
                           </div>
-                        </div>
-                      );
-                    })()}
-                  </div>
-                </button>
-              ))}
+                        ) : (
+                          <p className="text-xs text-white/85">No invited creators yet</p>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
-          </motion.section>
-        )}
+          )}
+        </motion.section>
 
         <motion.section
           initial={{ opacity: 0, y: 12, filter: "blur(8px)" }}

@@ -1,5 +1,5 @@
 import type { CreatorLite } from "@/services/creatorSearch";
-import { request } from "@/services/xano";
+import { xanoFetch } from "@/services/xanoClient";
 
 type NewInTownResponse = {
   users?: {
@@ -15,9 +15,9 @@ type NewInTownResponse = {
 
 export async function fetchNewInTown(): Promise<CreatorLite[]> {
   try {
-    const data = await request<NewInTownResponse>("/newintown", {
+    const data = await xanoFetch<NewInTownResponse>("/newintown", {
       method: "POST",
-      body: JSON.stringify({}),
+      body: {},
     });
 
     return (data.users?.items ?? [])
