@@ -799,7 +799,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                                               : "bg-neutral-200 text-neutral-500"
                                           }`}
                                         >
-                                          {booking.loading ? "Requesting…" : booking.success ? "Booked ✓" : "Request booking"}
+                                          {booking.loading ? "Selecting…" : booking.success ? "Selected ✓" : "Select"}
                                         </button>
                                         {booking.success && (
                                           <button
