@@ -293,7 +293,7 @@ export default function ActivitiesHome() {
                       </div>
                       <div className="flex items-center gap-2">
                         <span className="rounded-full border border-white/40 bg-black/25 p-1 text-white">
-                          {activity.invites.length > 0 ? <Mail className="h-3 w-3" /> : <UserRound className="h-3 w-3" />}
+                          {(activity.invites.length > 0 || (raw?.InvitedUsers?.length ?? 0) > 0) ? <Mail className="h-3 w-3" /> : <UserRound className="h-3 w-3" />}
                         </span>
                         {activity.invites.length > 0 ? (
                           <div className="flex items-center -space-x-2">
@@ -311,6 +311,8 @@ export default function ActivitiesHome() {
                               </span>
                             )}
                           </div>
+                        ) : (raw?.InvitedUsers?.length ?? 0) > 0 ? (
+                          <p className="text-xs text-white/85">{raw!.InvitedUsers!.length} invited creator{raw!.InvitedUsers!.length > 1 ? "s" : ""}</p>
                         ) : (
                           <p className="text-xs text-white/85">No invited creators yet</p>
                         )}
