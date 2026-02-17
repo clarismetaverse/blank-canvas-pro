@@ -1,7 +1,8 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Calendar, Check, ChevronRight, Minus, MoonStar, Plus, Ship, Sparkles, User, Users, Utensils, Waves, X } from "lucide-react";
+import { Calendar, Check, ChevronDown, ChevronRight, Minus, MoonStar, Plus, Ship, Sparkles, User, Users, Utensils, Waves, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import LocalActivityInviteModelsModal, { type InviteableModel } from "@/features/activities/LocalActivityInviteModelsModal";
 import type { CreatorLite } from "@/services/creatorSearch";
 import { fetchEventTemps, type EventTemp } from "@/services/activities";
 import { requestVicBooking, type BookingStatus } from "@/services/vicBookings";
@@ -143,6 +144,8 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
   const [expandedLocalBookingId, setExpandedLocalBookingId] = useState<string | null>(null);
   const [localBookings, setLocalBookings] = useState<Record<string, LocalBookingState>>({});
   const [bookingToastVisible, setBookingToastVisible] = useState(false);
+  const [inviteModelsOpen, setInviteModelsOpen] = useState(false);
+  const [invitedModels, setInvitedModels] = useState<Record<string, InviteableModel[]>>({});
 
   const creatorName = creator?.name || "Creator";
 
@@ -275,22 +278,26 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
   const selectedTime = selectedLocalBooking?.time ?? "";
   const selectedGuests = selectedLocalBooking?.guests ?? 0;
   const canInvite = Boolean(selectedDate) && Boolean(selectedTime) && selectedGuests >= 1;
-  const canSelectTable =
-    Boolean(selectedLocalItem) &&
-    canInvite &&
-    !selectedLocalBooking?.loading &&
-    !selectedLocalBooking?.success;
+  const invitesBudget = 8;
+  const invitedForSelected = selectedLocalItem ? (invitedModels[selectedLocalItem.id] ?? []) : [];
+  const invitedCount = invitedForSelected.length;
 
-  const [invitePulse, setInvitePulse] = useState(false);
+  const venueShortName = useMemo(() => {
+    const raw = selectedLocalItem?.title?.trim() ?? "";
+    const base = raw.split(" - ")[0].split(" | ")[0].trim();
+    if (!base) return "";
+    return base.length > 18 ? `${base.slice(0, 18).trim()}…` : base;
+  }, [selectedLocalItem?.title]);
 
-  useEffect(() => {
-    if (!canInvite) {
-      return;
-    }
-    setInvitePulse(true);
-    const timeout = window.setTimeout(() => setInvitePulse(false), 1200);
-    return () => window.clearTimeout(timeout);
-  }, [canInvite]);
+  const tablePreviewLabel = useMemo(() => {
+    if (!selectedLocalItem) return "";
+    const pax = selectedLocalBooking?.guests ?? 0;
+    const name = venueShortName || "Venue";
+    return pax ? `${pax} pax • ${name}` : name;
+  }, [selectedLocalItem, selectedLocalBooking?.guests, venueShortName]);
+
+  const hasSelectedTable = Boolean(selectedLocalBooking?.success);
+  const canInviteModels = hasSelectedTable;
 
 
   const updateLocalBooking = (activityId: string, updater: (prev: LocalBookingState) => LocalBookingState) => {
@@ -825,6 +832,23 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                                       </label>
 
                                       <div className="space-y-2">
+                                        {hasSelectedTable && (
+                                          <button
+                                            type="button"
+                                            onClick={() => setInviteModelsOpen(true)}
+                                            className="flex w-full items-center justify-between rounded-2xl border border-neutral-200 bg-white px-3 py-2 text-left"
+                                          >
+                                            <div className="flex min-w-0 items-center gap-2">
+                                              <span className="text-xs font-semibold text-neutral-900">{tablePreviewLabel}</span>
+                                              <span className="rounded-full border border-neutral-200 bg-neutral-50 px-2 py-0.5 text-[10px] font-semibold text-neutral-700">
+                                                {invitedCount} invited
+                                              </span>
+                                            </div>
+                                            <span className="inline-flex items-center gap-1 text-xs font-semibold text-neutral-700">
+                                              Manage <ChevronDown className="h-4 w-4" />
+                                            </span>
+                                          </button>
+                                        )}
                                         <button
                                           type="button"
                                           onClick={() => void submitLocalBooking(item)}
@@ -835,8 +859,44 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                                               : "bg-neutral-200 text-neutral-500"
                                           }`}
                                         >
-                                          {booking.loading ? "Selecting…" : booking.success ? "Selected ✓" : "Select"}
+                                          {booking.loading ? "Selecting…" : booking.success ? "Selected ✓" : "Select table"}
                                         </button>
+
+                                        <motion.button
+                                          type="button"
+                                          onClick={() => setInviteModelsOpen(true)}
+                                          disabled={!canInviteModels}
+                                          whileTap={{ scale: canInviteModels ? 0.99 : 1 }}
+                                          animate={{
+                                            opacity: canInviteModels ? 1 : 0.45,
+                                            boxShadow: canInviteModels
+                                              ? "0 18px 40px rgba(255,56,92,0.18)"
+                                              : "0 1px 2px rgba(0,0,0,0.06)",
+                                          }}
+                                          transition={{ duration: 0.28, ease: "easeOut" }}
+                                          className={`relative w-full overflow-hidden rounded-full px-4 py-3 text-sm font-semibold text-white ${
+                                            canInviteModels ? "cursor-pointer" : "cursor-not-allowed"
+                                          }`}
+                                          style={{
+                                            background:
+                                              "radial-gradient(1200px 240px at 20% 0%, rgba(255,255,255,0.30), rgba(255,255,255,0.0) 55%), linear-gradient(135deg, #FF385C 0%, #C81E5A 45%, #7A1E54 100%)",
+                                          }}
+                                        >
+                                          <span className="pointer-events-none absolute -right-10 -top-10 h-24 w-24 rounded-full bg-white/25 blur-2xl" />
+                                          <span className="pointer-events-none absolute -left-10 -bottom-10 h-24 w-24 rounded-full bg-white/15 blur-2xl" />
+                                          <span className="relative inline-flex items-center justify-center gap-2">
+                                            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-white/15 ring-1 ring-white/20">
+                                              <Sparkles className="h-4 w-4 text-white/90" />
+                                            </span>
+                                            Invite models
+                                            <ChevronRight className="h-4 w-4 text-white/90" />
+                                          </span>
+                                        </motion.button>
+
+                                        <p className={`text-center text-xs ${canInviteModels ? "text-emerald-600" : "text-neutral-500"}`}>
+                                          {canInviteModels ? "Ready — invite models to this table." : "Select a table to unlock invites."}
+                                        </p>
+
                                         {booking.success && (
                                           <button
                                             type="button"
@@ -860,42 +920,20 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                 </motion.div>
               )}
             </AnimatePresence>
-            <div className="sticky bottom-0 inset-x-0 z-20 mt-2 border-t border-neutral-200 bg-white/90 px-4 pb-5 pt-3 backdrop-blur-md">
-              <div className="flex gap-3">
-                <motion.button
-                  type="button"
-                  onClick={handleInvite}
-                  disabled={!canInvite}
-                  animate={{ opacity: canInvite ? 1 : 0.4, boxShadow: invitePulse ? "0 0 0 6px rgba(16, 185, 129, 0.12)" : "0 1px 2px rgba(0,0,0,0.06)" }}
-                  transition={{ duration: 0.28, ease: "easeOut" }}
-                  className={`flex h-11 flex-1 items-center justify-center gap-2 rounded-full border border-neutral-200 bg-white text-sm font-semibold text-neutral-900 transition hover:shadow-sm ${
-                    canInvite ? "" : "cursor-not-allowed shadow-none"
-                  }`}
-                >
-                  <Users className="h-4 w-4" />
-                  Invite models
-                </motion.button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (selectedLocalItem) {
-                      void submitLocalBooking(selectedLocalItem);
-                    }
-                  }}
-                  disabled={!canSelectTable}
-                  className={`h-11 flex-1 rounded-full text-sm font-semibold text-white transition active:scale-[0.99] ${
-                    canSelectTable
-                      ? "bg-neutral-900 shadow-[0_12px_28px_rgba(0,0,0,0.25)]"
-                      : "cursor-not-allowed bg-neutral-300"
-                  }`}
-                >
-                  Select table
-                </button>
-              </div>
-              <p className={`mt-2 text-center text-xs ${canInvite ? "text-emerald-600" : "text-neutral-500"}`}>
-                {canInvite ? "You're ready — start inviting models." : "Plan a table to start inviting."}
-              </p>
-            </div>
+            {selectedLocalItem && (
+              <LocalActivityInviteModelsModal
+                open={inviteModelsOpen}
+                onClose={() => setInviteModelsOpen(false)}
+                venueLabel={tablePreviewLabel}
+                maxInvites={invitesBudget}
+                initialSelected={invitedForSelected}
+                onConfirm={(selected) => {
+                  setInvitedModels((prev) => ({ ...prev, [selectedLocalItem.id]: selected }));
+                  setBookingToastVisible(true);
+                  window.setTimeout(() => setBookingToastVisible(false), 1500);
+                }}
+              />
+            )}
           </motion.div>
 
           <AnimatePresence>
