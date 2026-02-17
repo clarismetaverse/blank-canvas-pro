@@ -9,7 +9,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, MessageCircle, Search, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import type { InviteLite, InviteStatus, TripActivity } from "@/services/activities";
-import { fetchMyActivities } from "@/services/activitiesMe";
+import { xanoFetch } from "@/services/xanoClient";
 import type { Activity, ActivityStatus } from "@/services/activityApi";
 
 const easeOut = { duration: 0.3, ease: "easeOut" };
@@ -222,6 +222,7 @@ export default function ActivityDetail() {
   const { activityId } = useParams();
 
   const [activity, setActivity] = useState<TripActivity | null>(null);
+  const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [viewingStatus, setViewingStatus] = useState<InviteStatus | null>(null);
   const [search, setSearch] = useState("");
@@ -273,9 +274,11 @@ export default function ActivityDetail() {
     };
 
     const load = async () => {
+      setLoading(true);
       try {
-        const activities = await fetchMyActivities();
-        const raw = activities.find((a) => String(a.id) === activityId) ?? null;
+        const activities = await xanoFetch<Activity[]>("/motherboard/trips", { method: "GET" });
+        const list = Array.isArray(activities) ? activities : [];
+        const raw = list.find((a) => String(a.id) === activityId) ?? null;
         if (!raw) {
           setActivity(null);
           return;
@@ -291,6 +294,8 @@ export default function ActivityDetail() {
       } catch (err) {
         console.error("Failed to load activity detail", err);
         setActivity(null);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -312,6 +317,17 @@ export default function ActivityDetail() {
     const q = search.toLowerCase();
     return invite.creator.name.toLowerCase().includes(q) || invite.creator.ig.toLowerCase().includes(q);
   });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#FAFAFA] px-4 pt-6">
+        <div className="mx-auto w-full max-w-md space-y-4 pt-10">
+          <div className="h-52 w-full animate-pulse rounded-3xl bg-neutral-200" />
+          <div className="h-32 w-full animate-pulse rounded-3xl bg-neutral-200" />
+        </div>
+      </div>
+    );
+  }
 
   if (!activity) {
     return (
