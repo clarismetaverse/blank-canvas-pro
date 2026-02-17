@@ -1,9 +1,10 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Calendar, ChevronRight, MoonStar, Ship, Sparkles, User, Utensils, Waves, X } from "lucide-react";
+import { Calendar, Check, ChevronRight, Minus, MoonStar, Plus, Ship, Sparkles, User, Utensils, Waves, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { CreatorLite } from "@/services/creatorSearch";
 import { fetchEventTemps, type EventTemp } from "@/services/activities";
+import { requestVicBooking, type BookingStatus } from "@/services/vicBookings";
 
 type InviteExperienceSheetProps = {
   open: boolean;
@@ -24,6 +25,22 @@ type ActivityItem = {
   title: string;
   description: string;
   imageUrl: string;
+};
+
+type LocalActivityItem = {
+  id: string;
+  title: string;
+  dateLabel?: string;
+  coverUrl: string;
+  tag: string;
+};
+
+type LocalBookingState = {
+  guests: number;
+  time: string;
+  notes: string;
+  loading: boolean;
+  success: null | { bookingId: string; status: BookingStatus };
 };
 
 const backdrop = {
@@ -122,6 +139,9 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
   const activitiesSectionRef = useRef<HTMLElement | null>(null);
   const [filteredEvents, setFilteredEvents] = useState<EventTemp[]>([]);
   const [eventsLoading, setEventsLoading] = useState(false);
+  const [expandedLocalBookingId, setExpandedLocalBookingId] = useState<string | null>(null);
+  const [localBookings, setLocalBookings] = useState<Record<string, LocalBookingState>>({});
+  const [bookingToastVisible, setBookingToastVisible] = useState(false);
 
   const creatorName = creator?.name || "Creator";
 
@@ -217,6 +237,71 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
     return normalizedName.includes("top") || account.includes("verified") || creatorWithTier.id % 7 === 0;
   }, [creator]);
 
+  const bookingTimeOptions = useMemo(
+    () => ["18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00"],
+    []
+  );
+
+  const localActivityItems = useMemo<LocalActivityItem[]>(
+    () =>
+      filteredEvents.map((event) => ({
+        id: String(event.id),
+        title: event.Name,
+        dateLabel: event.Date_start || undefined,
+        coverUrl: event.Cover?.url || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80",
+        tag: event.Type || "local",
+      })),
+    [filteredEvents]
+  );
+
+  const getLocalBookingState = (activityId: string): LocalBookingState =>
+    localBookings[activityId] ?? {
+      guests: 2,
+      time: "",
+      notes: "",
+      loading: false,
+      success: null,
+    };
+
+  const updateLocalBooking = (activityId: string, updater: (prev: LocalBookingState) => LocalBookingState) => {
+    setLocalBookings((prev) => {
+      const current = prev[activityId] ?? {
+        guests: 2,
+        time: "",
+        notes: "",
+        loading: false,
+        success: null,
+      };
+      return {
+        ...prev,
+        [activityId]: updater(current),
+      };
+    });
+  };
+
+  const submitLocalBooking = async (item: LocalActivityItem) => {
+    const current = getLocalBookingState(item.id);
+    if (!current.time || current.loading || current.success) {
+      return;
+    }
+
+    updateLocalBooking(item.id, (prev) => ({ ...prev, loading: true }));
+
+    try {
+      const response = await requestVicBooking({
+        experienceId: item.id,
+        guests: current.guests,
+        time: current.time,
+        notes: current.notes.trim() || undefined,
+      });
+      updateLocalBooking(item.id, (prev) => ({ ...prev, loading: false, success: response }));
+      setBookingToastVisible(true);
+      window.setTimeout(() => setBookingToastVisible(false), 2000);
+    } catch {
+      updateLocalBooking(item.id, (prev) => ({ ...prev, loading: false }));
+    }
+  };
+
   useEffect(() => {
     const node = scrollRef.current;
     if (!node) {
@@ -299,6 +384,20 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
             variants={sheet}
             transition={{ duration: 0.25, ease: "easeOut" }}
           >
+            <AnimatePresence>
+              {bookingToastVisible && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10, filter: "blur(6px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  exit={{ opacity: 0, y: -10, filter: "blur(6px)" }}
+                  transition={{ duration: 0.28, ease: "easeOut" }}
+                  className="pointer-events-none sticky top-3 z-40 mx-4 mb-2 rounded-2xl border border-emerald-200 bg-emerald-50/95 px-3 py-2 text-xs font-medium text-emerald-800 backdrop-blur"
+                >
+                  Request sent — we’ll confirm soon
+                </motion.div>
+              )}
+            </AnimatePresence>
+
             <AnimatePresence>
               {activeTrip && isStickyHeader && (
                 <motion.div
@@ -562,42 +661,163 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                       ) : filteredEvents.length === 0 ? (
                         <p className="text-xs text-neutral-400">No events found.</p>
                       ) : (
-                        filteredEvents.map((event) => (
-                          <button
-                            key={event.id}
-                            type="button"
-                            onClick={() => navigate(`/activities/${event.id}`)}
-                            className="relative min-h-[280px] w-full overflow-hidden rounded-3xl text-left text-white shadow-lg transition active:scale-[0.99]"
-                          >
-                            <div className="absolute inset-0">
-                              {event.Cover?.url ? (
-                                <img src={event.Cover.url} alt={event.Name} className="absolute inset-0 h-full w-full object-cover" />
-                              ) : (
-                                <div className="absolute inset-0 bg-neutral-900" />
-                              )}
-                              <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent" />
-                              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                            </div>
-                            <div className="relative flex h-full min-h-[280px] flex-col justify-end p-6">
-                              <div className="absolute left-4 top-4">
-                                <span className="inline-flex rounded-full border border-white/30 bg-white/20 px-2.5 py-0.5 text-[10px] font-semibold text-white backdrop-blur-sm">
-                                  {event.Type}
-                                </span>
-                              </div>
-                              <div className="space-y-1">
-                                <p className="text-2xl font-semibold text-white">{event.Name}</p>
-                                {event.Date_start && <p className="text-sm text-white/75">{event.Date_start}</p>}
-                                {event.Tags?.length > 0 && (
-                                  <div className="mt-1 flex flex-wrap gap-1">
-                                    {event.Tags.slice(0, 3).map((tag) => (
-                                      <span key={tag} className="rounded-full bg-white/20 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-sm">{tag}</span>
-                                    ))}
+                        localActivityItems.map((item) => {
+                          const booking = getLocalBookingState(item.id);
+                          const isOpen = expandedLocalBookingId === item.id;
+                          const canSubmit = Boolean(booking.time) && !booking.loading && !booking.success;
+                          return (
+                            <motion.article
+                              key={item.id}
+                              initial={{ opacity: 0, y: 10, filter: "blur(6px)" }}
+                              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                              transition={{ duration: 0.3, ease: "easeOut" }}
+                              className="overflow-hidden rounded-3xl border border-neutral-200 bg-[#FFFEFC] shadow-[0_16px_38px_rgba(15,23,42,0.08)]"
+                            >
+                              <button type="button" onClick={() => setExpandedLocalBookingId((prev) => (prev === item.id ? null : item.id))} className="block w-full text-left">
+                                <div className="relative min-h-[280px] w-full">
+                                  <img src={item.coverUrl} alt={item.title} className="absolute inset-0 h-full w-full object-cover" />
+                                  <div className="absolute inset-0 bg-gradient-to-b from-black/20 to-transparent" />
+                                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                                  <div className="absolute left-4 top-4">
+                                    <span className="inline-flex rounded-full border border-white/35 bg-white/20 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-sm">
+                                      {item.tag}
+                                    </span>
                                   </div>
+                                  <div className="absolute bottom-5 left-5 right-5 space-y-1">
+                                    <p className="text-2xl font-semibold text-white">{item.title}</p>
+                                    {item.dateLabel && <p className="text-sm text-white/80">{item.dateLabel}</p>}
+                                  </div>
+                                </div>
+                                <div className="flex items-center justify-between px-4 py-3">
+                                  <p className="text-xs text-neutral-500">
+                                    {booking.success ? "Booking requested" : isOpen ? "Choose guests, time, and notes" : "Tap to book like Dorsia"}
+                                  </p>
+                                  {booking.success ? (
+                                    <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800">
+                                      <Check className="h-3.5 w-3.5" />
+                                      {booking.success.status === "confirmed" ? "Confirmed" : "Pending"}
+                                    </span>
+                                  ) : (
+                                    <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-semibold text-neutral-900">
+                                      <Sparkles className="h-3.5 w-3.5" />
+                                      Book table
+                                    </span>
+                                  )}
+                                </div>
+                              </button>
+
+                              <AnimatePresence initial={false}>
+                                {isOpen && (
+                                  <motion.div
+                                    initial={{ height: 0, opacity: 0 }}
+                                    animate={{ height: "auto", opacity: 1 }}
+                                    exit={{ height: 0, opacity: 0 }}
+                                    transition={{ duration: 0.28, ease: [0.22, 0.61, 0.36, 1] }}
+                                    className="overflow-hidden border-t border-neutral-200"
+                                  >
+                                    <div className="space-y-4 px-4 pb-4 pt-4">
+                                      <div className="flex items-center justify-between rounded-2xl border border-neutral-200 bg-[#FAFAF8] px-3 py-3">
+                                        <div>
+                                          <p className="text-xs font-semibold text-neutral-900">Guests</p>
+                                          <p className="text-[11px] text-neutral-500">Select party size</p>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                          <button
+                                            type="button"
+                                            onClick={() => updateLocalBooking(item.id, (prev) => ({ ...prev, guests: Math.max(1, prev.guests - 1) }))}
+                                            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 bg-white"
+                                            aria-label="Decrease guests"
+                                          >
+                                            <Minus className="h-4 w-4 text-neutral-700" />
+                                          </button>
+                                          <span className="min-w-[52px] rounded-full border border-neutral-200 bg-white px-3 py-1 text-center text-sm font-semibold text-neutral-900">
+                                            {booking.guests}
+                                          </span>
+                                          <button
+                                            type="button"
+                                            onClick={() => updateLocalBooking(item.id, (prev) => ({ ...prev, guests: Math.min(10, prev.guests + 1) }))}
+                                            className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 bg-white"
+                                            aria-label="Increase guests"
+                                          >
+                                            <Plus className="h-4 w-4 text-neutral-700" />
+                                          </button>
+                                        </div>
+                                      </div>
+
+                                      <div className="rounded-2xl border border-neutral-200 bg-white p-3">
+                                        <div className="mb-2 flex items-start justify-between">
+                                          <div>
+                                            <p className="text-xs font-semibold text-neutral-900">Time</p>
+                                            <p className="text-[11px] text-neutral-500">Pick an exact time</p>
+                                          </div>
+                                          {booking.time && (
+                                            <span className="rounded-full border border-neutral-200 bg-neutral-50 px-2.5 py-1 text-[10px] font-semibold text-neutral-800">
+                                              {booking.time}
+                                            </span>
+                                          )}
+                                        </div>
+                                        <div className="flex gap-2 overflow-x-auto pb-1">
+                                          {bookingTimeOptions.map((timeOption) => {
+                                            const active = booking.time === timeOption;
+                                            return (
+                                              <button
+                                                key={timeOption}
+                                                type="button"
+                                                onClick={() => updateLocalBooking(item.id, (prev) => ({ ...prev, time: timeOption }))}
+                                                className={`shrink-0 rounded-full border px-3 py-2 text-xs font-semibold transition-colors ${
+                                                  active
+                                                    ? "border-neutral-900 bg-neutral-900 text-white"
+                                                    : "border-neutral-200 bg-white text-neutral-800"
+                                                }`}
+                                              >
+                                                {timeOption}
+                                              </button>
+                                            );
+                                          })}
+                                        </div>
+                                      </div>
+
+                                      <label className="block rounded-2xl border border-neutral-200 bg-white p-3">
+                                        <span className="mb-2 block text-xs font-semibold text-neutral-900">Notes</span>
+                                        <textarea
+                                          rows={3}
+                                          value={booking.notes}
+                                          onChange={(event) => updateLocalBooking(item.id, (prev) => ({ ...prev, notes: event.target.value }))}
+                                          placeholder="Any preferences? (quiet table, terrace, etc.)"
+                                          className="w-full resize-none rounded-xl border border-neutral-200 bg-[#FAFAF8] px-3 py-2 text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
+                                        />
+                                      </label>
+
+                                      <div className="space-y-2">
+                                        <button
+                                          type="button"
+                                          onClick={() => void submitLocalBooking(item)}
+                                          disabled={!canSubmit}
+                                          className={`w-full rounded-full px-4 py-3 text-sm font-semibold transition-all ${
+                                            canSubmit
+                                              ? "bg-neutral-900 text-white shadow-[0_16px_34px_rgba(0,0,0,0.18)] active:scale-[0.99]"
+                                              : "bg-neutral-200 text-neutral-500"
+                                          }`}
+                                        >
+                                          {booking.loading ? "Requesting…" : booking.success ? "Booked ✓" : "Request booking"}
+                                        </button>
+                                        {booking.success && (
+                                          <button
+                                            type="button"
+                                            onClick={() => navigate("/planned")}
+                                            className="w-full rounded-full border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold text-neutral-900"
+                                          >
+                                            Go to planned activities
+                                          </button>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </motion.div>
                                 )}
-                              </div>
-                            </div>
-                          </button>
-                        ))
+                              </AnimatePresence>
+                            </motion.article>
+                          );
+                        })
                       )}
                     </div>
                   </section>
