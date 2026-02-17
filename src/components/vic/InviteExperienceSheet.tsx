@@ -256,6 +256,33 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
     [filteredEvents]
   );
 
+  const selectedLocalItem = useMemo(
+    () => localActivityItems.find((item) => item.id === expandedLocalBookingId) ?? null,
+    [expandedLocalBookingId, localActivityItems]
+  );
+
+  const selectedLocalBooking = selectedLocalItem ? getLocalBookingState(selectedLocalItem.id) : null;
+  const selectedDate = selectedLocalItem?.dateLabel ?? "";
+  const selectedTime = selectedLocalBooking?.time ?? "";
+  const selectedGuests = selectedLocalBooking?.guests ?? 0;
+  const canInvite = Boolean(selectedDate) && Boolean(selectedTime) && selectedGuests >= 1;
+  const canSelectTable =
+    Boolean(selectedLocalItem) &&
+    canInvite &&
+    !selectedLocalBooking?.loading &&
+    !selectedLocalBooking?.success;
+
+  const [invitePulse, setInvitePulse] = useState(false);
+
+  useEffect(() => {
+    if (!canInvite) {
+      return;
+    }
+    setInvitePulse(true);
+    const timeout = window.setTimeout(() => setInvitePulse(false), 1200);
+    return () => window.clearTimeout(timeout);
+  }, [canInvite]);
+
   const getLocalBookingState = (activityId: string): LocalBookingState =>
     localBookings[activityId] ?? {
       guests: 2,
@@ -832,24 +859,41 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                 </motion.div>
               )}
             </AnimatePresence>
-            <div className="sticky bottom-0 z-20 -mx-0 mt-2 border-t border-neutral-200 bg-white/95 px-5 pb-4 pt-4 backdrop-blur">
-              <button
-                type="button"
-                className={`w-full rounded-full px-4 py-3 text-sm font-semibold text-white transition ${
-                  canSendInvitation ? "bg-neutral-900" : "bg-neutral-300"
-                }`}
-                disabled={!canSendInvitation}
-                onClick={handleInvite}
-              >
-                Send invitation
-              </button>
-              <button
-                type="button"
-                className={`mt-3 w-full text-xs font-semibold ${canSendInvitation ? "text-neutral-700" : "text-neutral-400"}`}
-                disabled={!canSendInvitation}
-              >
-                Share profile
-              </button>
+            <div className="sticky bottom-0 inset-x-0 z-20 mt-2 border-t border-neutral-200 bg-white/90 px-4 pb-5 pt-3 backdrop-blur-md">
+              <div className="flex gap-3">
+                <motion.button
+                  type="button"
+                  onClick={handleInvite}
+                  disabled={!canInvite}
+                  animate={{ opacity: canInvite ? 1 : 0.4, boxShadow: invitePulse ? "0 0 0 6px rgba(16, 185, 129, 0.12)" : "0 1px 2px rgba(0,0,0,0.06)" }}
+                  transition={{ duration: 0.28, ease: "easeOut" }}
+                  className={`flex h-11 flex-1 items-center justify-center gap-2 rounded-full border border-neutral-200 bg-white text-sm font-semibold text-neutral-900 transition hover:shadow-sm ${
+                    canInvite ? "" : "cursor-not-allowed shadow-none"
+                  }`}
+                >
+                  <Users className="h-4 w-4" />
+                  Invite models
+                </motion.button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (selectedLocalItem) {
+                      void submitLocalBooking(selectedLocalItem);
+                    }
+                  }}
+                  disabled={!canSelectTable}
+                  className={`h-11 flex-1 rounded-full text-sm font-semibold text-white transition active:scale-[0.99] ${
+                    canSelectTable
+                      ? "bg-neutral-900 shadow-[0_12px_28px_rgba(0,0,0,0.25)]"
+                      : "cursor-not-allowed bg-neutral-300"
+                  }`}
+                >
+                  Select table
+                </button>
+              </div>
+              <p className={`mt-2 text-center text-xs ${canInvite ? "text-emerald-600" : "text-neutral-500"}`}>
+                {canInvite ? "You're ready — start inviting models." : "Plan a table to start inviting."}
+              </p>
             </div>
           </motion.div>
 
