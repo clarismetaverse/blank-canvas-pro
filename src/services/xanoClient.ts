@@ -18,7 +18,8 @@ export async function xanoFetch<T>(path: string, options: XanoFetchOptions = {})
 
   const token = getAuthToken();
   if (token && !headers.has("Authorization")) {
-    headers.set("Authorization", `Bearer ${token}`);
+    const normalizedToken = token.startsWith("Bearer ") ? token.replace(/^Bearer\s+/i, "") : token;
+    headers.set("Authorization", normalizedToken);
   }
 
   const response = await fetch(`${XANO_BASE_URL}${path}`, {
@@ -29,6 +30,12 @@ export async function xanoFetch<T>(path: string, options: XanoFetchOptions = {})
 
   if (!response.ok) {
     const responseText = await response.text();
+    if ((import.meta as { env?: { DEV?: boolean } }).env?.DEV) {
+      console.error(
+        `[xanoFetch] ${requestOptions.method || "GET"} ${path} failed with status ${response.status}`,
+        responseText
+      );
+    }
     throw new Error(
       `Xano request failed (${response.status}) ${requestOptions.method || "GET"} ${path}: ${responseText || response.statusText}`
     );
