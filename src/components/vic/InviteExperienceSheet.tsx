@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Calendar, Check, ChevronRight, Minus, MoonStar, Plus, Ship, Sparkles, User, Utensils, Waves, X } from "lucide-react";
+import { Calendar, Check, ChevronRight, Minus, MoonStar, Plus, Ship, Sparkles, User, Users, Utensils, Waves, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import type { CreatorLite } from "@/services/creatorSearch";
@@ -33,6 +33,7 @@ type LocalActivityItem = {
   dateLabel?: string;
   coverUrl: string;
   tag: string;
+  supportCount: number;
 };
 
 type LocalBookingState = {
@@ -250,6 +251,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
         dateLabel: event.Date_start || undefined,
         coverUrl: event.Cover?.url || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80",
         tag: event.Type || "local",
+        supportCount: 40 + (event.id % 25),
       })),
     [filteredEvents]
   );
@@ -686,6 +688,12 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                                   <div className="absolute bottom-5 left-5 right-5 space-y-1">
                                     <p className="text-2xl font-semibold text-white">{item.title}</p>
                                     {item.dateLabel && <p className="text-sm text-white/80">{item.dateLabel}</p>}
+                                    <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[12px] font-medium text-white/90 backdrop-blur-md">
+                                      <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/15">
+                                        <Users className="h-3.5 w-3.5 text-white/90" />
+                                      </span>
+                                      <span>{item.supportCount} models support this venue</span>
+                                    </div>
                                   </div>
                                 </div>
                                 <div className="flex items-center justify-between px-4 py-3">
