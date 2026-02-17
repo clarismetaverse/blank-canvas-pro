@@ -182,7 +182,7 @@ export default function LocalActivityInviteModelsModal({
         <motion.div className="fixed inset-0 z-[80] flex items-end justify-center" initial="hidden" animate="visible" exit="exit">
           <motion.button
             type="button"
-            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            className="absolute inset-0 bg-black/40 backdrop-blur-sm"
             variants={backdrop}
             onClick={onClose}
             aria-label="Close"
@@ -191,52 +191,52 @@ export default function LocalActivityInviteModelsModal({
           <motion.div
             variants={sheet}
             transition={{ duration: 0.28, ease: "easeOut" }}
-            className="relative z-10 w-full max-w-md overflow-hidden rounded-t-[28px] border border-white/10 bg-neutral-950 text-white shadow-[0_40px_120px_rgba(0,0,0,0.55)]"
+            className="relative z-10 w-full max-w-md overflow-hidden rounded-t-[28px] border border-neutral-200 bg-[#FAFAFA] text-neutral-900 shadow-[0_-10px_60px_rgba(0,0,0,0.15)]"
           >
             <div className="relative overflow-hidden px-5 pb-4 pt-5">
-              <div className="pointer-events-none absolute -right-14 -top-20 h-56 w-56 rounded-full bg-[#FF385C]/25 blur-3xl" />
-              <div className="pointer-events-none absolute -left-14 -bottom-20 h-56 w-56 rounded-full bg-[#7A1E54]/30 blur-3xl" />
+              <div className="pointer-events-none absolute -right-14 -top-20 h-56 w-56 rounded-full bg-blue-500/8 blur-3xl" />
+              <div className="pointer-events-none absolute -left-14 -bottom-20 h-56 w-56 rounded-full bg-purple-500/8 blur-3xl" />
 
               <div className="flex items-start justify-between gap-3">
                 <div>
-                  <p className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold text-white/85">
+                  <p className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1 text-[11px] font-semibold text-neutral-600">
                     <Sparkles className="h-3.5 w-3.5" />
                     Premium invites
                   </p>
-                  <p className="mt-2 text-xl font-semibold">Invite models</p>
-                  <p className="mt-1 text-xs text-white/65">{venueLabel ? `For ${venueLabel}` : "Select the right people for this table."}</p>
+                  <p className="mt-2 text-xl font-semibold text-neutral-900">Invite models</p>
+                  <p className="mt-1 text-xs text-neutral-500">{venueLabel ? `For ${venueLabel}` : "Select the right people for this table."}</p>
                 </div>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="rounded-full border border-white/10 bg-white/5 p-2 text-white/80 hover:bg-white/10"
+                  className="rounded-full border border-neutral-200 bg-white p-2 text-neutral-500 hover:bg-neutral-100"
                   aria-label="Close"
                 >
                   <X className="h-4 w-4" />
                 </button>
               </div>
 
-              <div className="mt-4 flex items-center gap-2 rounded-2xl border border-white/10 bg-white/5 px-3 py-2">
-                <Search className="h-4 w-4 text-white/60" />
+              <div className="mt-4 flex items-center gap-2 rounded-2xl border border-neutral-200 bg-white px-3 py-2">
+                <Search className="h-4 w-4 text-neutral-400" />
                 <input
                   ref={inputRef}
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
                   placeholder="Search by name or IG…"
-                  className="w-full bg-transparent text-sm text-white placeholder:text-white/40 focus:outline-none"
+                  className="w-full bg-transparent text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
                 />
-                {loading && <span className="text-[11px] font-semibold text-white/55">Searching…</span>}
+                {loading && <span className="text-[11px] font-semibold text-neutral-400">Searching…</span>}
               </div>
 
               <div className="mt-3 flex items-center gap-2">
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold text-white/80">
-                  Selected <span className="text-white">{selectedCount}</span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1 text-[11px] font-semibold text-neutral-500">
+                  Selected <span className="text-neutral-900">{selectedCount}</span>
                 </span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-[11px] font-semibold text-white/80">
-                  Invites left <span className="text-white">{invitesLeft}</span>
+                <span className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1 text-[11px] font-semibold text-neutral-500">
+                  Invites left <span className="text-neutral-900">{invitesLeft}</span>
                 </span>
                 {!canAddMore && (
-                  <span className="inline-flex items-center gap-2 rounded-full border border-[#FF385C]/30 bg-[#FF385C]/15 px-3 py-1 text-[11px] font-semibold text-[#FFB3C0]">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-[11px] font-semibold text-red-500">
                     Max reached
                   </span>
                 )}
@@ -244,20 +244,20 @@ export default function LocalActivityInviteModelsModal({
             </div>
 
             <div className="px-5 pb-2">
-              <p className="text-xs font-semibold text-white/70">{headerTitle}</p>
+              <p className="text-xs font-semibold text-neutral-500">{headerTitle}</p>
             </div>
 
             <div className="max-h-[56vh] overflow-y-auto px-4 pb-4 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
               {showSkeletons ? (
                 <div className="space-y-3">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={`sk-${i}`} className="h-[78px] w-full animate-pulse rounded-3xl border border-white/10 bg-white/5" />
+                    <div key={`sk-${i}`} className="h-[78px] w-full animate-pulse rounded-3xl border border-neutral-200 bg-neutral-100" />
                   ))}
                 </div>
               ) : displayList.length === 0 && !loading ? (
-                <div className="rounded-3xl border border-white/10 bg-white/5 p-4">
-                  <p className="text-sm font-semibold text-white/90">No results</p>
-                  <p className="mt-1 text-xs text-white/60">Try a different keyword.</p>
+                <div className="rounded-3xl border border-neutral-200 bg-white p-4">
+                  <p className="text-sm font-semibold text-neutral-900">No results</p>
+                  <p className="mt-1 text-xs text-neutral-500">Try a different keyword.</p>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -276,33 +276,33 @@ export default function LocalActivityInviteModelsModal({
                         disabled={disabled}
                         className={`group flex w-full items-center gap-4 rounded-3xl border px-4 py-5 text-left transition ${
                           isSelected
-                            ? "border-[#FF385C]/35 bg-gradient-to-br from-white/10 to-white/5"
-                            : "border-white/10 bg-white/5 hover:bg-white/7"
+                            ? "border-blue-200 bg-blue-50/60"
+                            : "border-neutral-200 bg-white hover:bg-neutral-50"
                         } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
                       >
-                        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-white/10 bg-white/10">
+                        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
                           {avatarUrl ? (
                             <img src={avatarUrl} alt={m.name ?? "Creator"} className="h-full w-full object-cover" />
                           ) : (
-                            <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-white/70">
+                            <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-neutral-400">
                               {(m.name ?? "C").slice(0, 1).toUpperCase()}
                             </div>
                           )}
                         </div>
 
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-white/90">{m.name ?? "Creator"}</p>
-                          <p className="truncate text-xs text-white/55">Model • Available</p>
+                          <p className="truncate text-sm font-semibold text-neutral-900">{m.name ?? "Creator"}</p>
+                          <p className="truncate text-xs text-neutral-400">Model • Available</p>
                         </div>
 
                         <div className="flex items-center gap-2">
                           {isSelected ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-[#FF385C] px-3 py-1 text-[11px] font-semibold text-white shadow-[0_14px_30px_rgba(255,56,92,0.25)]">
+                            <span className="inline-flex items-center gap-1 rounded-full bg-neutral-900 px-3 py-1 text-[11px] font-semibold text-white shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
                               <Check className="h-3.5 w-3.5" />
                               Selected
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 rounded-full border border-white/15 bg-white/5 px-3 py-1 text-[11px] font-semibold text-white/80">
+                            <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-3 py-1 text-[11px] font-semibold text-neutral-500">
                               Add <ChevronRight className="h-3.5 w-3.5" />
                             </span>
                           )}
@@ -314,12 +314,12 @@ export default function LocalActivityInviteModelsModal({
               )}
             </div>
 
-            <div className="border-t border-white/10 bg-neutral-950/85 px-4 pb-5 pt-3 backdrop-blur">
+            <div className="border-t border-neutral-200 bg-[#FAFAFA]/95 px-4 pb-5 pt-3 backdrop-blur">
               <div className="flex items-center justify-between gap-3">
                 <button
                   type="button"
                   onClick={onClose}
-                  className="h-11 flex-1 rounded-full border border-white/15 bg-white/5 text-sm font-semibold text-white/85 hover:bg-white/10"
+                  className="h-11 flex-1 rounded-full border border-neutral-200 bg-white text-sm font-semibold text-neutral-600 hover:bg-neutral-50"
                 >
                   Cancel
                 </button>
@@ -327,13 +327,13 @@ export default function LocalActivityInviteModelsModal({
                 <button
                   type="button"
                   onClick={handleConfirm}
-                  className="h-11 flex-1 rounded-full bg-white text-sm font-semibold text-neutral-900 shadow-[0_18px_40px_rgba(255,255,255,0.08)] active:scale-[0.99]"
+                  className="h-11 flex-1 rounded-full bg-neutral-900 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.15)] active:scale-[0.99]"
                 >
                   Confirm invites
                 </button>
               </div>
 
-              <p className="mt-2 text-center text-[11px] text-white/55">Invitations will be linked to this table.</p>
+              <p className="mt-2 text-center text-[11px] text-neutral-400">Invitations will be linked to this table.</p>
             </div>
           </motion.div>
         </motion.div>
