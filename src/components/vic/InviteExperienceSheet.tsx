@@ -8,7 +8,8 @@ import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityI
 import { fetchEventTemps, type EventTemp } from "@/services/activities";
 import { createActivity, patchActivity } from "@/services/activityApi";
 import { requestVicBooking, type BookingStatus } from "@/services/vicBookings";
-import { fetchUserTurbo } from "@/services/xano";
+import { fetchVicProfile } from "@/services/vic";
+import { getAuthToken } from "@/services";
 
 type InviteExperienceSheetProps = {
   open: boolean;
@@ -163,9 +164,11 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
 
     const loadHost = async () => {
       try {
-        const me = await fetchUserTurbo();
-        if (!active) return;
-        setHostId(Number(me?.id) > 0 ? Number(me.id) : 0);
+        const token = getAuthToken();
+        if (!token) return;
+        const me = await fetchVicProfile(token);
+        if (!active || !me) return;
+        setHostId(Number(me.id) > 0 ? Number(me.id) : 0);
       } catch {
         if (active) setHostId(0);
       }
