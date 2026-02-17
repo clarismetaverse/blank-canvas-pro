@@ -8,6 +8,7 @@ export default defineConfig(({ mode }) => ({
     alias: {
       '@': '/src',
     },
+    dedupe: ['react', 'react-dom', 'react/jsx-runtime'],
   },
   server: {
     port: 8080,

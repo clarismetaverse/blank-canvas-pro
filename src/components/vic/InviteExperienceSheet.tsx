@@ -256,6 +256,15 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
     [filteredEvents]
   );
 
+  const getLocalBookingState = (activityId: string): LocalBookingState =>
+    localBookings[activityId] ?? {
+      guests: 2,
+      time: "",
+      notes: "",
+      loading: false,
+      success: null,
+    };
+
   const selectedLocalItem = useMemo(
     () => localActivityItems.find((item) => item.id === expandedLocalBookingId) ?? null,
     [expandedLocalBookingId, localActivityItems]
@@ -283,14 +292,6 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
     return () => window.clearTimeout(timeout);
   }, [canInvite]);
 
-  const getLocalBookingState = (activityId: string): LocalBookingState =>
-    localBookings[activityId] ?? {
-      guests: 2,
-      time: "",
-      notes: "",
-      loading: false,
-      success: null,
-    };
 
   const updateLocalBooking = (activityId: string, updater: (prev: LocalBookingState) => LocalBookingState) => {
     setLocalBookings((prev) => {
