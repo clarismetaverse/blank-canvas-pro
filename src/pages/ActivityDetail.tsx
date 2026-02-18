@@ -6,7 +6,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, MessageCircle, Search, X } from "lucide-react";
+import { Building2, Calendar, ChevronLeft, MapPin, MessageCircle, Search, User, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchActivityById, type InviteLite, type InviteStatus, type TripActivity } from "@/services/activities";
 import type { Activity, ActivityStatus } from "@/services/activityApi";
@@ -15,9 +15,11 @@ const easeOut = { duration: 0.3, ease: "easeOut" };
 
 type EditableActivityFields = Pick<TripActivity, "title" | "dateLabel" | "locationLabel" | "notes">;
 
-function AvatarStack({ people }: { people: InviteLite[] }) {
+function AvatarStack({ people, size = 36 }: { people: InviteLite[]; size?: 32 | 36 | 40 }) {
   const shown = people.slice(0, 6);
   const overflow = Math.max(0, people.length - shown.length);
+  const avatarSizeClass = size === 32 ? "h-8 w-8" : size === 40 ? "h-10 w-10" : "h-9 w-9";
+  const overflowPillClass = size === 32 ? "h-8" : size === 40 ? "h-10" : "h-9";
 
   return (
     <div className="flex items-center">
@@ -25,7 +27,7 @@ function AvatarStack({ people }: { people: InviteLite[] }) {
         {shown.map((invite) => (
           <div
             key={invite.id}
-            className="h-9 w-9 overflow-hidden rounded-full border-2 border-white shadow-[0_10px_20px_rgba(0,0,0,0.08)]"
+            className={`${avatarSizeClass} overflow-hidden rounded-full border-2 border-white shadow-[0_10px_20px_rgba(0,0,0,0.08)]`}
           >
             <img
               src={invite.creator.avatarUrl}
@@ -38,7 +40,7 @@ function AvatarStack({ people }: { people: InviteLite[] }) {
       </div>
 
       {overflow > 0 && (
-        <div className="ml-3 inline-flex h-9 items-center rounded-full border border-neutral-200 bg-white px-3 text-xs font-semibold text-neutral-700 shadow-[0_10px_20px_rgba(0,0,0,0.06)]">
+        <div className={`ml-3 inline-flex ${overflowPillClass} items-center rounded-full border border-neutral-200 bg-white px-3 text-xs font-semibold text-neutral-700 shadow-[0_10px_20px_rgba(0,0,0,0.06)]`}>
           +{overflow}
         </div>
       )}
@@ -60,16 +62,14 @@ function StatPill({ label, value }: { label: string; value: number }) {
  * Shows pending + rejected counters.
  * Pending = status === "invited" (and "pending" if exists in backend later)
  */
-function InvitedSummaryRow({
-  invited,
-  rejected,
-  onViewAll,
-}: {
+function InvitedSummaryRow({ invited, accepted, rejected, onViewAll }: {
   invited: InviteLite[];
+  accepted: InviteLite[];
   rejected: InviteLite[];
   onViewAll: () => void;
 }) {
   const pendingCount = invited.length;
+  const invitedCount = invited.length + accepted.length + rejected.length;
   const rejectedCount = rejected.length;
 
   return (
@@ -82,7 +82,14 @@ function InvitedSummaryRow({
       <div className="flex items-center justify-between">
         <div>
           <h3 className="text-sm font-semibold text-neutral-900">Invited models</h3>
-          <p className="mt-0.5 text-xs text-neutral-500">Pending replies + rejected summary</p>
+          {invited.length > 0 ? (
+            <div className="mt-1 flex items-center gap-3">
+              <AvatarStack people={invited} size={32} />
+              <p className="text-xs text-neutral-500">Awaiting replies</p>
+            </div>
+          ) : (
+            <p className="mt-0.5 text-xs text-neutral-500">No one yet</p>
+          )}
         </div>
         <button
           type="button"
@@ -93,12 +100,11 @@ function InvitedSummaryRow({
         </button>
       </div>
 
-      <div className="mt-3 flex items-center justify-between gap-3">
-        <AvatarStack people={invited} />
-        <div className="flex items-center gap-2">
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+          <StatPill label="Invited" value={invitedCount} />
+          <StatPill label="Accepted" value={accepted.length} />
           <StatPill label="Pending" value={pendingCount} />
           <StatPill label="Rejected" value={rejectedCount} />
-        </div>
       </div>
     </motion.section>
   );
@@ -146,9 +152,12 @@ function AcceptedVerticalCarousel({
       className="rounded-3xl border border-neutral-200 bg-white p-4 shadow-[0_12px_34px_rgba(0,0,0,0.06)]"
     >
       <div className="flex items-center justify-between">
-        <div>
+        <div className="min-w-0">
           <h3 className="text-sm font-semibold text-neutral-900">Accepted models</h3>
-          <p className="mt-0.5 text-xs text-neutral-500">Scroll. Tap Chat on a card.</p>
+          <div className="mt-1 flex items-center gap-3">
+            <AvatarStack people={accepted} size={32} />
+            <p className="text-xs text-neutral-500">Accepted ({accepted.length})</p>
+          </div>
         </div>
         <div className="flex items-center gap-2">
           <button
@@ -164,7 +173,7 @@ function AcceptedVerticalCarousel({
         </div>
       </div>
 
-      <div className="mt-3 h-[520px] overflow-y-auto pr-1 snap-y snap-mandatory">
+      <div className="mt-3 h-[380px] overflow-y-auto pr-1 snap-y snap-mandatory">
         <div className="space-y-4">
           {accepted.map((invite, idx) => (
             <motion.div
@@ -181,7 +190,7 @@ function AcceptedVerticalCarousel({
               }}
             >
               <div className="relative overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-[0_18px_48px_rgba(0,0,0,0.10)]">
-                <div className="relative h-[420px] w-full">
+                <div className="relative h-[300px] w-full">
                   <img
                     src={invite.creator.avatarUrl}
                     alt={invite.creator.name}
@@ -317,6 +326,11 @@ export default function ActivityDetail() {
     return invite.creator.name.toLowerCase().includes(q) || invite.creator.ig.toLowerCase().includes(q);
   });
 
+  const cityValue = activity?.locationLabel || "—";
+  const venueValue = activity?.subtitle || "Venue";
+  const dateValue = activity?.dateLabel || "—";
+  const notesValue = activity?.notes || "—";
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
@@ -351,7 +365,7 @@ export default function ActivityDetail() {
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <h1 className="text-sm font-semibold text-neutral-900">{activity.title}</h1>
+          <h1 className="text-sm font-semibold text-neutral-900">Activity</h1>
         </div>
       </header>
 
@@ -360,9 +374,24 @@ export default function ActivityDetail() {
           initial={{ opacity: 0, y: 8, filter: "blur(6px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={easeOut}
-          className="overflow-hidden rounded-3xl border border-neutral-200 shadow-[0_14px_38px_rgba(0,0,0,0.14)]"
+          className="relative overflow-hidden rounded-3xl border border-neutral-200 shadow-[0_14px_38px_rgba(0,0,0,0.14)]"
         >
-          <img src={activity.coverUrl} alt={activity.title} className="h-52 w-full object-cover" />
+          <img src={activity.coverUrl} alt={activity.title} className="h-60 w-full object-cover" />
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black/75 via-black/35 to-transparent" />
+          <div className="absolute left-4 top-4">
+            <span className="inline-flex items-center rounded-full border border-white/30 bg-white/80 px-3 py-1 text-[11px] font-medium text-neutral-900 backdrop-blur">
+              {activity.subtitle || "Local activity"}
+            </span>
+          </div>
+          <div className="absolute right-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/80 px-3 py-1.5 text-xs font-medium text-neutral-900 backdrop-blur">
+            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-neutral-100">
+              <User className="h-3.5 w-3.5 text-neutral-600" />
+            </span>
+            Host
+          </div>
+          <div className="absolute inset-x-4 bottom-4">
+            <h2 className="text-2xl font-semibold text-white drop-shadow-[0_10px_20px_rgba(0,0,0,0.55)]">{activity.title || "—"}</h2>
+          </div>
         </motion.section>
 
         <motion.section
@@ -381,34 +410,70 @@ export default function ActivityDetail() {
               Edit
             </button>
           </div>
-          <div className="space-y-2 text-sm text-neutral-700">
-            <p><span className="font-medium text-neutral-900">Name:</span> {activity.title}</p>
-            <p><span className="font-medium text-neutral-900">Date / time:</span> {activity.dateLabel}</p>
-            <p><span className="font-medium text-neutral-900">City / venue:</span> {activity.locationLabel}</p>
-            <p><span className="font-medium text-neutral-900">Notes:</span> {activity.notes}</p>
+          <div className="space-y-2.5">
+            {[
+              { icon: MapPin, label: "City", value: cityValue },
+              { icon: Building2, label: "Venue", value: venueValue },
+              { icon: Calendar, label: "Date / time", value: dateValue },
+            ].map((item) => (
+              <div key={item.label} className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50/60 px-3 py-2.5">
+                <item.icon className="h-4 w-4 text-neutral-500" />
+                <div>
+                  <p className="text-[11px] uppercase tracking-wide text-neutral-500">{item.label}</p>
+                  <p className="text-sm font-medium text-neutral-900">{item.value || "—"}</p>
+                </div>
+              </div>
+            ))}
+            <p className="pt-1 text-xs text-neutral-500">{notesValue}</p>
           </div>
         </motion.section>
 
-        {/* Invited UP (with rejected/pending counts) */}
+        <motion.section
+          initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
+          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+          transition={{ ...easeOut, delay: 0.055 }}
+          className="rounded-3xl border border-neutral-200 bg-white p-4 shadow-[0_10px_30px_rgba(0,0,0,0.06)]"
+        >
+          <p className="text-xs text-neutral-500">Plan a table to start inviting.</p>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => console.log("[ActivityDetail] invite more models")}
+              className="rounded-full bg-neutral-900 px-3 py-2.5 text-xs font-semibold text-white"
+            >
+              Invite more models
+            </button>
+            <button
+              type="button"
+              onClick={() => console.log("[ActivityDetail] complete table booking")}
+              className="rounded-full border border-neutral-200 bg-white px-3 py-2.5 text-xs font-semibold text-neutral-700"
+            >
+              Complete table booking
+            </button>
+          </div>
+        </motion.section>
+
+        {groupedInvites.accepted.length > 0 && (
+          <AcceptedVerticalCarousel
+            accepted={groupedInvites.accepted}
+            onViewAll={() => {
+              setViewingStatus("accepted");
+              setSearch("");
+            }}
+            onChat={(invite) => {
+              // Hook this to your chat route/modal
+              console.log("[ActivityDetail] chat with", invite.creator);
+            }}
+          />
+        )}
+
         <InvitedSummaryRow
           invited={groupedInvites.invited}
+          accepted={groupedInvites.accepted}
           rejected={groupedInvites.rejected}
           onViewAll={() => {
             setViewingStatus("invited");
             setSearch("");
-          }}
-        />
-
-        {/* Accepted vertical carousel */}
-        <AcceptedVerticalCarousel
-          accepted={groupedInvites.accepted}
-          onViewAll={() => {
-            setViewingStatus("accepted");
-            setSearch("");
-          }}
-          onChat={(invite) => {
-            // Hook this to your chat route/modal
-            console.log("[ActivityDetail] chat with", invite.creator);
           }}
         />
 
