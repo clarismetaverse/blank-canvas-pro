@@ -7,12 +7,18 @@ type CreatorCardProps = {
   creator: CreatorLite;
   locked?: boolean;
   variant?: "default" | "vic";
+  mode?: "default" | "select";
+  isInvited?: boolean;
+  onInvite?: (creator: CreatorLite) => void;
 };
 
 export default function CreatorCard({
   creator,
   locked,
   variant = "default",
+  mode = "default",
+  isInvited = false,
+  onInvite,
 }: CreatorCardProps) {
   const [open, setOpen] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -41,6 +47,11 @@ export default function CreatorCard({
               Premium
             </span>
           )}
+          {mode === "select" && isInvited && (
+            <span className="absolute left-3 top-3 inline-flex items-center rounded-full bg-emerald-500/90 px-2.5 py-1 text-[10px] font-semibold text-white shadow">
+              Invited ✓
+            </span>
+          )}
           <div className="absolute bottom-0 left-0 right-0 p-4">
             <div className="text-left">
               <p className="text-lg font-semibold text-white">
@@ -64,7 +75,7 @@ export default function CreatorCard({
           </div>
         </div>
       </button>
-      {isVic && (
+      {isVic && mode !== "select" && (
         <button
           type="button"
           onClick={(event) => {
@@ -85,6 +96,12 @@ export default function CreatorCard({
         onClose={() => setOpen(false)}
         locked={locked}
         variant={variant}
+        mode={mode}
+        isInvited={isInvited}
+        onInvite={(selectedCreator) => {
+          onInvite?.(selectedCreator);
+          setOpen(false);
+        }}
         isFavorite={isFavorite}
         onToggleFavorite={() => setIsFavorite((prev) => !prev)}
       />

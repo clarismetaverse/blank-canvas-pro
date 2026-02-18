@@ -33,6 +33,9 @@ type CreatorProfileSheetProps = {
   open: boolean;
   locked?: boolean;
   variant?: "default" | "vic";
+  mode?: "default" | "select";
+  isInvited?: boolean;
+  onInvite?: (creator: CreatorLite) => void;
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
   onClose: () => void;
@@ -49,6 +52,9 @@ export default function CreatorProfileSheet({
   open,
   locked,
   variant = "default",
+  mode = "default",
+  isInvited = false,
+  onInvite,
   isFavorite = false,
   onToggleFavorite,
   onClose,
@@ -60,6 +66,7 @@ export default function CreatorProfileSheet({
   const platformLabel = hasTikTok ? "TikTok creator" : "Instagram creator";
   const roles = roleBadges(creator);
   const isVic = variant === "vic";
+  const isSelectMode = mode === "select";
   const handleToggleFavorite = onToggleFavorite ?? (() => {});
   const heroImage = creator?.Profile_pic?.url;
   const displayRole = roles[0] ?? "Creator";
@@ -254,25 +261,45 @@ export default function CreatorProfileSheet({
                 </div>
 
                 <div className="flex gap-3 border-t border-neutral-200 bg-white px-5 py-4">
+                  {!isSelectMode && (
+                    <button
+                      type="button"
+                      className="flex-1 rounded-full bg-neutral-900 px-4 py-3 text-sm font-semibold text-white"
+                      onClick={() => window.alert("Coming soon")}
+                    >
+                      <span className="inline-flex items-center justify-center gap-2">
+                        <Gift className="h-4 w-4" />
+                        Gift
+                      </span>
+                    </button>
+                  )}
                   <button
                     type="button"
-                    className="flex-1 rounded-full bg-neutral-900 px-4 py-3 text-sm font-semibold text-white"
-                    onClick={() => window.alert("Coming soon")}
+                    disabled={Boolean(locked) || Boolean(isInvited)}
+                    className={
+                      isInvited
+                        ? "flex-1 rounded-full bg-emerald-500 px-4 py-3 text-sm font-semibold text-white opacity-95"
+                        : locked
+                          ? "flex-1 rounded-full border border-neutral-200 px-4 py-3 text-sm font-semibold text-neutral-400"
+                          : "flex-1 rounded-full border border-neutral-200 px-4 py-3 text-sm font-semibold text-neutral-900"
+                    }
+                    onClick={() => {
+                      if (locked) return;
+
+                      if (isSelectMode) {
+                        if (creator) onInvite?.(creator);
+                        return;
+                      }
+
+                      setInviteOpen(true);
+                    }}
                   >
-                    <span className="inline-flex items-center justify-center gap-2">
-                      <Gift className="h-4 w-4" />
-                      Gift
-                    </span>
-                  </button>
-                  <button
-                    type="button"
-                    className="flex-1 rounded-full border border-neutral-200 px-4 py-3 text-sm font-semibold text-neutral-700"
-                    onClick={() => setInviteOpen(true)}
-                  >
-                    <span className="inline-flex items-center justify-center gap-2">
-                      <Ticket className="h-4 w-4" />
-                      Invite
-                    </span>
+                    {isInvited ? "Invited ✓" : (
+                      <span className="inline-flex items-center justify-center gap-2">
+                        <Ticket className="h-4 w-4" />
+                        Invite
+                      </span>
+                    )}
                   </button>
                 </div>
               </>
@@ -387,11 +414,13 @@ export default function CreatorProfileSheet({
               </>
             )}
           </motion.div>
-          <InviteExperienceSheet
-            open={inviteOpen}
-            onClose={() => setInviteOpen(false)}
-            creator={creator}
-          />
+          {!isSelectMode && (
+            <InviteExperienceSheet
+              open={inviteOpen}
+              onClose={() => setInviteOpen(false)}
+              creator={creator}
+            />
+          )}
         </motion.div>
       )}
     </AnimatePresence>
