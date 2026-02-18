@@ -54,7 +54,6 @@ export function ChipInput({ label, placeholder, values, onChange }: ChipInputPro
                 addValue();
               }
             }}
-            className="rounded-xl border-neutral-200 bg-[#FAFAFA]"
           />
           <button
             type="button"
