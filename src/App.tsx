@@ -5,7 +5,9 @@ import ActivityDetail from "@/pages/ActivityDetail";
 import ActivitiesInvite from "@/pages/ActivitiesInvite";
 import VicProfile from "@/pages/VicProfile";
 import Login from "@/pages/Login";
-import Register from "@/pages/Register";
+import RegisterVIC from "@/pages/RegisterVIC";
+import Apply from "@/pages/Apply";
+import ApplyThanks from "@/pages/ApplyThanks";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
 
@@ -22,7 +24,9 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route path="/register" element={<Register />} />
+      <Route path="/apply" element={<Apply />} />
+      <Route path="/apply/thanks" element={<ApplyThanks />} />
+      <Route path="/register" element={<RegisterVIC />} />
 
       <Route element={<ProtectedRoute />}>
         <Route
