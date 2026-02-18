@@ -10,6 +10,7 @@ import { Building2, Calendar, ChevronLeft, MapPin, MessageCircle, Search, User, 
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchActivityById, type InviteLite, type InviteStatus, type TripActivity } from "@/services/activities";
 import type { Activity, ActivityStatus } from "@/services/activityApi";
+import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityInviteModelsModal";
 
 const easeOut = { duration: 0.3, ease: "easeOut" };
 
@@ -235,6 +236,7 @@ export default function ActivityDetail() {
   const [viewingStatus, setViewingStatus] = useState<InviteStatus | null>(null);
   const [search, setSearch] = useState("");
   const [showRejected, setShowRejected] = useState(false);
+  const [inviteModelsOpen, setInviteModelsOpen] = useState(false);
   const [editForm, setEditForm] = useState<EditableActivityFields>({
     title: "",
     dateLabel: "",
@@ -438,7 +440,7 @@ export default function ActivityDetail() {
           <div className="mt-3 grid grid-cols-2 gap-2">
             <button
               type="button"
-              onClick={() => console.log("[ActivityDetail] invite more models")}
+              onClick={() => setInviteModelsOpen(true)}
               className="rounded-full bg-neutral-900 px-3 py-2.5 text-xs font-semibold text-white"
             >
               Invite more models
@@ -647,6 +649,17 @@ export default function ActivityDetail() {
           </>
         )}
       </AnimatePresence>
+
+      <LocalActivityInviteModelsModal
+        open={inviteModelsOpen}
+        onClose={() => setInviteModelsOpen(false)}
+        venueLabel={activity?.subtitle || activity?.title}
+        cityName={activity?.locationLabel || "your city"}
+        onConfirm={(selected) => {
+          console.log("[ActivityDetail] new invites confirmed", selected);
+          setInviteModelsOpen(false);
+        }}
+      />
     </div>
   );
 }
