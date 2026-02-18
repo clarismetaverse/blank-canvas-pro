@@ -9,7 +9,7 @@ export type VicVisibility = "public" | "hidden";
 export interface VicApplyDraft {
   Role: VicApplyRole;
   discoverable: boolean;
-  MembersClub?: string;
+  MembersClub?: string | Array<{ id: string; name: string; city: string; points: number }>;
   CanHostAtClub?: boolean;
   InvitationCode?: string;
 }
@@ -26,7 +26,8 @@ export interface VicSignupPayload {
   Social?: string[];
   InvitationCode?: string;
   discoverable?: boolean;
-  MembersClub?: string;
+  MembersClub?: string | string[] | Array<{ id: string; name: string; city: string; points: number }>;
+  MemberScore?: number;
   CanHostAtClub?: boolean;
   Gallery?: string[];
   Picture?: string;
