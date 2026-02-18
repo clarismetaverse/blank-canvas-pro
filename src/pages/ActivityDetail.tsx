@@ -8,8 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, MessageCircle, Search, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import type { InviteLite, InviteStatus, TripActivity } from "@/services/activities";
-import { xanoFetch } from "@/services/xanoClient";
+import { fetchActivityById, type InviteLite, type InviteStatus, type TripActivity } from "@/services/activities";
 import type { Activity, ActivityStatus } from "@/services/activityApi";
 
 const easeOut = { duration: 0.3, ease: "easeOut" };
@@ -274,16 +273,12 @@ export default function ActivityDetail() {
     };
 
     const load = async () => {
-      setLoading(true);
+      if (!activityId) return;
+
       try {
-        const activities = await xanoFetch<Activity[]>("/motherboard/trips", { method: "GET" });
-        const list = Array.isArray(activities) ? activities : [];
-        const raw = list.find((a) => String(a.id) === activityId) ?? null;
-        if (!raw) {
-          setActivity(null);
-          return;
-        }
-        const mapped = mapToTrip(raw);
+        setLoading(true);
+        const data = await fetchActivityById(activityId);
+        const mapped = mapToTrip(data);
         setActivity(mapped);
         setEditForm({
           title: mapped.title,
@@ -291,8 +286,12 @@ export default function ActivityDetail() {
           locationLabel: mapped.locationLabel,
           notes: mapped.notes,
         });
-      } catch (err) {
-        console.error("Failed to load activity detail", err);
+      } catch (error: unknown) {
+        if (typeof error === "object" && error !== null && "status" in error && error.status === 401) {
+          navigate("/login");
+        } else {
+          console.error("Failed to load activity", error);
+        }
         setActivity(null);
       } finally {
         setLoading(false);
@@ -300,7 +299,7 @@ export default function ActivityDetail() {
     };
 
     void load();
-  }, [activityId]);
+  }, [activityId, navigate]);
 
   const groupedInvites = useMemo(() => {
     if (!activity) return { accepted: [], invited: [], rejected: [] } as Record<InviteStatus, InviteLite[]>;
@@ -320,11 +319,8 @@ export default function ActivityDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-[#FAFAFA] px-4 pt-6">
-        <div className="mx-auto w-full max-w-md space-y-4 pt-10">
-          <div className="h-52 w-full animate-pulse rounded-3xl bg-neutral-200" />
-          <div className="h-32 w-full animate-pulse rounded-3xl bg-neutral-200" />
-        </div>
+      <div className="min-h-screen bg-[#FAFAFA] flex items-center justify-center">
+        <div className="text-sm text-neutral-500">Loading activity…</div>
       </div>
     );
   }

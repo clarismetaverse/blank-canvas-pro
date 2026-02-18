@@ -1,3 +1,6 @@
+import { xanoFetch } from "@/services/xanoClient";
+import type { Activity } from "@/services/activityApi";
+
 export type InviteStatus = "invited" | "accepted" | "rejected";
 
 export type InviteLite = {
@@ -188,6 +191,12 @@ const placeholderTrips: TripActivity[] = [
 
 export async function fetchTrips(): Promise<TripActivity[]> {
   return Promise.resolve(placeholderTrips);
+}
+
+export async function fetchActivityById(id: string): Promise<Activity> {
+  return xanoFetch<Activity>(`/activity/${id}`, {
+    method: "GET",
+  });
 }
 
 export type CreateEventPayload = {
