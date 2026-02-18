@@ -7,7 +7,6 @@ import ConfirmInvitesModal from "@/features/activities/ConfirmInvitesModal";
 import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityInviteModelsModal";
 import { fetchEventTemps, type EventTemp } from "@/services/activities";
 import { createActivity, patchActivity } from "@/services/activityApi";
-import { sendActivityInvites } from "@/services/activities";
 import { requestVicBooking, type BookingStatus } from "@/services/vicBookings";
 import { fetchVicProfile } from "@/services/vic";
 import { getAuthToken } from "@/services";
@@ -1069,10 +1068,6 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                         ActivitiesList: bookingState.notes.trim(),
                         status: "active",
                       });
-
-                      if (invitedIds.length > 0) {
-                        await sendActivityInvites(activityId, invitedIds);
-                      }
 
                       updateLocalBooking(selectedLocalItem.id, (prev) => ({ ...prev, activityId }));
                       setInvitedModels((prev) => ({ ...prev, [selectedLocalItem.id]: pendingInvites }));
