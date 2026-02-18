@@ -275,13 +275,15 @@ export default function CreatorProfileSheet({
                   )}
                   <button
                     type="button"
-                    disabled={Boolean(locked) || Boolean(isInvited)}
+                    disabled={Boolean(locked) || (Boolean(isInvited) && !isSelectMode)}
                     className={
-                      isInvited
-                        ? "flex-1 rounded-full bg-emerald-500 px-4 py-3 text-sm font-semibold text-white opacity-95"
-                        : locked
-                          ? "flex-1 rounded-full border border-neutral-200 px-4 py-3 text-sm font-semibold text-neutral-400"
-                          : "flex-1 rounded-full bg-neutral-900 px-4 py-3 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.15)] active:scale-[0.98] transition-transform"
+                      isInvited && isSelectMode
+                        ? "flex-1 rounded-full border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-500 active:scale-[0.98] transition-transform"
+                        : isInvited
+                          ? "flex-1 rounded-full bg-emerald-500 px-4 py-3 text-sm font-semibold text-white opacity-95"
+                          : locked
+                            ? "flex-1 rounded-full border border-neutral-200 px-4 py-3 text-sm font-semibold text-neutral-400"
+                            : "flex-1 rounded-full bg-neutral-900 px-4 py-3 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.15)] active:scale-[0.98] transition-transform"
                     }
                     onClick={() => {
                       if (locked) return;
@@ -294,7 +296,7 @@ export default function CreatorProfileSheet({
                       setInviteOpen(true);
                     }}
                   >
-                    {isInvited ? "Invited ✓" : (
+                    {isInvited && isSelectMode ? "Deselect" : isInvited ? "Invited ✓" : (
                       <span className="inline-flex items-center justify-center gap-2">
                         <Ticket className="h-4 w-4" />
                         Invite
