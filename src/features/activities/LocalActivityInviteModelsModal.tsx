@@ -107,15 +107,19 @@ export default function LocalActivityInviteModelsModal({
       return;
     }
 
+    const abortController = new AbortController();
     let cancelled = false;
+
     const run = async () => {
       setLoading(true);
       try {
-        const found = await searchCreators(query);
+        const found = await searchCreators(query, abortController.signal);
         if (cancelled) return;
         setResults((found ?? []).slice(0, 40));
-      } catch {
-        if (!cancelled) setResults([]);
+      } catch (err) {
+        if (!cancelled && !(err instanceof DOMException && err.name === "AbortError")) {
+          setResults([]);
+        }
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -124,6 +128,7 @@ export default function LocalActivityInviteModelsModal({
     void run();
     return () => {
       cancelled = true;
+      abortController.abort();
     };
   }, [dq, open]);
 

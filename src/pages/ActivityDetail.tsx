@@ -8,7 +8,7 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Building2, Calendar, ChevronLeft, MapPin, MessageCircle, Search, User, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchActivityById, type InviteLite, type InviteStatus, type TripActivity } from "@/services/activities";
+import { fetchActivityById, sendActivityInvites, type InviteLite, type InviteStatus, type TripActivity } from "@/services/activities";
 import type { Activity, ActivityStatus } from "@/services/activityApi";
 import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityInviteModelsModal";
 
@@ -655,8 +655,28 @@ export default function ActivityDetail() {
         onClose={() => setInviteModelsOpen(false)}
         venueLabel={activity?.subtitle || activity?.title}
         cityName={activity?.locationLabel || "your city"}
-        onConfirm={(selected) => {
-          console.log("[ActivityDetail] new invites confirmed", selected);
+        onConfirm={async (selected) => {
+          if (!activityId || selected.length === 0) return;
+          try {
+            const creatorIds = selected.map((c) => Number(c.id));
+            await sendActivityInvites(Number(activityId), creatorIds);
+
+            // Add new invites to local state
+            const newInvites: InviteLite[] = selected.map((c) => ({
+              id: String(c.id),
+              status: "invited" as InviteStatus,
+              creator: {
+                name: c.name || "Creator",
+                avatarUrl: c.Profile_pic?.url || "https://i.pravatar.cc/100?img=65",
+                ig: c.IG_account || "",
+              },
+            }));
+            setActivity((prev) =>
+              prev ? { ...prev, invites: [...prev.invites, ...newInvites] } : prev
+            );
+          } catch (err) {
+            console.error("[ActivityDetail] Failed to send invites", err);
+          }
           setInviteModelsOpen(false);
         }}
       />

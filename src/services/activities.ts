@@ -250,3 +250,26 @@ export async function fetchEventTemps(): Promise<EventTemp[]> {
   const { request } = await import("@/services/xano");
   return request<EventTemp[]>("/event_temp");
 }
+
+export type InvitePayload = {
+  activity_id: number;
+  user_turbo_id: number[];
+};
+
+export type InviteResponse = {
+  id: number;
+  [key: string]: unknown;
+};
+
+export async function sendActivityInvites(
+  activityId: number,
+  creatorIds: number[]
+): Promise<InviteResponse> {
+  return xanoFetch<InviteResponse>("/activities/invite", {
+    method: "POST",
+    body: {
+      activity_id: activityId,
+      user_turbo_id: creatorIds,
+    },
+  });
+}

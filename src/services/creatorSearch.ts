@@ -27,7 +27,9 @@ export async function searchCreators(q: string, signal?: AbortSignal): Promise<C
     Accept: "application/json",
   };
   if (token) {
-    headers["Authorization"] = `Bearer ${token}`;
+    // Xano VIC tokens must NOT use "Bearer" prefix on this API group
+    const normalizedToken = token.startsWith("Bearer ") ? token.replace(/^Bearer\s+/i, "") : token;
+    headers["Authorization"] = normalizedToken;
   }
 
   const res = await fetch(`${API}/search/user_turbo`, {
