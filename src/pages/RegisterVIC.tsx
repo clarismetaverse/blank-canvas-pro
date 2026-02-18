@@ -128,31 +128,31 @@ export default function RegisterVIC() {
         <h1 className="text-3xl font-semibold text-neutral-900">Create VIC profile</h1>
         <p className="mt-2 text-sm text-neutral-500">Complete your host registration to unlock curated access.</p>
 
-        <form className="mt-8 space-y-5" onSubmit={onSubmit}>
+        <form className="mt-8 space-y-5 text-neutral-900" onSubmit={onSubmit}>
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
               <Label className="text-xs font-medium text-neutral-600">Name</Label>
-              <Input className="rounded-2xl border-neutral-200 bg-white/90" value={name} onChange={(event) => setName(event.target.value)} required />
+              <Input value={name} onChange={(event) => setName(event.target.value)} required />
             </div>
             <div className="space-y-2">
               <Label className="text-xs font-medium text-neutral-600">Role</Label>
-              <Input className="rounded-2xl border-neutral-200 bg-neutral-100" value={role} onChange={(event) => setRole(event.target.value as VicApplyRole)} placeholder="VIC Host" />
+              <Input value={role} onChange={(event) => setRole(event.target.value as VicApplyRole)} placeholder="VIC Host" />
             </div>
             <div className="space-y-2">
               <Label className="text-xs font-medium text-neutral-600">Email</Label>
-              <Input className="rounded-2xl border-neutral-200 bg-white/90" type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
+              <Input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
             </div>
             <div className="space-y-2">
               <Label className="text-xs font-medium text-neutral-600">Homebase</Label>
-              <Input className="rounded-2xl border-neutral-200 bg-white/90" value={homebase} onChange={(event) => setHomebase(event.target.value)} placeholder="City / base" />
+              <Input value={homebase} onChange={(event) => setHomebase(event.target.value)} placeholder="City / base" />
             </div>
             <div className="space-y-2">
               <Label className="text-xs font-medium text-neutral-600">language</Label>
-              <Input className="rounded-2xl border-neutral-200 bg-white/90" value={language} onChange={(event) => setLanguage(event.target.value)} placeholder="English, French..." />
+              <Input value={language} onChange={(event) => setLanguage(event.target.value)} placeholder="English, French..." />
             </div>
             <div className="space-y-2">
               <Label className="text-xs font-medium text-neutral-600">InvitationCode</Label>
-              <Input className="rounded-2xl border-neutral-200 bg-white/90" value={invitationCode} onChange={(event) => setInvitationCode(event.target.value)} />
+              <Input value={invitationCode} onChange={(event) => setInvitationCode(event.target.value)} />
             </div>
           </div>
 
@@ -161,7 +161,7 @@ export default function RegisterVIC() {
               <Label className="text-xs font-medium text-neutral-600">Password</Label>
               <div className="relative">
                 <Input
-                  className="rounded-2xl border-neutral-200 bg-white/90 pr-10"
+                  className="pr-10"
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(event) => setPassword(event.target.value)}
@@ -177,7 +177,7 @@ export default function RegisterVIC() {
               <Label className="text-xs font-medium text-neutral-600">Confirm password</Label>
               <div className="relative">
                 <Input
-                  className="rounded-2xl border-neutral-200 bg-white/90 pr-10"
+                  className="pr-10"
                   type={showConfirmPassword ? "text" : "password"}
                   value={confirmPassword}
                   onChange={(event) => setConfirmPassword(event.target.value)}
@@ -200,13 +200,13 @@ export default function RegisterVIC() {
               value={bio}
               onChange={(event) => setBio(event.target.value)}
               rows={3}
-              className="w-full rounded-2xl border border-neutral-200 bg-white/90 p-3 text-sm outline-none focus:ring-2 focus:ring-neutral-300"
+              className="w-full rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-900 placeholder-neutral-400 focus:outline-none focus:ring-2 focus:ring-neutral-900/10"
             />
           </div>
 
           <div className="space-y-2">
             <Label className="text-xs font-medium text-neutral-600">minibio</Label>
-            <Input className="rounded-2xl border-neutral-200 bg-white/90" value={minibio} onChange={(event) => setMinibio(event.target.value)} />
+            <Input value={minibio} onChange={(event) => setMinibio(event.target.value)} />
           </div>
 
           <ChipInput label="Interests" placeholder="Art collector" values={interests} onChange={setInterests} />
@@ -216,7 +216,7 @@ export default function RegisterVIC() {
 
           <div className="space-y-2">
             <Label className="text-xs font-medium text-neutral-600">MembersClub</Label>
-            <Input className="rounded-2xl border-neutral-200 bg-white/90" value={membersClub} onChange={(event) => setMembersClub(event.target.value)} />
+            <Input value={membersClub} onChange={(event) => setMembersClub(event.target.value)} />
             <label className="flex items-center gap-2 text-sm text-neutral-600">
               <input
                 type="checkbox"
@@ -235,15 +235,15 @@ export default function RegisterVIC() {
           <div className="grid gap-4 md:grid-cols-3">
             <div className="space-y-2">
               <Label className="text-xs font-medium text-neutral-600">number</Label>
-              <Input className="rounded-2xl border-neutral-200 bg-white/90" value={number} onChange={(event) => setNumber(event.target.value)} />
+              <Input value={number} onChange={(event) => setNumber(event.target.value)} />
             </div>
             <div className="space-y-2">
               <Label className="text-xs font-medium text-neutral-600">age</Label>
-              <Input className="rounded-2xl border-neutral-200 bg-white/90" value={age} onChange={(event) => setAge(event.target.value)} />
+              <Input value={age} onChange={(event) => setAge(event.target.value)} />
             </div>
             <div className="space-y-2">
               <Label className="text-xs font-medium text-neutral-600">nationality</Label>
-              <Input className="rounded-2xl border-neutral-200 bg-white/90" value={nationality} onChange={(event) => setNationality(event.target.value)} />
+              <Input value={nationality} onChange={(event) => setNationality(event.target.value)} />
             </div>
           </div>
 
