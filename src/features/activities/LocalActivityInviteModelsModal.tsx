@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type { CreatorLite } from "@/services/creatorSearch";
 import { searchCreators } from "@/services/creatorSearch";
 import { fetchNewInTown } from "@/services/newInTown";
+import CreatorProfileSheet from "@/components/memberspass/CreatorProfileSheet";
 
 type Props = {
   open: boolean;
@@ -53,6 +54,7 @@ export default function LocalActivityInviteModelsModal({
   const [results, setResults] = useState<CreatorLite[]>([]);
   const [selected, setSelected] = useState<Map<number, CreatorLite>>(new Map());
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [profileCreator, setProfileCreator] = useState<CreatorLite | null>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -269,7 +271,7 @@ export default function LocalActivityInviteModelsModal({
                       <button
                         key={id}
                         type="button"
-                        onClick={() => toggle(m)}
+                        onClick={() => setProfileCreator(m)}
                         disabled={disabled}
                         className={`group flex w-full items-center gap-4 rounded-3xl border px-4 py-5 text-left transition ${
                           isSelected
@@ -335,6 +337,19 @@ export default function LocalActivityInviteModelsModal({
           </motion.div>
         </motion.div>
       )}
+
+      <CreatorProfileSheet
+        creator={profileCreator}
+        open={!!profileCreator}
+        onClose={() => setProfileCreator(null)}
+        variant="vic"
+        mode="select"
+        isInvited={profileCreator ? selected.has(Number(profileCreator.id)) : false}
+        onInvite={(c) => {
+          toggle(c);
+          setProfileCreator(null);
+        }}
+      />
     </AnimatePresence>
   );
 }
