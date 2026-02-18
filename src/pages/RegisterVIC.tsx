@@ -2,12 +2,14 @@ import type { FormEvent } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { motion } from "framer-motion";
 import { Link, useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react";
+import { ChevronRight, Eye, EyeOff, X } from "lucide-react";
+import { MembersClubPickerModal } from "@/components/vic/MembersClubPickerModal";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ChipInput } from "@/components/vic-onboarding/ChipInput";
 import { GalleryUploader } from "@/components/vic-onboarding/GalleryUploader";
 import { VisibilityToggle } from "@/components/vic-onboarding/VisibilityToggle";
+import { type MembersClub } from "@/services/membersClubs";
 import { setAuthToken } from "@/services";
 import {
   fetchVicProfileByToken,
@@ -27,6 +29,23 @@ async function fileToDataUrl(file: File): Promise<string> {
   });
 }
 
+const VALID_CITIES: MembersClub["city"][] = ["Bali", "Dubai", "Milan"];
+
+function isMembersClubObject(value: unknown): value is MembersClub {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const record = value as Record<string, unknown>;
+  return (
+    typeof record.id === "string" &&
+    typeof record.name === "string" &&
+    typeof record.city === "string" &&
+    VALID_CITIES.includes(record.city as MembersClub["city"]) &&
+    typeof record.points === "number"
+  );
+}
+
 export default function RegisterVIC() {
   const navigate = useNavigate();
   const [name, setName] = useState("");
@@ -40,7 +59,9 @@ export default function RegisterVIC() {
   const [language, setLanguage] = useState("");
   const [invitationCode, setInvitationCode] = useState("");
   const [discoverable, setDiscoverable] = useState(true);
-  const [membersClub, setMembersClub] = useState("");
+  const [selectedClubs, setSelectedClubs] = useState<MembersClub[]>([]);
+  const [membersClubModalOpen, setMembersClubModalOpen] = useState(false);
+  const [lastSelectedCity, setLastSelectedCity] = useState<MembersClub["city"]>("Bali");
   const [canHostAtClub, setCanHostAtClub] = useState(false);
   const [interests, setInterests] = useState<string[]>([]);
   const [social, setSocial] = useState<string[]>([]);
@@ -62,12 +83,38 @@ export default function RegisterVIC() {
 
     setRole(draft.Role);
     setDiscoverable(Boolean(draft.discoverable));
-    setMembersClub(draft.MembersClub ?? "");
+
+    if (Array.isArray(draft.MembersClub)) {
+      const parsed = draft.MembersClub.filter(isMembersClubObject);
+      setSelectedClubs(parsed);
+      if (parsed[0]) {
+        setLastSelectedCity(parsed[0].city);
+      }
+    }
+
     setCanHostAtClub(Boolean(draft.CanHostAtClub));
     setInvitationCode(draft.InvitationCode ?? "");
   }, []);
 
-  const isClubHostDisabled = useMemo(() => !membersClub.trim(), [membersClub]);
+  const memberScore = useMemo(() => selectedClubs.reduce((sum, club) => sum + club.points, 0), [selectedClubs]);
+
+  const isClubHostDisabled = useMemo(() => selectedClubs.length === 0, [selectedClubs]);
+
+  const onAddClub = (club: MembersClub) => {
+    setSelectedClubs((current) => {
+      if (current.some((item) => item.id === club.id)) {
+        return current;
+      }
+
+      return [...current, club];
+    });
+
+    setLastSelectedCity(club.city);
+  };
+
+  const onRemoveClub = (clubId: string) => {
+    setSelectedClubs((current) => current.filter((club) => club.id !== clubId));
+  };
 
   const onSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -96,7 +143,8 @@ export default function RegisterVIC() {
         Social: social.length ? social : undefined,
         InvitationCode: invitationCode || undefined,
         discoverable,
-        MembersClub: membersClub.trim() || undefined,
+        MembersClub: selectedClubs.length ? selectedClubs.map((club) => `${club.name} (${club.city})`) : undefined,
+        MemberScore: selectedClubs.length ? memberScore : undefined,
         CanHostAtClub: isClubHostDisabled ? undefined : canHostAtClub,
         Gallery: gallery.length ? gallery : undefined,
         Picture: avatar,
@@ -139,7 +187,7 @@ export default function RegisterVIC() {
               <Input value={role} onChange={(event) => setRole(event.target.value as VicApplyRole)} placeholder="VIC Host" />
             </div>
             <div className="space-y-2">
-              <Label className="text-xs font-medium text-neutral-600">Email</Label>
+              <Label className="text-xs font-medium text-neutral-600">email</Label>
               <Input type="email" value={email} onChange={(event) => setEmail(event.target.value)} required />
             </div>
             <div className="space-y-2">
@@ -214,9 +262,51 @@ export default function RegisterVIC() {
 
           <VisibilityToggle discoverable={discoverable} onChange={setDiscoverable} />
 
-          <div className="space-y-2">
-            <Label className="text-xs font-medium text-neutral-600">MembersClub</Label>
-            <Input value={membersClub} onChange={(event) => setMembersClub(event.target.value)} />
+          <div className="space-y-3 rounded-3xl border border-neutral-200 bg-white/85 p-4 shadow-[0_12px_30px_rgba(0,0,0,0.05)] backdrop-blur-xl">
+            <button
+              type="button"
+              onClick={() => setMembersClubModalOpen(true)}
+              className="flex w-full items-center justify-between rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-left transition hover:bg-neutral-50"
+            >
+              <div>
+                <p className="text-sm font-semibold text-neutral-900">Members Club affiliation (optional)</p>
+                <p className="mt-1 text-xs text-neutral-500">
+                  Multiply social prestige &amp; reach. Add memberships to your bio and receive direct guest requests.
+                </p>
+              </div>
+              <div className="inline-flex items-center gap-1 text-sm font-medium text-neutral-700">
+                Add
+                <ChevronRight size={16} />
+              </div>
+            </button>
+
+            <div className="flex flex-wrap gap-2">
+              {selectedClubs.map((club) => (
+                <span
+                  key={club.id}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-neutral-200 bg-white px-3 py-1.5 text-xs font-medium text-neutral-700"
+                >
+                  {club.name} ({club.city})
+                  <button
+                    type="button"
+                    onClick={() => onRemoveClub(club.id)}
+                    className="rounded-full p-0.5 text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-800"
+                    aria-label={`Remove ${club.name}`}
+                  >
+                    <X size={12} />
+                  </button>
+                </span>
+              ))}
+
+              {!selectedClubs.length ? <p className="text-xs text-neutral-400">No memberships added yet.</p> : null}
+            </div>
+
+            <div>
+              <span className="inline-flex rounded-full border border-neutral-200 bg-neutral-100 px-3 py-1 text-xs font-semibold text-neutral-700">
+                Member score: {memberScore} pts
+              </span>
+            </div>
+
             <label className="flex items-center gap-2 text-sm text-neutral-600">
               <input
                 type="checkbox"
@@ -265,6 +355,14 @@ export default function RegisterVIC() {
           </p>
         </form>
       </motion.div>
+
+      <MembersClubPickerModal
+        open={membersClubModalOpen}
+        selectedClubs={selectedClubs}
+        initialCity={lastSelectedCity}
+        onClose={() => setMembersClubModalOpen(false)}
+        onAddClub={onAddClub}
+      />
     </div>
   );
 }
