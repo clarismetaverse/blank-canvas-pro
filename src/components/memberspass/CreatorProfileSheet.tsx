@@ -281,7 +281,7 @@ export default function CreatorProfileSheet({
                         ? "flex-1 rounded-full bg-emerald-500 px-4 py-3 text-sm font-semibold text-white opacity-95"
                         : locked
                           ? "flex-1 rounded-full border border-neutral-200 px-4 py-3 text-sm font-semibold text-neutral-400"
-                          : "flex-1 rounded-full border border-neutral-200 px-4 py-3 text-sm font-semibold text-neutral-900"
+                          : "flex-1 rounded-full bg-neutral-900 px-4 py-3 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.15)] active:scale-[0.98] transition-transform"
                     }
                     onClick={() => {
                       if (locked) return;
