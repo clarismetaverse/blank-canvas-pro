@@ -6,14 +6,6 @@ export type CreatorLite = {
   IG_account?: string;
   Tiktok_account?: string;
   Profile_pic?: { url?: string } | null;
-  user_interest_topics_turbo_id?: number[];
-};
-
-export type CreatorSearchTurboParams = {
-  q: string;
-  interestIds?: number[];
-  nationality?: string;
-  signal?: AbortSignal;
 };
 
 function getToken() {
@@ -25,7 +17,10 @@ function getToken() {
   );
 }
 
-function buildHeaders(): HeadersInit {
+export async function searchCreators(q: string, signal?: AbortSignal): Promise<CreatorLite[]> {
+  const term = (q || "").trim();
+  if (!term) return [];
+
   const token = getToken();
   const headers: HeadersInit = {
     "Content-Type": "application/json",
@@ -36,16 +31,10 @@ function buildHeaders(): HeadersInit {
     const normalizedToken = token.startsWith("Bearer ") ? token.replace(/^Bearer\s+/i, "") : token;
     headers["Authorization"] = normalizedToken;
   }
-  return headers;
-}
-
-export async function searchCreators(q: string, signal?: AbortSignal): Promise<CreatorLite[]> {
-  const term = (q || "").trim();
-  if (!term) return [];
 
   const res = await fetch(`${API}/search/user_turbo`, {
     method: "POST",
-    headers: buildHeaders(),
+    headers,
     body: JSON.stringify({ q: term }),
     signal,
   });
@@ -53,42 +42,6 @@ export async function searchCreators(q: string, signal?: AbortSignal): Promise<C
   if (!res.ok) {
     const msg = await res.text().catch(() => res.statusText);
     throw new Error(msg || "Creator search failed");
-  }
-
-  const data = (await res.json()) as CreatorLite[];
-  return Array.isArray(data) ? data : [];
-}
-
-export async function searchCreatorsTurbo({
-  q,
-  interestIds = [],
-  nationality,
-  signal,
-}: CreatorSearchTurboParams): Promise<CreatorLite[]> {
-  const term = (q || "").trim();
-  const selectedNationality = (nationality || "").trim();
-  const hasFilters = interestIds.length > 0 || selectedNationality.length > 0;
-  if (!term && !hasFilters) return [];
-
-  const body: Record<string, unknown> = {
-    q: term,
-    user_interest_topics_turbo_id: interestIds,
-  };
-
-  if (selectedNationality) {
-    body.nationality = selectedNationality;
-  }
-
-  const res = await fetch(`${API}/search/user_turbo`, {
-    method: "POST",
-    headers: buildHeaders(),
-    body: JSON.stringify(body),
-    signal,
-  });
-
-  if (!res.ok) {
-    const msg = await res.text().catch(() => res.statusText);
-    throw new Error(msg || "Creator turbo search failed");
   }
 
   const data = (await res.json()) as CreatorLite[];
