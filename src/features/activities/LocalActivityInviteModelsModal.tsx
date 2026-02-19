@@ -115,7 +115,7 @@ export default function LocalActivityInviteModelsModal({
     const run = async () => {
       setLoading(true);
       try {
-        const found = await searchCreators(query, abortController.signal);
+        const found = await searchCreators({ q: query, signal: abortController.signal });
         if (cancelled) return;
         setResults((found ?? []).slice(0, 40));
       } catch (err) {
