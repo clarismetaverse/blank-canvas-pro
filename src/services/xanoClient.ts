@@ -1,6 +1,6 @@
 import { getAuthToken } from "@/services";
 
-const XANO_BASE_URL = "https://xbut-eryu-hhsg.f2.xano.io/api:vGd6XDW3";
+const XANO_BASE_URL = "https://xbut-eryu-hhsg.f2.xano.io/api:bwh6Xc5O";
 
 type JsonValue = Record<string, unknown> | Array<unknown> | string | number | boolean | null;
 

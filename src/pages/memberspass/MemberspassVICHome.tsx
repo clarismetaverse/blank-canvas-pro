@@ -63,14 +63,6 @@ const featuredContent = [
   },
 ];
 
-const interestOptions = [
-  { id: 1, label: "Fashion" },
-  { id: 2, label: "Travel" },
-  { id: 3, label: "Food" },
-  { id: 4, label: "Wellness" },
-  { id: 5, label: "Nightlife" },
-];
-
 export default function MemberspassVICHome() {
   const navigate = useNavigate();
   const [points] = useState(2450);
@@ -80,7 +72,6 @@ export default function MemberspassVICHome() {
   });
 
   const [query, setQuery] = useState("");
-  const [selectedInterests, setSelectedInterests] = useState<number[]>([]);
   const [lastResults, setLastResults] = useState<CreatorLite[]>([]);
   const [selectedCreator, setSelectedCreator] = useState<CreatorLite | null>(null);
   const [newInTown, setNewInTown] = useState<CreatorLite[]>([]);
@@ -150,15 +141,12 @@ export default function MemberspassVICHome() {
           <CreatorSearchSelect
             value={query}
             onChange={setQuery}
-            selectedInterests={selectedInterests}
-            onSelectedInterestsChange={setSelectedInterests}
-            interestOptions={interestOptions}
             onSelect={(creator) => {
               setSelectedCreator(creator);
               setQuery(creator.name || "");
             }}
             onResults={(results) => {
-              setLastResults(results);
+              if (results.length) setLastResults(results);
             }}
           />
 
@@ -173,7 +161,6 @@ export default function MemberspassVICHome() {
                 onClick={() => {
                   setSelectedCreator(null);
                   setQuery("");
-                  setSelectedInterests([]);
                 }}
               >
                 Clear
