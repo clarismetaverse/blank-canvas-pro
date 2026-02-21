@@ -111,6 +111,8 @@ const activityItems: ActivityItem[] = [
   },
 ];
 
+const EMPTY_CREATORS: CreatorLite[] = [];
+
 const formatTripDate = (value?: string) => {
   if (!value) {
     return "TBD";
@@ -320,7 +322,9 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
   const selectedGuests = selectedLocalBooking?.guests ?? 0;
   const canInvite = Boolean(selectedDate) && Boolean(selectedTime) && selectedGuests >= 1;
   const invitesBudget = 8;
-  const invitedForSelected = selectedLocalItem ? (invitedModels[selectedLocalItem.id] ?? []) : [];
+  const invitedForSelected = selectedLocalItem
+    ? (invitedModels[selectedLocalItem.id] ?? EMPTY_CREATORS)
+    : EMPTY_CREATORS;
   const invitedCount = invitedForSelected.length;
   const cityName = useMemo(() => {
     if (typeof window === "undefined") return "your city";
@@ -987,7 +991,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                 </motion.div>
               )}
             </AnimatePresence>
-            {selectedLocalItem && (
+            {selectedLocalItem && inviteModelsOpen && (
               <LocalActivityInviteModelsModal
                 open={inviteModelsOpen}
                 onClose={() => setInviteModelsOpen(false)}
@@ -1003,7 +1007,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                 }}
               />
             )}
-            {selectedLocalItem && (
+            {selectedLocalItem && confirmInvitesOpen && (
               <ConfirmInvitesModal
                 open={confirmInvitesOpen}
                 onClose={() => {
