@@ -9,9 +9,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Building2, Calendar, ChevronLeft, MapPin, MessageCircle, Search, User, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
 import { fetchActivityById, type InviteLite, type InviteStatus, type TripActivity } from "@/services/activities";
-import { putTripsInvite } from "@/services/tripsInvite";
+import { getValidInvitedUsers, putTripsInvite } from "@/services/tripsInvite";
 import type { Activity, ActivityStatus } from "@/services/activityApi";
 import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityInviteModelsModal";
+import InvitesSentPopup from "@/components/vic/InvitesSentPopup";
 
 const easeOut = { duration: 0.3, ease: "easeOut" };
 
@@ -238,6 +239,7 @@ export default function ActivityDetail() {
   const [search, setSearch] = useState("");
   const [showRejected, setShowRejected] = useState(false);
   const [inviteModelsOpen, setInviteModelsOpen] = useState(false);
+  const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; count: number; avatars: Array<{ id: number; name: string; url: string }> }>({ open: false, tripName: "", count: 0, avatars: [] });
   const [editForm, setEditForm] = useState<EditableActivityFields>({
     title: "",
     dateLabel: "",
@@ -651,6 +653,13 @@ export default function ActivityDetail() {
         )}
       </AnimatePresence>
 
+      <InvitesSentPopup
+        open={invitesSentPopup.open}
+        onClose={() => setInvitesSentPopup((prev) => ({ ...prev, open: false }))}
+        tripName={invitesSentPopup.tripName}
+        count={invitesSentPopup.count}
+        avatars={invitesSentPopup.avatars}
+      />
       <LocalActivityInviteModelsModal
         open={inviteModelsOpen}
         onClose={() => setInviteModelsOpen(false)}
@@ -661,7 +670,14 @@ export default function ActivityDetail() {
           if (!activityId || selected.length === 0) return;
           try {
             const creatorIds = selected.map((c) => Number(c.id));
-            await putTripsInvite(Number(activityId), creatorIds);
+            const response = await putTripsInvite(Number(activityId), creatorIds);
+            const validInvitedUsers = getValidInvitedUsers(response.InvitedUsers);
+            setInvitesSentPopup({
+              open: true,
+              tripName: typeof response.Name === "string" && response.Name ? response.Name : activity?.title || "",
+              count: validInvitedUsers.length,
+              avatars: validInvitedUsers.slice(0, 3).map((user) => ({ id: user.id, name: user.name, url: user.avatarUrl })),
+            });
 
             const data = await fetchActivityById(activityId);
             const expanded =

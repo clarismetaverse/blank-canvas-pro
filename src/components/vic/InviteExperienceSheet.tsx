@@ -7,10 +7,11 @@ import ConfirmInvitesModal from "@/features/activities/ConfirmInvitesModal";
 import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityInviteModelsModal";
 import { fetchEventTemps, type EventTemp } from "@/services/activities";
 import { createActivity } from "@/services/activityApi";
-import { putTripsInvite } from "@/services/tripsInvite";
+import { getValidInvitedUsers, putTripsInvite, type ValidInvitedUser } from "@/services/tripsInvite";
 import { requestVicBooking, type BookingStatus } from "@/services/vicBookings";
 import { fetchVicProfile } from "@/services/vic";
 import { getAuthToken } from "@/services";
+import InvitesSentPopup from "@/components/vic/InvitesSentPopup";
 
 type InviteExperienceSheetProps = {
   open: boolean;
@@ -159,6 +160,12 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
   const [pendingInvites, setPendingInvites] = useState<CreatorLite[]>([]);
   const [invitedModels, setInvitedModels] = useState<Record<string, CreatorLite[]>>({});
   const [hostId, setHostId] = useState<number>(0);
+  const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; count: number; avatars: ValidInvitedUser[] }>({
+    open: false,
+    tripName: "",
+    count: 0,
+    avatars: [],
+  });
 
   const creatorName = creator?.name || "Creator";
 
@@ -1071,7 +1078,15 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                         throw new Error("Missing activity id");
                       }
 
-                      await putTripsInvite(activityId, invitedIds);
+                      const response = await putTripsInvite(activityId, invitedIds);
+                      const validInvitedUsers = getValidInvitedUsers(response.InvitedUsers);
+
+                      setInvitesSentPopup({
+                        open: true,
+                        tripName: typeof response.Name === "string" && response.Name ? response.Name : selectedLocalItem.title || "",
+                        count: validInvitedUsers.length,
+                        avatars: validInvitedUsers.slice(0, 3),
+                      });
 
                       updateLocalBooking(selectedLocalItem.id, (prev) => ({ ...prev, activityId }));
                       setInvitedModels((prev) => ({ ...prev, [selectedLocalItem.id]: pendingInvites }));
@@ -1090,6 +1105,13 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                 loading={confirmLoading}
               />
             )}
+            <InvitesSentPopup
+              open={invitesSentPopup.open}
+              onClose={() => setInvitesSentPopup((prev) => ({ ...prev, open: false }))}
+              tripName={invitesSentPopup.tripName}
+              count={invitesSentPopup.count}
+              avatars={invitesSentPopup.avatars.map((item) => ({ id: item.id, name: item.name, url: item.avatarUrl }))}
+            />
           </motion.div>
 
           <AnimatePresence>
