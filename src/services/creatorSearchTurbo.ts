@@ -19,7 +19,7 @@ function getToken() {
 
 export async function searchCreatorsTurbo({ q, topicIds, signal }: SearchCreatorsTurboParams): Promise<CreatorLite[]> {
   const term = (q || "").trim();
-  if (!term) return [];
+  if (term.length < 2) return [];
 
   const token = getToken();
   const headers: HeadersInit = {

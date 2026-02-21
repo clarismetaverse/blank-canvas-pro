@@ -64,6 +64,15 @@ export default function LocalActivityInviteModelsModal({
     [selectedTopicIds]
   );
 
+  const initialSelectedKey = useMemo(
+    () =>
+      initialSelected
+        .map((x) => Number(x.id))
+        .sort((a, b) => a - b)
+        .join(","),
+    [initialSelected]
+  );
+
   useEffect(() => {
     if (!open) return;
 
@@ -94,7 +103,7 @@ export default function LocalActivityInviteModelsModal({
     return () => {
       active = false;
     };
-  }, [open, initialSelected]);
+  }, [open, initialSelectedKey]);
 
   useEffect(() => {
     if (!open) return;
