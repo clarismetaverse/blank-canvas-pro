@@ -6,7 +6,7 @@ type Props = {
   onClose: () => void;
   tripName: string;
   count: number;
-  avatars: Array<{ id: number; name: string; url: string }>;
+  avatars: Array<{ id: number; name: string; url: string | null }>;
 };
 
 const backdrop = {
@@ -45,18 +45,19 @@ export default function InvitesSentPopup({ open, onClose, tripName, count, avata
             </button>
 
             <p className="text-2xl font-semibold tracking-[-0.02em]">Invites sent ✨</p>
-            <p className="mt-1 text-sm text-white/70">Invited {count} models</p>
-
-            <div className="mt-4 flex items-center">
-              {avatars.map((avatar, index) => (
-                <div
-                  key={avatar.id}
-                  className="h-12 w-12 overflow-hidden rounded-full border-2 border-neutral-950 bg-white/10"
-                  style={{ marginLeft: index === 0 ? 0 : -12 }}
-                >
-                  <img src={avatar.url} alt={avatar.name} className="h-full w-full object-cover" />
-                </div>
-              ))}
+            <div className="mt-4 flex items-center gap-3">
+              <div className="flex items-center">
+                {avatars.slice(0, 3).map((avatar, index) => (
+                  <div
+                    key={avatar.id}
+                    className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full border-2 border-neutral-950 bg-white/10 text-xs font-semibold uppercase text-white/70"
+                    style={{ marginLeft: index === 0 ? 0 : -12 }}
+                  >
+                    {avatar.url ? <img src={avatar.url} alt={avatar.name} className="h-full w-full object-cover" /> : avatar.name.slice(0, 1)}
+                  </div>
+                ))}
+              </div>
+              <p className="text-sm text-white/70">Invited {count} models</p>
             </div>
 
             <div className="mt-4 rounded-2xl border border-white/10 bg-white/5 px-3 py-2">
