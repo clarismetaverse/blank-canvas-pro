@@ -6,7 +6,8 @@ import type { CreatorLite } from "@/services/creatorSearch";
 import ConfirmInvitesModal from "@/features/activities/ConfirmInvitesModal";
 import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityInviteModelsModal";
 import { fetchEventTemps, type EventTemp } from "@/services/activities";
-import { createActivity, patchActivity } from "@/services/activityApi";
+import { createActivity } from "@/services/activityApi";
+import { putTripsInvite } from "@/services/tripsInvite";
 import { requestVicBooking, type BookingStatus } from "@/services/vicBookings";
 import { fetchVicProfile } from "@/services/vic";
 import { getAuthToken } from "@/services";
@@ -1060,14 +1061,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                         throw new Error("Missing activity id");
                       }
 
-                      await patchActivity(activityId, {
-                        InvitedUsers: invitedIds,
-                        ModelLimit: invitedIds.length,
-                        ParticipantsMinimumNumber: bookingState.guests,
-                        Starting_Day: selectedLocalItem.dateLabel || null,
-                        ActivitiesList: bookingState.notes.trim(),
-                        status: "active",
-                      });
+                      await putTripsInvite(activityId, invitedIds);
 
                       updateLocalBooking(selectedLocalItem.id, (prev) => ({ ...prev, activityId }));
                       setInvitedModels((prev) => ({ ...prev, [selectedLocalItem.id]: pendingInvites }));
