@@ -10,7 +10,7 @@ type PutTripsInviteResponse = {
 export type ValidInvitedUser = {
   id: number;
   name: string;
-  avatarUrl: string;
+  avatarUrl: string | null;
 };
 
 export function getValidInvitedUsers(input: unknown): ValidInvitedUser[] {
@@ -26,9 +26,9 @@ export function getValidInvitedUsers(input: unknown): ValidInvitedUser[] {
 
       const candidate = entry as { id?: unknown; name?: unknown; Profile_pic?: { url?: unknown } | null };
       const id = Number(candidate.id);
-      const avatarUrl = typeof candidate.Profile_pic?.url === "string" ? candidate.Profile_pic.url : "";
+      const avatarUrl = typeof candidate.Profile_pic?.url === "string" && candidate.Profile_pic.url ? candidate.Profile_pic.url : null;
 
-      if (!Number.isFinite(id) || id <= 0 || !avatarUrl) {
+      if (!Number.isFinite(id) || id <= 0) {
         return null;
       }
 
