@@ -261,6 +261,11 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
     [selectedActivities]
   );
 
+  const selectedTopicIds = useMemo(
+    () => selectedActivities.map((value) => Number(value)).filter((id) => Number.isFinite(id)),
+    [selectedActivities]
+  );
+
   const isTopCreator = useMemo(() => {
     const creatorWithTier = creator as (CreatorLite & { tier?: string; vip?: boolean }) | null;
     if (!creatorWithTier) {
@@ -990,6 +995,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                 cityName={cityName}
                 maxInvites={invitesBudget}
                 initialSelected={invitedForSelected}
+                selectedTopicIds={selectedTopicIds}
                 onConfirm={(selected) => {
                   setPendingInvites(selected);
                   setInviteModelsOpen(false);

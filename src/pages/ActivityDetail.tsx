@@ -656,6 +656,7 @@ export default function ActivityDetail() {
         onClose={() => setInviteModelsOpen(false)}
         venueLabel={activity?.subtitle || activity?.title}
         cityName={activity?.locationLabel || "your city"}
+        selectedTopicIds={activity?.VICS ?? []}
         onConfirm={async (selected) => {
           if (!activityId || selected.length === 0) return;
           try {

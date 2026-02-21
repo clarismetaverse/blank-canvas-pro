@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Check, ChevronRight, Search, Sparkles, X } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CreatorLite } from "@/services/creatorSearch";
-import { searchCreators } from "@/services/creatorSearch";
+import { searchCreatorsTurbo } from "@/services/creatorSearchTurbo";
 import { fetchNewInTown } from "@/services/newInTown";
 import CreatorProfileSheet from "@/components/memberspass/CreatorProfileSheet";
 
@@ -13,6 +13,7 @@ type Props = {
   cityName?: string;
   maxInvites?: number;
   initialSelected?: CreatorLite[];
+  selectedTopicIds?: number[];
   onConfirm: (selected: CreatorLite[]) => void;
 };
 
@@ -44,6 +45,7 @@ export default function LocalActivityInviteModelsModal({
   cityName = "your city",
   maxInvites = 8,
   initialSelected = [],
+  selectedTopicIds = [],
   onConfirm,
 }: Props) {
   const [q, setQ] = useState("");
@@ -55,6 +57,12 @@ export default function LocalActivityInviteModelsModal({
   const [selected, setSelected] = useState<Map<number, CreatorLite>>(new Map());
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [profileCreator, setProfileCreator] = useState<CreatorLite | null>(null);
+  const latestSearchRequestIdRef = useRef(0);
+
+  const normalizedTopicIds = useMemo(
+    () => selectedTopicIds.map((id) => Number(id)).filter((id) => Number.isFinite(id)),
+    [selectedTopicIds]
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -111,19 +119,29 @@ export default function LocalActivityInviteModelsModal({
 
     const abortController = new AbortController();
     let cancelled = false;
+    const requestId = latestSearchRequestIdRef.current + 1;
+    latestSearchRequestIdRef.current = requestId;
 
     const run = async () => {
       setLoading(true);
       try {
-        const found = await searchCreators(query, abortController.signal);
-        if (cancelled) return;
+        const found = await searchCreatorsTurbo({
+          q: query,
+          topicIds: normalizedTopicIds,
+          signal: abortController.signal,
+        });
+        if (cancelled || requestId !== latestSearchRequestIdRef.current) return;
         setResults((found ?? []).slice(0, 40));
       } catch (err) {
-        if (!cancelled && !(err instanceof DOMException && err.name === "AbortError")) {
+        if (
+          !cancelled &&
+          requestId === latestSearchRequestIdRef.current &&
+          !(err instanceof DOMException && err.name === "AbortError")
+        ) {
           setResults([]);
         }
       } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled && requestId === latestSearchRequestIdRef.current) setLoading(false);
       }
     };
 
@@ -132,7 +150,7 @@ export default function LocalActivityInviteModelsModal({
       cancelled = true;
       abortController.abort();
     };
-  }, [dq, open]);
+  }, [dq, normalizedTopicIds, open]);
 
   const selectedCount = selected.size;
   const invitesLeft = Math.max(0, maxInvites - selectedCount);
