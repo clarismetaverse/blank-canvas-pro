@@ -8,7 +8,8 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Building2, Calendar, ChevronLeft, MapPin, MessageCircle, Search, User, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchActivityById, sendActivityInvites, type InviteLite, type InviteStatus, type TripActivity } from "@/services/activities";
+import { fetchActivityById, type InviteLite, type InviteStatus, type TripActivity } from "@/services/activities";
+import { putTripsInvite } from "@/services/tripsInvite";
 import type { Activity, ActivityStatus } from "@/services/activityApi";
 import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityInviteModelsModal";
 
@@ -659,21 +660,23 @@ export default function ActivityDetail() {
           if (!activityId || selected.length === 0) return;
           try {
             const creatorIds = selected.map((c) => Number(c.id));
-            await sendActivityInvites(Number(activityId), creatorIds);
+            await putTripsInvite(Number(activityId), creatorIds);
+
+            const data = await fetchActivityById(activityId);
+            const expanded =
+              data.ModelsList && data.ModelsList.length > 0 ? data.ModelsList : data.InvitedUsersExpanded ?? [];
 
             // Add new invites to local state
-            const newInvites: InviteLite[] = selected.map((c) => ({
-              id: String(c.id),
+            const newInvites: InviteLite[] = expanded.map((user, i) => ({
+              id: String(user.id ?? `${data.id}-${i}`),
               status: "invited" as InviteStatus,
               creator: {
-                name: c.name || "Creator",
-                avatarUrl: c.Profile_pic?.url || "https://i.pravatar.cc/100?img=65",
-                ig: c.IG_account || "",
+                name: user.name || "Invited creator",
+                avatarUrl: user.Profile_pic?.url || "https://i.pravatar.cc/100?img=65",
+                ig: "",
               },
             }));
-            setActivity((prev) =>
-              prev ? { ...prev, invites: [...prev.invites, ...newInvites] } : prev
-            );
+            setActivity((prev) => (prev ? { ...prev, invites: newInvites } : prev));
           } catch (err) {
             console.error("[ActivityDetail] Failed to send invites", err);
           }
