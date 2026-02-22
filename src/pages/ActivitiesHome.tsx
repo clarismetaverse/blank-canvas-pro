@@ -258,7 +258,7 @@ export default function ActivitiesHome() {
 
         <motion.section initial={{ opacity: 0, y: 8, filter: "blur(6px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={easeOut}>
           <div className="mb-3 px-1">
-            <h2 className="text-sm font-semibold text-neutral-900">Your activities</h2>
+            <h2 className="text-sm font-semibold text-neutral-900">Your upcoming activities</h2>
           </div>
           {myActivitiesLoading ? (
             <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pt-1">
