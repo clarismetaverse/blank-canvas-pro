@@ -666,7 +666,7 @@ export default function ActivityDetail() {
         onClose={() => setInviteModelsOpen(false)}
         venueLabel={activity?.subtitle || activity?.title}
         cityName={activity?.locationLabel || "your city"}
-        selectedTopicIds={activity?.VICS ?? []}
+        selectedTopicIds={[]}
         onConfirm={async (selected) => {
           if (!activityId || selected.length === 0) return;
           try {
@@ -677,7 +677,7 @@ export default function ActivityDetail() {
               open: true,
               tripName: typeof response.Name === "string" && response.Name ? response.Name : activity?.title || "",
               count: validInvitedUsers.length,
-              avatars: validInvitedUsers.slice(0, 3).map((user) => ({ id: user.id, name: user.name, url: user.avatarUrl })),
+              avatars: validInvitedUsers.slice(0, 3).map((user) => ({ id: user.id, name: user.name, url: user.avatarUrl || "" })),
             });
 
             const data = await fetchActivityById(activityId);
