@@ -406,7 +406,7 @@ export default function ActivityDetail() {
             <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-neutral-100">
               <User className="h-3.5 w-3.5 text-neutral-600" />
             </span>
-            Host
+            Hosted by
           </div>
           <div className="absolute inset-x-4 bottom-4">
             <h2 className="text-2xl font-semibold text-white drop-shadow-[0_10px_20px_rgba(0,0,0,0.55)]">{activity.title || "—"}</h2>
