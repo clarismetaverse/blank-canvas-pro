@@ -12,6 +12,7 @@ import { fetchActivityById, type ActivityDetailResponse, type InviteLite, type I
 import { getValidInvitedUsers, putTripsInvite } from "@/services/tripsInvite";
 import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityInviteModelsModal";
 import InvitesSentPopup from "@/components/vic/InvitesSentPopup";
+import { useAuth } from "@/hooks/useAuth";
 
 const easeOut = { duration: 0.3, ease: "easeOut" };
 
@@ -229,6 +230,7 @@ function AcceptedVerticalCarousel({
 
 export default function ActivityDetail() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const { activityId } = useParams();
 
   const [activity, setActivity] = useState<TripActivity | null>(null);
@@ -403,10 +405,14 @@ export default function ActivityDetail() {
             </span>
           </div>
           <div className="absolute right-4 top-4 inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/80 px-3 py-1.5 text-xs font-medium text-neutral-900 backdrop-blur">
-            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-neutral-100">
-              <User className="h-3.5 w-3.5 text-neutral-600" />
-            </span>
-            Hosted by
+            {user?.Picture?.url ? (
+              <img src={user.Picture.url} alt={user.Name} className="h-6 w-6 rounded-full object-cover" />
+            ) : (
+              <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-neutral-100">
+                <User className="h-3.5 w-3.5 text-neutral-600" />
+              </span>
+            )}
+            Hosted by {user?.Name || ""}
           </div>
           <div className="absolute inset-x-4 bottom-4">
             <h2 className="text-2xl font-semibold text-white drop-shadow-[0_10px_20px_rgba(0,0,0,0.55)]">{activity.title || "—"}</h2>
