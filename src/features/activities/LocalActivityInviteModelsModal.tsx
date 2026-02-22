@@ -61,7 +61,7 @@ export default function LocalActivityInviteModelsModal({
 
   const normalizedTopicIds = useMemo(
     () => selectedTopicIds.map((id) => Number(id)).filter((id) => Number.isFinite(id)),
-    [selectedTopicIds]
+    [selectedTopicIds],
   );
 
   const initialSelectedKey = useMemo(
@@ -70,7 +70,7 @@ export default function LocalActivityInviteModelsModal({
         .map((x) => Number(x.id))
         .sort((a, b) => a - b)
         .join(","),
-    [initialSelected]
+    [initialSelected],
   );
 
   useEffect(() => {
@@ -205,7 +205,12 @@ export default function LocalActivityInviteModelsModal({
   return (
     <AnimatePresence>
       {open && (
-        <motion.div className="fixed inset-0 z-[80] flex items-end justify-center" initial="hidden" animate="visible" exit="exit">
+        <motion.div
+          className="fixed inset-0 z-[80] flex items-end justify-center"
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+        >
           <motion.button
             type="button"
             className="absolute inset-0 bg-black/40 backdrop-blur-sm"
@@ -230,7 +235,9 @@ export default function LocalActivityInviteModelsModal({
                     Premium invites
                   </p>
                   <p className="mt-2 text-xl font-semibold text-neutral-900">Invite models</p>
-                  <p className="mt-1 text-xs text-neutral-500">{venueLabel ? `For ${venueLabel}` : "Select the right people for this table."}</p>
+                  <p className="mt-1 text-xs text-neutral-500">
+                    {venueLabel ? `For ${venueLabel}` : "Select the right people for this table."}
+                  </p>
                 </div>
                 <button
                   type="button"
@@ -277,7 +284,10 @@ export default function LocalActivityInviteModelsModal({
               {showSkeletons ? (
                 <div className="space-y-3">
                   {Array.from({ length: 5 }).map((_, i) => (
-                    <div key={`sk-${i}`} className="h-[78px] w-full animate-pulse rounded-3xl border border-neutral-200 bg-neutral-100" />
+                    <div
+                      key={`sk-${i}`}
+                      className="h-[78px] w-full animate-pulse rounded-3xl border border-neutral-200 bg-neutral-100"
+                    />
                   ))}
                 </div>
               ) : displayList.length === 0 && !loading ? (
@@ -355,7 +365,7 @@ export default function LocalActivityInviteModelsModal({
                   onClick={handleConfirm}
                   className="h-11 flex-1 rounded-full bg-neutral-900 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.15)] active:scale-[0.99]"
                 >
-                  Confirm invites
+                  Send invites
                 </button>
               </div>
 
