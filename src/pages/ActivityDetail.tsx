@@ -8,9 +8,8 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Building2, Calendar, ChevronLeft, MapPin, MessageCircle, Search, User, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
-import { fetchActivityById, type InviteLite, type InviteStatus, type TripActivity } from "@/services/activities";
+import { fetchActivityById, type ActivityDetailResponse, type InviteLite, type InviteStatus, type TripActivity } from "@/services/activities";
 import { getValidInvitedUsers, putTripsInvite } from "@/services/tripsInvite";
-import type { Activity, ActivityStatus } from "@/services/activityApi";
 import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityInviteModelsModal";
 import InvitesSentPopup from "@/components/vic/InvitesSentPopup";
 
@@ -250,26 +249,41 @@ export default function ActivityDetail() {
   useEffect(() => {
     const PLACEHOLDER_COVER =
       "https://images.unsplash.com/photo-1519677100203-a0e668c92439?auto=format&fit=crop&w=1200&q=80";
+    const FALLBACK_AVATAR = "https://i.pravatar.cc/100?img=65";
 
-    const toInviteStatus = (status?: ActivityStatus): InviteStatus => {
-      if (status === "confirmed") return "accepted";
-      if (status === "cancelled") return "rejected";
-      return "invited";
+    const extractIgHandle = (igAccount?: string, fallbackName?: string) => {
+      if (igAccount) {
+        const trimmed = igAccount.trim();
+        if (trimmed) {
+          const match = trimmed.match(/instagram\.com\/([A-Za-z0-9._]+)/i);
+          if (match?.[1]) return match[1];
+          if (trimmed.startsWith("@")) return trimmed.slice(1);
+          return trimmed;
+        }
+      }
+      return fallbackName || "";
     };
 
-    const mapToTrip = (a: Activity): TripActivity => {
-      const expanded =
-        a.ModelsList && a.ModelsList.length > 0 ? a.ModelsList : a.InvitedUsersExpanded ?? [];
+    const mapToInvites = (a: ActivityDetailResponse): InviteLite[] => {
+      const invitedUsers = Array.isArray(a.InvitedUsers) ? a.InvitedUsers : [];
 
-      const invites: InviteLite[] = expanded.map((user, i) => ({
-        id: String(user.id ?? `${a.id}-${i}`),
-        status: toInviteStatus(a.status),
-        creator: {
-          name: user.name || "Invited creator",
-          avatarUrl: user.Profile_pic?.url || "https://i.pravatar.cc/100?img=65",
-          ig: "",
-        },
-      }));
+      return invitedUsers.map((user, i) => {
+        const creatorName = user.NickName || user.name || "Invited creator";
+
+        return {
+          id: String(user.id ?? `${a.id}-${i}`),
+          status: "invited",
+          creator: {
+            name: creatorName,
+            avatarUrl: user.Profile_pic?.url || FALLBACK_AVATAR,
+            ig: extractIgHandle(user.IG_account, user.NickName),
+          },
+        };
+      });
+    };
+
+    const mapToTrip = (a: ActivityDetailResponse): TripActivity => {
+      const invites = mapToInvites(a);
 
       return {
         id: String(a.id),
@@ -681,17 +695,22 @@ export default function ActivityDetail() {
             });
 
             const data = await fetchActivityById(activityId);
-            const expanded =
-              data.ModelsList && data.ModelsList.length > 0 ? data.ModelsList : data.InvitedUsersExpanded ?? [];
-
-            // Add new invites to local state
-            const newInvites: InviteLite[] = expanded.map((user, i) => ({
+            const newInvites: InviteLite[] = (data.InvitedUsers ?? []).map((user, i) => ({
               id: String(user.id ?? `${data.id}-${i}`),
-              status: "invited" as InviteStatus,
+              status: "invited",
               creator: {
-                name: user.name || "Invited creator",
+                name: user.NickName || user.name || "Invited creator",
                 avatarUrl: user.Profile_pic?.url || "https://i.pravatar.cc/100?img=65",
-                ig: "",
+                ig: (() => {
+                  const account = user.IG_account?.trim();
+                  if (account) {
+                    const match = account.match(/instagram\.com\/([A-Za-z0-9._]+)/i);
+                    if (match?.[1]) return match[1];
+                    if (account.startsWith("@")) return account.slice(1);
+                    return account;
+                  }
+                  return user.NickName || "";
+                })(),
               },
             }));
             setActivity((prev) => (prev ? { ...prev, invites: newInvites } : prev));

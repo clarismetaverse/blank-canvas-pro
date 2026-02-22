@@ -1,4 +1,5 @@
 import { xanoFetch } from "@/services/xanoClient";
+import { request } from "@/services/xano";
 import type { Activity } from "@/services/activityApi";
 
 export type InviteStatus = "invited" | "accepted" | "rejected";
@@ -193,8 +194,22 @@ export async function fetchTrips(): Promise<TripActivity[]> {
   return Promise.resolve(placeholderTrips);
 }
 
-export async function fetchActivityById(id: string): Promise<Activity> {
-  return xanoFetch<Activity>(`/activity/${id}`, {
+export type ActivityDetailInvitedUser = {
+  id: number;
+  name?: string;
+  NickName?: string;
+  IG_account?: string;
+  Tiktok_account?: string;
+  Profile_pic?: { url?: string } | null;
+};
+
+export type ActivityDetailResponse = Omit<Activity, "InvitedUsers" | "InvitedUsersExpanded"> & {
+  InvitedUsers?: ActivityDetailInvitedUser[];
+  InvitedUsersExpanded?: ActivityDetailInvitedUser[];
+};
+
+export async function fetchActivityById(id: string): Promise<ActivityDetailResponse> {
+  return request<ActivityDetailResponse>(`/activity/${id}`, {
     method: "GET",
   });
 }
