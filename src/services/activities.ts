@@ -209,7 +209,12 @@ export type ActivityDetailResponse = Omit<Activity, "InvitedUsers" | "InvitedUse
 };
 
 export async function fetchActivityById(id: string): Promise<ActivityDetailResponse> {
-  return request<ActivityDetailResponse>(`/activity/${id}`, {
+  const tripId = Number(id);
+  const path = Number.isFinite(tripId) && tripId > 0
+    ? `/activity/NA?trip_id=${tripId}`
+    : `/activity/${encodeURIComponent(id)}`;
+
+  return request<ActivityDetailResponse>(path, {
     method: "GET",
   });
 }
