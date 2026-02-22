@@ -158,10 +158,31 @@ export default function ConfirmInvitesModal({
                   onClick={() => setExpanded((prev) => !prev)}
                   className="flex w-full items-center justify-between rounded-2xl border border-white/12 bg-white/5 px-4 py-3 text-sm font-semibold text-white/90 hover:bg-white/7 active:scale-[0.995]"
                 >
-                  <span className="inline-flex items-center gap-2">
-                    Invited
-                    <span className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-semibold text-white/80">
-                      {invitedCount}
+                  <span className="inline-flex items-center gap-3">
+                    <span>Invited</span>
+                    <span className="flex items-center -space-x-2">
+                      {invited.slice(0, 5).map((creator) => {
+                        const avatar = creator.Profile_pic?.url;
+                        return (
+                          <div
+                            key={creator.id}
+                            className="h-7 w-7 overflow-hidden rounded-full border-2 border-neutral-950 bg-white/10"
+                          >
+                            {avatar ? (
+                              <img src={avatar} alt={creator.name || ""} className="h-full w-full object-cover" />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-[10px] font-semibold text-white/70">
+                                {(creator.name || "C").slice(0, 1).toUpperCase()}
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                      {invitedCount > 5 && (
+                        <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-neutral-950 bg-white/15 text-[10px] font-semibold text-white/80">
+                          +{invitedCount - 5}
+                        </div>
+                      )}
                     </span>
                   </span>
                   {expanded ? <ChevronUp className="h-4 w-4 text-white/70" /> : <ChevronDown className="h-4 w-4 text-white/70" />}
