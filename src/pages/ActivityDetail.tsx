@@ -416,19 +416,20 @@ export default function ActivityDetail() {
             </button>
           </div>
           <div className="space-y-2.5">
-            {[
-              { icon: MapPin, label: "City", value: cityValue },
-              { icon: Building2, label: "Venue", value: venueValue },
-              { icon: Calendar, label: "Date / time", value: dateValue },
-            ].map((item) => (
-              <div key={item.label} className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50/60 px-3 py-2.5">
-                <item.icon className="h-4 w-4 text-neutral-500" />
-                <div>
-                  <p className="text-[11px] uppercase tracking-wide text-neutral-500">{item.label}</p>
-                  <p className="text-sm font-medium text-neutral-900">{item.value || "—"}</p>
+            <div className="grid grid-cols-2 gap-2">
+              {[
+                { icon: MapPin, label: "City", value: cityValue },
+                { icon: Calendar, label: "Date / time", value: dateValue },
+              ].map((item) => (
+                <div key={item.label} className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-neutral-50/60 px-3 py-2.5">
+                  <item.icon className="h-4 w-4 text-neutral-500" />
+                  <div>
+                    <p className="text-[11px] uppercase tracking-wide text-neutral-500">{item.label}</p>
+                    <p className="text-sm font-medium text-neutral-900">{item.value || "—"}</p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
             <p className="pt-1 text-xs text-neutral-500">{notesValue}</p>
           </div>
         </motion.section>
