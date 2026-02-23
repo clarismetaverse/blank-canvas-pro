@@ -1,9 +1,14 @@
 import { request } from "@/services/xano";
 
 type PutTripsInviteResponse = {
-  id?: number;
-  Name?: string;
-  InvitedUsers?: unknown;
+  result1?: {
+    id?: number;
+    Name?: string;
+    InvitedUsers?: unknown;
+    [key: string]: unknown;
+  };
+  invite?: number;
+  invitedtotal?: number;
   [key: string]: unknown;
 };
 
