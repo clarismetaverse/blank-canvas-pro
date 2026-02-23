@@ -160,9 +160,11 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
   const [pendingInvites, setPendingInvites] = useState<CreatorLite[]>([]);
   const [invitedModels, setInvitedModels] = useState<Record<string, CreatorLite[]>>({});
   const [hostId, setHostId] = useState<number>(0);
-  const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; avatars: ValidInvitedUser[] }>({
+  const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; total: number; delta: number; avatars: ValidInvitedUser[] }>({
     open: false,
     tripName: "",
+    total: 0,
+    delta: 0,
     avatars: [],
   });
 
@@ -1078,11 +1080,16 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                       }
 
                       const response = await putTripsInvite(activityId, invitedIds);
-                      const validInvitedUsers = getValidInvitedUsers(response.InvitedUsers);
+                      const trip = response.result1 && typeof response.result1 === "object" ? response.result1 : {};
+                      const validInvitedUsers = getValidInvitedUsers(trip.InvitedUsers);
+                      const delta = Number(response.invite) || 0;
+                      const total = Number(response.invitedtotal) || validInvitedUsers.length;
 
                       setInvitesSentPopup({
                         open: true,
-                        tripName: typeof response.Name === "string" && response.Name ? response.Name : selectedLocalItem.title || "",
+                        tripName: typeof trip.Name === "string" && trip.Name ? trip.Name : selectedLocalItem.title || "",
+                        total,
+                        delta,
                         avatars: validInvitedUsers,
                       });
 
@@ -1112,7 +1119,8 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                 navigate("/activities");
               }}
               tripName={invitesSentPopup.tripName}
-              count={invitesSentPopup.avatars.length}
+              total={invitesSentPopup.total}
+              delta={invitesSentPopup.delta}
               avatars={invitesSentPopup.avatars.slice(0, 3).map((item) => ({ id: item.id, name: item.name, url: item.avatarUrl }))}
             />
           </motion.div>

@@ -240,7 +240,13 @@ export default function ActivityDetail() {
   const [search, setSearch] = useState("");
   const [showRejected, setShowRejected] = useState(false);
   const [inviteModelsOpen, setInviteModelsOpen] = useState(false);
-  const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; count: number; avatars: Array<{ id: number; name: string; url: string }> }>({ open: false, tripName: "", count: 0, avatars: [] });
+  const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; total: number; delta: number; avatars: Array<{ id: number; name: string; url: string }> }>({
+    open: false,
+    tripName: "",
+    total: 0,
+    delta: 0,
+    avatars: [],
+  });
   const [editForm, setEditForm] = useState<EditableActivityFields>({
     title: "",
     dateLabel: "",
@@ -678,7 +684,8 @@ export default function ActivityDetail() {
         open={invitesSentPopup.open}
         onClose={() => setInvitesSentPopup((prev) => ({ ...prev, open: false }))}
         tripName={invitesSentPopup.tripName}
-        count={invitesSentPopup.count}
+        total={invitesSentPopup.total}
+        delta={invitesSentPopup.delta}
         avatars={invitesSentPopup.avatars}
       />
       <LocalActivityInviteModelsModal
@@ -692,11 +699,15 @@ export default function ActivityDetail() {
           try {
             const creatorIds = selected.map((c) => Number(c.id));
             const response = await putTripsInvite(Number(activityId), creatorIds);
-            const validInvitedUsers = getValidInvitedUsers(response.InvitedUsers);
+            const trip = response.result1 && typeof response.result1 === "object" ? response.result1 : {};
+            const validInvitedUsers = getValidInvitedUsers(trip.InvitedUsers);
+            const delta = Number(response.invite) || 0;
+            const total = Number(response.invitedtotal) || validInvitedUsers.length;
             setInvitesSentPopup({
               open: true,
-              tripName: typeof response.Name === "string" && response.Name ? response.Name : activity?.title || "",
-              count: validInvitedUsers.length,
+              tripName: typeof trip.Name === "string" && trip.Name ? trip.Name : activity?.title || "",
+              total,
+              delta,
               avatars: validInvitedUsers.slice(0, 3).map((user) => ({ id: user.id, name: user.name, url: user.avatarUrl || "" })),
             });
 
