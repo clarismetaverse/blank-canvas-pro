@@ -240,12 +240,13 @@ export default function ActivityDetail() {
   const [search, setSearch] = useState("");
   const [showRejected, setShowRejected] = useState(false);
   const [inviteModelsOpen, setInviteModelsOpen] = useState(false);
-  const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; total: number; delta: number; avatars: Array<{ id: number; name: string; url: string }> }>({
+  const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; cityName?: string; total: number; delta: number; avatars: Array<{ id: number; name: string; url: string | null }>; hostAvatarUrl?: string | null }>({
     open: false,
     tripName: "",
     total: 0,
     delta: 0,
     avatars: [],
+    hostAvatarUrl: null,
   });
   const [editForm, setEditForm] = useState<EditableActivityFields>({
     title: "",
@@ -683,9 +684,15 @@ export default function ActivityDetail() {
       <InvitesSentPopup
         open={invitesSentPopup.open}
         onClose={() => setInvitesSentPopup((prev) => ({ ...prev, open: false }))}
+        onDone={() => {
+          setInvitesSentPopup((prev) => ({ ...prev, open: false }));
+          navigate("/activities");
+        }}
         tripName={invitesSentPopup.tripName}
+        cityName={invitesSentPopup.cityName}
         total={invitesSentPopup.total}
         delta={invitesSentPopup.delta}
+        hostAvatarUrl={invitesSentPopup.hostAvatarUrl}
         avatars={invitesSentPopup.avatars}
       />
       <LocalActivityInviteModelsModal
@@ -706,9 +713,11 @@ export default function ActivityDetail() {
             setInvitesSentPopup({
               open: true,
               tripName: typeof trip.Name === "string" && trip.Name ? trip.Name : activity?.title || "",
+              cityName: activity?.locationLabel || undefined,
               total,
               delta,
-              avatars: validInvitedUsers.slice(0, 3).map((user) => ({ id: user.id, name: user.name, url: user.avatarUrl || "" })),
+              avatars: validInvitedUsers.slice(0, 3).map((user) => ({ id: user.id, name: user.name, url: user.avatarUrl })),
+              hostAvatarUrl: user?.Picture?.url || null,
             });
 
             const data = await fetchActivityById(activityId);

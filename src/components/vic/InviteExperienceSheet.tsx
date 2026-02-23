@@ -160,12 +160,14 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
   const [pendingInvites, setPendingInvites] = useState<CreatorLite[]>([]);
   const [invitedModels, setInvitedModels] = useState<Record<string, CreatorLite[]>>({});
   const [hostId, setHostId] = useState<number>(0);
-  const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; total: number; delta: number; avatars: ValidInvitedUser[] }>({
+  const [hostAvatarUrl, setHostAvatarUrl] = useState<string | null>(null);
+  const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; cityName?: string; total: number; delta: number; avatars: ValidInvitedUser[]; hostAvatarUrl?: string | null }>({
     open: false,
     tripName: "",
     total: 0,
     delta: 0,
     avatars: [],
+    hostAvatarUrl: null,
   });
 
   const creatorName = creator?.name || "Creator";
@@ -180,8 +182,12 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
         const me = await fetchVicProfile(token);
         if (!active || !me) return;
         setHostId(Number(me.id) > 0 ? Number(me.id) : 0);
+        setHostAvatarUrl(typeof me.Picture?.url === "string" && me.Picture.url ? me.Picture.url : null);
       } catch {
-        if (active) setHostId(0);
+        if (active) {
+          setHostId(0);
+          setHostAvatarUrl(null);
+        }
       }
     };
 
@@ -1088,9 +1094,11 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                       setInvitesSentPopup({
                         open: true,
                         tripName: typeof trip.Name === "string" && trip.Name ? trip.Name : selectedLocalItem.title || "",
+                        cityName: cityName || undefined,
                         total,
                         delta,
                         avatars: validInvitedUsers,
+                        hostAvatarUrl,
                       });
 
                       updateLocalBooking(selectedLocalItem.id, (prev) => ({ ...prev, activityId }));
@@ -1114,13 +1122,18 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
               open={invitesSentPopup.open}
               onClose={() => {
                 setInvitesSentPopup((prev) => ({ ...prev, open: false }));
+              }}
+              onDone={() => {
+                setInvitesSentPopup((prev) => ({ ...prev, open: false }));
                 setInviteModelsOpen(false);
                 onClose();
                 navigate("/activities");
               }}
               tripName={invitesSentPopup.tripName}
+              cityName={invitesSentPopup.cityName}
               total={invitesSentPopup.total}
               delta={invitesSentPopup.delta}
+              hostAvatarUrl={invitesSentPopup.hostAvatarUrl}
               avatars={invitesSentPopup.avatars.slice(0, 3).map((item) => ({ id: item.id, name: item.name, url: item.avatarUrl }))}
             />
           </motion.div>
