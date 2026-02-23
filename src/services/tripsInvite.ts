@@ -1,15 +1,18 @@
 import { request } from "@/services/xano";
 
-type PutTripsInviteResponse = {
-  result1?: {
-    id?: number;
-    Name?: string;
-    InvitedUsers?: unknown;
-    [key: string]: unknown;
-  };
-  invite?: number;
-  invitedtotal?: number;
+export type TripActivityApi = {
+  id?: number;
+  Name?: string;
+  Destination?: string;
+  cityName?: string;
+  InvitedUsers?: unknown;
   [key: string]: unknown;
+};
+
+export type TripsInviteResponse = {
+  result1: TripActivityApi;
+  invite: number;
+  invitedtotal: number;
 };
 
 export type ValidInvitedUser = {
@@ -46,7 +49,7 @@ export function getValidInvitedUsers(input: unknown): ValidInvitedUser[] {
     .filter((item): item is ValidInvitedUser => item !== null);
 }
 
-export async function putTripsInvite(trip_id: number, invited_users: number[]): Promise<PutTripsInviteResponse> {
+export async function putTripsInvite(trip_id: number, invited_users: number[]): Promise<TripsInviteResponse> {
   const normalizedInvitedUsers = Array.from(
     new Set(
       invited_users
@@ -55,11 +58,20 @@ export async function putTripsInvite(trip_id: number, invited_users: number[]): 
     )
   ).sort((a, b) => a - b);
 
-  return request<PutTripsInviteResponse>("/trips/invite", {
+  const response = await request<Partial<TripsInviteResponse>>("/trips/invite", {
     method: "PUT",
     body: JSON.stringify({
       trip_id,
       invited_users: normalizedInvitedUsers,
     }),
   });
+
+  const rawResult = response?.result1;
+  const result1 = rawResult && typeof rawResult === "object" ? (rawResult as TripActivityApi) : {};
+
+  return {
+    result1,
+    invite: Number(response?.invite) || 0,
+    invitedtotal: Number(response?.invitedtotal) || 0,
+  };
 }
