@@ -42,7 +42,7 @@ export default function InvitesSentPopup({ open, onClose, tripName, total, delta
 
     raf = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(raf);
-  }, [open, startValue, total]);
+  }, [open, startValue, total, delta]);
 
   return (
     <AnimatePresence>
