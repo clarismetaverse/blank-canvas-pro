@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { X } from "lucide-react";
+import { useEffect } from "react";
 
 type Props = {
   open: boolean;
@@ -16,6 +17,19 @@ const backdrop = {
 };
 
 export default function InvitesSentPopup({ open, onClose, tripName, count, avatars }: Props) {
+  useEffect(() => {
+    if (!open) return;
+
+    const audio = new Audio("/sounds/invite-success.wav");
+    audio.volume = 0.35;
+
+    const timeoutId = window.setTimeout(() => {
+      audio.play().catch(() => {});
+    }, 120);
+
+    return () => window.clearTimeout(timeoutId);
+  }, [open]);
+
   return (
     <AnimatePresence>
       {open && (
@@ -29,10 +43,10 @@ export default function InvitesSentPopup({ open, onClose, tripName, count, avata
           />
 
           <motion.div
-            initial={{ opacity: 0, y: 20, scale: 0.98 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 12, scale: 0.98 }}
-            transition={{ duration: 0.25, ease: "easeOut" }}
+            initial={{ opacity: 0, y: 18, scale: 0.98, filter: "blur(6px)" }}
+            animate={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+            exit={{ opacity: 0, y: 8, scale: 0.99, filter: "blur(4px)" }}
+            transition={{ duration: 0.35, ease: "easeOut" }}
             className="relative z-10 w-full max-w-sm rounded-[30px] border border-white/15 bg-neutral-950 p-5 text-white shadow-[0_35px_100px_rgba(0,0,0,0.5)]"
           >
             <button
