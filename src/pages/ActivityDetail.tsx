@@ -433,45 +433,85 @@ export default function ActivityDetail() {
   const participantsPeople = useMemo<PersonLite[]>(() => {
     if (!activityRaw) return [];
 
-    type RawParticipant = {
-      user_turbo_id?: number | string;
+    type RawUserTurbo = {
       id?: number | string;
-      statusapp?: string;
-      NickName?: string;
       name?: string;
+      NickName?: string;
       IG_account?: string;
       Profile_pic?: { url?: string } | null;
     };
 
-    const normalizeStatus = (status?: string): PersonLiteStatus => {
-      const value = (status || "").toLowerCase();
+    type RawParticipant = {
+      user_turbo_id?: number | string;
+      statusapp?: string | null;
+      _user_turbo_vic?: RawUserTurbo | null;
+      // sometimes Xano might flatten user fields:
+      id?: number | string;
+      name?: string;
+      NickName?: string;
+      IG_account?: string;
+      Profile_pic?: { url?: string } | null;
+    };
+
+    const normalizeStatus = (status?: string | null): PersonLiteStatus => {
+      const value = String(status || "").toLowerCase();
       if (value === "confirmed" || value === "accepted") return "confirmed";
       if (value === "pending") return "pending";
-      if (value === "rejected") return "rejected";
+      if (value === "invited") return "invited";
+      if (value === "rejected" || value === "declined" || value === "cancelled") return "rejected";
       return "pending";
     };
 
+    const pickUser = (participant: RawParticipant): RawUserTurbo => {
+      if (participant._user_turbo_vic && typeof participant._user_turbo_vic === "object") {
+        return participant._user_turbo_vic;
+      }
+
+      return {
+        id: participant.id,
+        name: participant.name,
+        NickName: participant.NickName,
+        IG_account: participant.IG_account,
+        Profile_pic: participant.Profile_pic,
+      };
+    };
+
+    const getParticipantsArray = (): RawParticipant[] => {
+      const anyRaw = activityRaw as unknown as {
+        participant?: RawParticipant[];
+        Participants?: RawParticipant[];
+        Tripcover?: { Participants?: RawParticipant[] } | null;
+      };
+
+      if (Array.isArray(anyRaw.participant)) return anyRaw.participant;
+      if (Array.isArray(anyRaw.Participants)) return anyRaw.Participants;
+      if (anyRaw.Tripcover && Array.isArray(anyRaw.Tripcover.Participants)) return anyRaw.Tripcover.Participants;
+
+      return [];
+    };
+
     const map = new Map<string, PersonLite>();
-    const participants = Array.isArray((activityRaw as unknown as { Participants?: RawParticipant[] }).Participants)
-      ? (activityRaw as unknown as { Participants: RawParticipant[] }).Participants
-      : [];
+
+    const participants = getParticipantsArray();
 
     for (const participant of participants) {
-      const key = String(participant.user_turbo_id ?? participant.id ?? "").trim();
+      const user = pickUser(participant);
+      const key = String(participant.user_turbo_id ?? user.id ?? "").trim();
       if (!key) continue;
-      const name = participant.NickName || participant.name || "Participant";
+
+      const name = user.NickName || user.name || "Participant";
       map.set(key, {
         id: key,
         name,
-        ig: extractIgHandle(participant.IG_account, participant.NickName),
-        avatarUrl: participant.Profile_pic?.url || FALLBACK_AVATAR,
+        ig: extractIgHandle(user.IG_account, user.NickName || user.name),
+        avatarUrl: user.Profile_pic?.url || FALLBACK_AVATAR,
         status: normalizeStatus(participant.statusapp),
       });
     }
 
     const invitedUsers = Array.isArray(activityRaw.InvitedUsers) ? activityRaw.InvitedUsers : [];
     for (const user of invitedUsers) {
-      const key = String(user.id ?? "").trim();
+      const key = String((user as { user_turbo_id?: number | string }).user_turbo_id ?? user.id ?? "").trim();
       if (!key || map.has(key)) continue;
       const name = user.NickName || user.name || "Invited creator";
       map.set(key, {
@@ -483,7 +523,13 @@ export default function ActivityDetail() {
       });
     }
 
-    return Array.from(map.values());
+    const order: Record<PersonLiteStatus, number> = { confirmed: 0, pending: 1, invited: 2, rejected: 3 };
+
+    return Array.from(map.values()).sort((a, b) => {
+      const diff = order[a.status] - order[b.status];
+      if (diff !== 0) return diff;
+      return a.name.localeCompare(b.name);
+    });
   }, [activityRaw]);
 
   const activeList = viewingStatus ? groupedInvites[viewingStatus] : [];
