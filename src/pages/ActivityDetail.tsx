@@ -63,13 +63,6 @@ function ParticipantsStrip({ people }: { people: PersonLite[] }) {
       <div className="absolute inset-0 bg-black/10" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
 
-      <div className="absolute left-3 top-3">
-        <span
-          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold capitalize backdrop-blur ${statusPillStyles[person.status]}`}
-        >
-          {person.status}
-        </span>
-      </div>
 
       <div className="absolute bottom-3 left-3 right-3">
         <p className="truncate text-sm font-semibold text-white drop-shadow-[0_10px_22px_rgba(0,0,0,0.55)]">{person.name}</p>
