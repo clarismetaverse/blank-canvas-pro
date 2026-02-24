@@ -452,8 +452,8 @@ export default function ActivityDetail() {
     };
 
     const map = new Map<string, PersonLite>();
-    const participants = Array.isArray((activityRaw as { Participants?: RawParticipant[] }).Participants)
-      ? (activityRaw as { Participants: RawParticipant[] }).Participants
+    const participants = Array.isArray((activityRaw as unknown as { Participants?: RawParticipant[] }).Participants)
+      ? (activityRaw as unknown as { Participants: RawParticipant[] }).Participants
       : [];
 
     for (const participant of participants) {
