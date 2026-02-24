@@ -17,6 +17,101 @@ import { useAuth } from "@/hooks/useAuth";
 const easeOut = { duration: 0.3, ease: "easeOut" };
 
 type EditableActivityFields = Pick<TripActivity, "title" | "dateLabel" | "locationLabel" | "notes">;
+const PLACEHOLDER_COVER =
+  "https://images.unsplash.com/photo-1519677100203-a0e668c92439?auto=format&fit=crop&w=1200&q=80";
+const FALLBACK_AVATAR = "https://i.pravatar.cc/100?img=65";
+
+const extractIgHandle = (igAccount?: string, fallbackName?: string) => {
+  if (igAccount) {
+    const trimmed = igAccount.trim();
+    if (trimmed) {
+      const match = trimmed.match(/instagram\.com\/([A-Za-z0-9._]+)/i);
+      if (match?.[1]) return match[1];
+      if (trimmed.startsWith("@")) return trimmed.slice(1);
+      return trimmed;
+    }
+  }
+  return fallbackName || "";
+};
+type PersonLiteStatus = "confirmed" | "pending" | "invited" | "rejected";
+type PersonLite = {
+  id: string;
+  name: string;
+  ig: string;
+  avatarUrl: string;
+  status: PersonLiteStatus;
+};
+
+function ParticipantsStrip({ people }: { people: PersonLite[] }) {
+  if (!people.length) return null;
+
+  const statusPillStyles: Record<PersonLiteStatus, string> = {
+    confirmed: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    pending: "border-amber-200 bg-amber-50 text-amber-700",
+    invited: "border-sky-200 bg-sky-50 text-sky-700",
+    rejected: "border-rose-200 bg-rose-50 text-rose-700",
+  };
+
+  const baseCard = "rounded-2xl border border-neutral-200 bg-white p-3";
+
+  return (
+    <motion.section
+      initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
+      animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+      transition={{ ...easeOut, delay: 0.052 }}
+      className="space-y-3"
+    >
+      <div className="flex items-center justify-between">
+        <h3 className="text-sm font-semibold text-neutral-900">Participants</h3>
+        <span className="rounded-full border border-neutral-200 bg-white px-3 py-1 text-xs font-semibold text-neutral-700">
+          {people.length} total
+        </span>
+      </div>
+
+      {people.length <= 2 ? (
+        <div className="grid grid-cols-2 gap-3">
+          {people.map((person) => (
+            <article key={person.id} className={baseCard}>
+              <div className="flex items-center justify-between gap-2">
+                <div className="min-w-0 flex items-center gap-3">
+                  <img src={person.avatarUrl} alt={person.name} className="h-11 w-11 rounded-full object-cover" loading="lazy" />
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold text-neutral-900">{person.name}</p>
+                    <p className="truncate text-xs text-neutral-500">@{person.ig || "—"}</p>
+                  </div>
+                </div>
+                <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold capitalize ${statusPillStyles[person.status]}`}>
+                  {person.status}
+                </span>
+              </div>
+            </article>
+          ))}
+        </div>
+      ) : (
+        <div className="-mx-4 overflow-x-auto px-4 pr-[28px] snap-x snap-mandatory">
+          <div className="flex gap-3">
+            {people.map((person) => (
+              <article key={person.id} className={`${baseCard} w-[calc((100%-24px)/3)] shrink-0 snap-start`}>
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0 flex items-center gap-3">
+                    <img src={person.avatarUrl} alt={person.name} className="h-10 w-10 rounded-full object-cover" loading="lazy" />
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-neutral-900">{person.name}</p>
+                      <p className="truncate text-xs text-neutral-500">@{person.ig || "—"}</p>
+                    </div>
+                  </div>
+                  <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold capitalize ${statusPillStyles[person.status]}`}>
+                    {person.status}
+                  </span>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+      )}
+    </motion.section>
+  );
+}
 
 function AvatarStack({ people, size = 36 }: { people: InviteLite[]; size?: 32 | 36 | 40 }) {
   const shown = people.slice(0, 6);
@@ -234,6 +329,7 @@ export default function ActivityDetail() {
   const { activityId } = useParams();
 
   const [activity, setActivity] = useState<TripActivity | null>(null);
+  const [activityRaw, setActivityRaw] = useState<ActivityDetailResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
   const [viewingStatus, setViewingStatus] = useState<InviteStatus | null>(null);
@@ -256,22 +352,6 @@ export default function ActivityDetail() {
   });
 
   useEffect(() => {
-    const PLACEHOLDER_COVER =
-      "https://images.unsplash.com/photo-1519677100203-a0e668c92439?auto=format&fit=crop&w=1200&q=80";
-    const FALLBACK_AVATAR = "https://i.pravatar.cc/100?img=65";
-
-    const extractIgHandle = (igAccount?: string, fallbackName?: string) => {
-      if (igAccount) {
-        const trimmed = igAccount.trim();
-        if (trimmed) {
-          const match = trimmed.match(/instagram\.com\/([A-Za-z0-9._]+)/i);
-          if (match?.[1]) return match[1];
-          if (trimmed.startsWith("@")) return trimmed.slice(1);
-          return trimmed;
-        }
-      }
-      return fallbackName || "";
-    };
 
     const mapToInvites = (a: ActivityDetailResponse): InviteLite[] => {
       const invitedUsers = Array.isArray(a.InvitedUsers) ? a.InvitedUsers : [];
@@ -316,6 +396,7 @@ export default function ActivityDetail() {
         setLoading(true);
         const data = await fetchActivityById(activityId);
         const mapped = mapToTrip(data);
+        setActivityRaw(data);
         setActivity(mapped);
         setEditForm({
           title: mapped.title,
@@ -329,6 +410,7 @@ export default function ActivityDetail() {
         } else {
           console.error("Failed to load activity", error);
         }
+        setActivityRaw(null);
         setActivity(null);
       } finally {
         setLoading(false);
@@ -347,6 +429,62 @@ export default function ActivityDetail() {
       rejected: activity.invites.filter((invite) => invite.status === "rejected"),
     };
   }, [activity]);
+
+  const participantsPeople = useMemo<PersonLite[]>(() => {
+    if (!activityRaw) return [];
+
+    type RawParticipant = {
+      user_turbo_id?: number | string;
+      id?: number | string;
+      statusapp?: string;
+      NickName?: string;
+      name?: string;
+      IG_account?: string;
+      Profile_pic?: { url?: string } | null;
+    };
+
+    const normalizeStatus = (status?: string): PersonLiteStatus => {
+      const value = (status || "").toLowerCase();
+      if (value === "confirmed" || value === "accepted") return "confirmed";
+      if (value === "pending") return "pending";
+      if (value === "rejected") return "rejected";
+      return "pending";
+    };
+
+    const map = new Map<string, PersonLite>();
+    const participants = Array.isArray((activityRaw as { Participants?: RawParticipant[] }).Participants)
+      ? (activityRaw as { Participants: RawParticipant[] }).Participants
+      : [];
+
+    for (const participant of participants) {
+      const key = String(participant.user_turbo_id ?? participant.id ?? "").trim();
+      if (!key) continue;
+      const name = participant.NickName || participant.name || "Participant";
+      map.set(key, {
+        id: key,
+        name,
+        ig: extractIgHandle(participant.IG_account, participant.NickName),
+        avatarUrl: participant.Profile_pic?.url || FALLBACK_AVATAR,
+        status: normalizeStatus(participant.statusapp),
+      });
+    }
+
+    const invitedUsers = Array.isArray(activityRaw.InvitedUsers) ? activityRaw.InvitedUsers : [];
+    for (const user of invitedUsers) {
+      const key = String(user.id ?? "").trim();
+      if (!key || map.has(key)) continue;
+      const name = user.NickName || user.name || "Invited creator";
+      map.set(key, {
+        id: key,
+        name,
+        ig: extractIgHandle(user.IG_account, user.NickName),
+        avatarUrl: user.Profile_pic?.url || FALLBACK_AVATAR,
+        status: "invited",
+      });
+    }
+
+    return Array.from(map.values());
+  }, [activityRaw]);
 
   const activeList = viewingStatus ? groupedInvites[viewingStatus] : [];
   const filteredList = activeList.filter((invite) => {
@@ -460,6 +598,8 @@ export default function ActivityDetail() {
             <p className="pt-1 text-xs text-neutral-500">{notesValue}</p>
           </div>
         </motion.section>
+
+        <ParticipantsStrip people={participantsPeople} />
 
         <motion.section
           initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
