@@ -211,7 +211,6 @@ function InvitedSummaryRow({ invited, accepted, rejected, onViewAll }: {
       </div>
 
       <div className="mt-4 flex flex-wrap items-center gap-2">
-          <StatPill label="Invited" value={invitedCount} />
           <StatPill label="Accepted" value={accepted.length} />
           <StatPill label="Pending" value={pendingCount} />
           <StatPill label="Rejected" value={rejectedCount} />
