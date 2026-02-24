@@ -46,13 +46,37 @@ function ParticipantsStrip({ people }: { people: PersonLite[] }) {
   if (!people.length) return null;
 
   const statusPillStyles: Record<PersonLiteStatus, string> = {
-    confirmed: "border-emerald-200 bg-emerald-50 text-emerald-700",
-    pending: "border-amber-200 bg-amber-50 text-amber-700",
-    invited: "border-sky-200 bg-sky-50 text-sky-700",
-    rejected: "border-rose-200 bg-rose-50 text-rose-700",
+    confirmed: "border-emerald-200 bg-emerald-50/95 text-emerald-700",
+    pending: "border-amber-200 bg-amber-50/95 text-amber-700",
+    invited: "border-sky-200 bg-sky-50/95 text-sky-700",
+    rejected: "border-rose-200 bg-rose-50/95 text-rose-700",
   };
 
-  const baseCard = "rounded-2xl border border-neutral-200 bg-white p-3";
+  const CARD_H = "h-[156px]";
+  const CARD_W_SCROLL = "w-[calc((100%-24px)/3)]";
+  const CARD_W_GRID = "w-full";
+
+  const Card = ({ person }: { person: PersonLite }) => (
+    <article className={`relative overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 shadow-[0_18px_48px_rgba(0,0,0,0.10)] ${CARD_H}`}>
+      <img src={person.avatarUrl} alt={person.name} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+
+      <div className="absolute inset-0 bg-black/10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
+
+      <div className="absolute left-3 top-3">
+        <span
+          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold capitalize backdrop-blur ${statusPillStyles[person.status]}`}
+        >
+          {person.status}
+        </span>
+      </div>
+
+      <div className="absolute bottom-3 left-3 right-3">
+        <p className="truncate text-sm font-semibold text-white drop-shadow-[0_10px_22px_rgba(0,0,0,0.55)]">{person.name}</p>
+        <p className="truncate text-xs text-white/80">@{person.ig || "—"}</p>
+      </div>
+    </article>
+  );
 
   return (
     <motion.section
@@ -71,43 +95,31 @@ function ParticipantsStrip({ people }: { people: PersonLite[] }) {
       {people.length <= 2 ? (
         <div className="grid grid-cols-2 gap-3">
           {people.map((person) => (
-            <article key={person.id} className={baseCard}>
-              <div className="flex items-center justify-between gap-2">
-                <div className="min-w-0 flex items-center gap-3">
-                  <img src={person.avatarUrl} alt={person.name} className="h-11 w-11 rounded-full object-cover" loading="lazy" />
-                  <div className="min-w-0">
-                    <p className="truncate text-sm font-semibold text-neutral-900">{person.name}</p>
-                    <p className="truncate text-xs text-neutral-500">@{person.ig || "—"}</p>
-                  </div>
-                </div>
-                <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold capitalize ${statusPillStyles[person.status]}`}>
-                  {person.status}
-                </span>
-              </div>
-            </article>
+            <div key={person.id} className={CARD_W_GRID}>
+              <Card person={person} />
+            </div>
           ))}
         </div>
       ) : (
-        <div className="-mx-4 overflow-x-auto px-4 pr-[28px] snap-x snap-mandatory">
-          <div className="flex gap-3">
-            {people.map((person) => (
-              <article key={person.id} className={`${baseCard} w-[calc((100%-24px)/3)] shrink-0 snap-start`}>
-                <div className="flex items-center justify-between gap-2">
-                  <div className="min-w-0 flex items-center gap-3">
-                    <img src={person.avatarUrl} alt={person.name} className="h-10 w-10 rounded-full object-cover" loading="lazy" />
-                    <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold text-neutral-900">{person.name}</p>
-                      <p className="truncate text-xs text-neutral-500">@{person.ig || "—"}</p>
-                    </div>
-                  </div>
-                  <span className={`rounded-full border px-2 py-1 text-[10px] font-semibold capitalize ${statusPillStyles[person.status]}`}>
-                    {person.status}
-                  </span>
-                </div>
-              </article>
-            ))}
+        <>
+          <div className="-mx-4 overflow-x-auto px-4 pr-[28px] snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            <div className="flex gap-3">
+              {people.map((person) => (
+                <motion.div
+                  key={person.id}
+                  className={`${CARD_W_SCROLL} shrink-0 snap-start`}
+                  initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
+                  animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                  transition={{ type: "spring", stiffness: 220, damping: 22, mass: 0.9 }}
+                >
+                  <Card person={person} />
+                </motion.div>
+              ))}
+            </div>
           </div>
-        </div>
+
+          <p className="text-[11px] text-neutral-400">Swipe to see more</p>
+        </>
       )}
     </motion.section>
   );
