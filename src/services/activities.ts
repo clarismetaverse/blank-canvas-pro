@@ -206,6 +206,32 @@ export type ActivityDetailInvitedUser = {
 export type ActivityDetailResponse = Omit<Activity, "InvitedUsers" | "InvitedUsersExpanded"> & {
   InvitedUsers?: ActivityDetailInvitedUser[];
   InvitedUsersExpanded?: ActivityDetailInvitedUser[];
+  Participants?: unknown[];
+};
+
+type ActivityDetailWrappedResponse = {
+  self?: ActivityDetailResponse;
+  participants?: unknown[];
+};
+
+const normalizeActivityDetail = (
+  payload: ActivityDetailResponse | ActivityDetailWrappedResponse
+): ActivityDetailResponse => {
+  const wrapped = payload as ActivityDetailWrappedResponse;
+  const base = wrapped?.self && typeof wrapped.self === "object"
+    ? wrapped.self
+    : (payload as ActivityDetailResponse);
+
+  const participants = Array.isArray(wrapped?.participants)
+    ? wrapped.participants
+    : Array.isArray(base?.Participants)
+      ? base.Participants
+      : [];
+
+  return {
+    ...base,
+    Participants: participants,
+  };
 };
 
 export async function fetchActivityById(id: string): Promise<ActivityDetailResponse> {
@@ -214,9 +240,11 @@ export async function fetchActivityById(id: string): Promise<ActivityDetailRespo
     ? `/activity/NA?trip_id=${tripId}`
     : `/activity/${encodeURIComponent(id)}`;
 
-  return request<ActivityDetailResponse>(path, {
+  const response = await request<ActivityDetailResponse | ActivityDetailWrappedResponse>(path, {
     method: "GET",
   });
+
+  return normalizeActivityDetail(response);
 }
 
 export type CreateEventPayload = {
