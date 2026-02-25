@@ -6,7 +6,7 @@ import { searchCreatorsTurbo } from "@/services/creatorSearchTurbo";
 import { fetchNewInTown } from "@/services/newInTown";
 import CreatorProfileSheet from "@/components/memberspass/CreatorProfileSheet";
 
-type TabKey = "discover" | "invited" | "pending" | "accepted" | "rejected";
+type TabKey = "participants" | "discover" | "invited" | "pending" | "accepted" | "rejected";
 
 type PersonLiteStatus = "invited" | "pending" | "accepted" | "rejected";
 
@@ -254,7 +254,9 @@ export default function LocalActivityInviteModelsModal({
       ? dq.trim().length >= 2
         ? "Search results"
         : `New in ${cityName}`
-      : `${tab.charAt(0).toUpperCase()}${tab.slice(1)} models`;
+      : tab === "participants"
+        ? "Participants"
+        : `${tab.charAt(0).toUpperCase()}${tab.slice(1)} models`;
   const showSkeletons = tab === "discover" && newInTownLoading && dq.trim().length < 2 && !newInTown.length;
 
   return (
@@ -320,6 +322,7 @@ export default function LocalActivityInviteModelsModal({
 
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 {([
+                  ["participants", "Participants"],
                   ["discover", "Discover"],
                   ["invited", "Invited"],
                   ["pending", "Pending"],
@@ -327,15 +330,20 @@ export default function LocalActivityInviteModelsModal({
                   ["rejected", "Rejected"],
                 ] as Array<[TabKey, string]>).map(([key, label]) => {
                   const active = tab === key;
+                  const isParticipants = key === "participants";
                   return (
                     <button
                       key={key}
                       type="button"
                       onClick={() => setTab(key)}
-                      className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                      className={`rounded-full border px-3 py-1 text-[11px] font-semibold transition ${
                         active
-                          ? "border-neutral-900 bg-neutral-900 text-white"
-                          : "border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-100"
+                          ? isParticipants
+                            ? "border-neutral-900 bg-neutral-900 text-white shadow-[0_10px_30px_rgba(0,0,0,0.18)] scale-[1.03]"
+                            : "border-neutral-900 bg-neutral-900 text-white"
+                          : isParticipants
+                            ? "border-neutral-300 bg-white text-neutral-800 shadow-sm hover:bg-neutral-50"
+                            : "border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-50"
                       }`}
                     >
                       {label}
@@ -489,13 +497,23 @@ export default function LocalActivityInviteModelsModal({
                   </button>
                 </div>
               ) : (
-                <button
-                  type="button"
-                  onClick={onClose}
-                  className="h-11 w-full rounded-full border border-neutral-200 bg-white text-sm font-semibold text-neutral-600 hover:bg-neutral-50"
-                >
-                  Close
-                </button>
+                tab === "participants" ? (
+                  <button
+                    type="button"
+                    onClick={() => setTab("discover")}
+                    className="h-11 w-full rounded-full bg-neutral-900 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.15)] active:scale-[0.99]"
+                  >
+                    Invite more
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="h-11 w-full rounded-full border border-neutral-200 bg-white text-sm font-semibold text-neutral-600 hover:bg-neutral-50"
+                  >
+                    Close
+                  </button>
+                )
               )}
 
               <p className="mt-2 text-center text-[11px] text-neutral-400">Invitations will be linked to this table.</p>
