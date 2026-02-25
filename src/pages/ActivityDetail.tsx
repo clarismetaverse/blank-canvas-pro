@@ -34,6 +34,7 @@ const extractIgHandle = (igAccount?: string, fallbackName?: string) => {
   return fallbackName || "";
 };
 type PersonLiteStatus = "confirmed" | "pending" | "invited" | "rejected";
+type InviteModalTabKey = "participants" | "discover" | "invited" | "pending" | "accepted" | "rejected";
 type PersonLite = {
   id: string;
   name: string;
@@ -42,7 +43,7 @@ type PersonLite = {
   status: PersonLiteStatus;
 };
 
-function ParticipantsStrip({ people }: { people: PersonLite[] }) {
+function ParticipantsStrip({ people, onViewAll }: { people: PersonLite[]; onViewAll: () => void }) {
   if (!people.length) return null;
 
   const statusPillStyles: Record<PersonLiteStatus, string> = {
@@ -80,9 +81,18 @@ function ParticipantsStrip({ people }: { people: PersonLite[] }) {
     >
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-neutral-900">Participants</h3>
-        <span className="rounded-full border border-neutral-200 bg-white px-3 py-1 text-xs font-semibold text-neutral-700">
-          {people.length} total
-        </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={onViewAll}
+            className="rounded-full border border-neutral-200 bg-white px-3 py-1 text-xs font-semibold text-neutral-700"
+          >
+            View all
+          </button>
+          <span className="rounded-full border border-neutral-200 bg-white px-3 py-1 text-xs font-semibold text-neutral-700">
+            {people.length} total
+          </span>
+        </div>
       </div>
 
       {people.length <= 2 ? (
@@ -342,6 +352,7 @@ export default function ActivityDetail() {
   const [search, setSearch] = useState("");
   const [showRejected, setShowRejected] = useState(false);
   const [inviteModelsOpen, setInviteModelsOpen] = useState(false);
+  const [inviteModalInitialTab, setInviteModalInitialTab] = useState<InviteModalTabKey>("discover");
   const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; cityName?: string; total: number; delta: number; avatars: Array<{ id: number; name: string; url: string | null }>; hostAvatarUrl?: string | null }>({
     open: false,
     tripName: "",
@@ -539,6 +550,10 @@ export default function ActivityDetail() {
   }, [activityRaw]);
 
   const peopleByTab = useMemo(() => {
+    const participants = participantsPeople.map((person) => ({
+      ...person,
+      status: (person.status === "confirmed" ? "accepted" : person.status) as "invited" | "pending" | "accepted" | "rejected",
+    }));
     const invited = participantsPeople
       .filter((person) => person.status === "invited")
       .map((person) => ({ ...person, status: "invited" as const }));
@@ -552,7 +567,7 @@ export default function ActivityDetail() {
       .filter((person) => person.status === "rejected")
       .map((person) => ({ ...person, status: "rejected" as const }));
 
-    return { invited, pending, accepted, rejected };
+    return { participants, invited, pending, accepted, rejected };
   }, [participantsPeople]);
 
   const activeList = viewingStatus ? groupedInvites[viewingStatus] : [];
@@ -673,12 +688,18 @@ export default function ActivityDetail() {
           accepted={groupedInvites.accepted}
           rejected={groupedInvites.rejected}
           onViewAll={() => {
-            setViewingStatus("invited");
-            setSearch("");
+            setInviteModalInitialTab("invited");
+            setInviteModelsOpen(true);
           }}
         />
 
-        <ParticipantsStrip people={participantsPeople} />
+        <ParticipantsStrip
+          people={participantsPeople}
+          onViewAll={() => {
+            setInviteModalInitialTab("participants");
+            setInviteModelsOpen(true);
+          }}
+        />
 
         <motion.section
           initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
@@ -690,7 +711,10 @@ export default function ActivityDetail() {
           <div className="mt-3 grid grid-cols-2 gap-2">
             <button
               type="button"
-              onClick={() => setInviteModelsOpen(true)}
+              onClick={() => {
+                setInviteModalInitialTab("discover");
+                setInviteModelsOpen(true);
+              }}
               className="rounded-full bg-neutral-900 px-3 py-2.5 text-xs font-semibold text-white"
             >
               Invite more models
@@ -709,8 +733,8 @@ export default function ActivityDetail() {
           <AcceptedVerticalCarousel
             accepted={groupedInvites.accepted}
             onViewAll={() => {
-              setViewingStatus("accepted");
-              setSearch("");
+              setInviteModalInitialTab("participants");
+              setInviteModelsOpen(true);
             }}
             onChat={(invite) => {
               // Hook this to your chat route/modal
@@ -907,6 +931,7 @@ export default function ActivityDetail() {
       <LocalActivityInviteModelsModal
         open={inviteModelsOpen}
         onClose={() => setInviteModelsOpen(false)}
+        initialTab={inviteModalInitialTab}
         venueLabel={activity?.subtitle || activity?.title}
         cityName={activity?.locationLabel || "your city"}
         selectedTopicIds={[]}
