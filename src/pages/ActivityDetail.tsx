@@ -66,7 +66,7 @@ function ParticipantsStrip({ people }: { people: PersonLite[] }) {
 
       <div className="absolute bottom-3 left-3 right-3">
         <p className="truncate text-sm font-semibold text-white drop-shadow-[0_10px_22px_rgba(0,0,0,0.55)]">{person.name}</p>
-        <p className="truncate text-xs text-white/80">@{person.ig || "—"}</p>
+        
       </div>
     </article>
   );
