@@ -34,7 +34,7 @@ export default function CreatorCard({
         onClick={() => setOpen(true)}
         className="group relative w-full overflow-hidden rounded-3xl text-left shadow-[0_12px_40px_rgba(0,0,0,0.16)] transition-transform duration-200 ease-out hover:scale-[1.01] active:scale-[0.98]"
       >
-        <div className="relative h-[290px] w-full">
+        <div className="relative h-[348px] w-full">
           {img ? (
             <img src={img} alt={creator.name || "Creator"} className="h-full w-full object-cover" />
           ) : (
