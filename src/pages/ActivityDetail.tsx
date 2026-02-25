@@ -184,7 +184,9 @@ function InvitedSummaryRow({ invited, accepted, rejected, onViewAll }: {
     >
       <div className="flex items-center justify-between">
         <div>
-          <h3 className="text-sm font-semibold text-neutral-900">Invited models</h3>
+          <h3 className="text-base font-semibold text-neutral-900">
+            Invited models <span className="text-lg">• {invitedCount}</span>
+          </h3>
           {invited.length > 0 ? (
             <div className="mt-1 flex items-center gap-3">
               <AvatarStack people={invited} size={32} />
@@ -649,6 +651,16 @@ export default function ActivityDetail() {
           </div>
         </motion.section>
 
+        <InvitedSummaryRow
+          invited={groupedInvites.invited}
+          accepted={groupedInvites.accepted}
+          rejected={groupedInvites.rejected}
+          onViewAll={() => {
+            setViewingStatus("invited");
+            setSearch("");
+          }}
+        />
+
         <ParticipantsStrip people={participantsPeople} />
 
         <motion.section
@@ -689,16 +701,6 @@ export default function ActivityDetail() {
             }}
           />
         )}
-
-        <InvitedSummaryRow
-          invited={groupedInvites.invited}
-          accepted={groupedInvites.accepted}
-          rejected={groupedInvites.rejected}
-          onViewAll={() => {
-            setViewingStatus("invited");
-            setSearch("");
-          }}
-        />
 
         {/* Rejected (optional, collapsable) */}
         <motion.section
