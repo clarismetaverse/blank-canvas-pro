@@ -79,10 +79,10 @@ export default function InvitesSentPopup({ open, onClose, onDone, tripName, city
                 <img
                   src={hostAvatarUrl}
                   alt="Host"
-                  className="h-14 w-14 rounded-full border-2 border-neutral-950 object-cover ring-2 ring-white/20"
+                  className="h-[90px] w-[90px] rounded-full border-2 border-neutral-950 object-cover ring-2 ring-white/20"
                 />
               ) : (
-                <div className="flex h-14 w-14 items-center justify-center rounded-full border-2 border-neutral-950 bg-white/10 text-sm font-semibold text-white/85 ring-2 ring-white/20">
+                <div className="flex h-[90px] w-[90px] items-center justify-center rounded-full border-2 border-neutral-950 bg-white/10 text-sm font-semibold text-white/85 ring-2 ring-white/20">
                   V
                 </div>
               )}
