@@ -42,20 +42,8 @@ type PersonLite = {
   status: PersonLiteStatus;
 };
 
-function ParticipantsStrip({
-  people,
-  onOpenProfile,
-  onChat,
-  newIds = [],
-}: {
-  people: PersonLite[];
-  onOpenProfile?: (person: PersonLite) => void;
-  onChat?: (person: PersonLite) => void;
-  newIds?: string[];
-}) {
+function ParticipantsStrip({ people }: { people: PersonLite[] }) {
   if (!people.length) return null;
-
-  const isNew = (id: string) => newIds.includes(String(id));
 
   const statusPillStyles: Record<PersonLiteStatus, string> = {
     confirmed: "border-emerald-200 bg-emerald-50/95 text-emerald-700",
@@ -66,64 +54,22 @@ function ParticipantsStrip({
 
   const CARD_H = "h-[156px]";
   const CARD_W_SCROLL = "w-[calc((100%-24px)/3)]";
-  const Card = ({ person }: { person: PersonLite }) => {
-    const newTag = isNew(person.id);
+  const CARD_W_GRID = "w-full";
 
-    return (
-      <motion.button
-        type="button"
-        onClick={() => onOpenProfile?.(person)}
-        whileTap={{ scale: 0.98 }}
-        className={`relative w-full overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 text-left shadow-[0_18px_48px_rgba(0,0,0,0.10)] ${CARD_H}`}
-      >
-        <img src={person.avatarUrl} alt={person.name} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
+  const Card = ({ person }: { person: PersonLite }) => (
+    <article className={`relative overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 shadow-[0_18px_48px_rgba(0,0,0,0.10)] ${CARD_H}`}>
+      <img src={person.avatarUrl} alt={person.name} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
 
-        <div className="absolute inset-0 bg-black/10" />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
+      <div className="absolute inset-0 bg-black/10" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
 
-        <div className="absolute left-3 top-3">
-          <span
-            className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[10px] font-semibold capitalize backdrop-blur ${statusPillStyles[person.status]}`}
-          >
-            {person.status}
-          </span>
-        </div>
 
-        {newTag && (
-          <motion.div
-            initial={{ opacity: 0, y: -8, scale: 0.96 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            transition={{ type: "spring", stiffness: 260, damping: 18 }}
-            className="absolute right-3 top-3"
-          >
-            <span className="inline-flex items-center rounded-full border border-white/35 bg-white/85 px-2.5 py-1 text-[10px] font-extrabold text-neutral-900 shadow-[0_10px_25px_rgba(0,0,0,0.18)] backdrop-blur">
-              NEW ✨
-            </span>
-          </motion.div>
-        )}
-
-        {!!onChat && (
-          <button
-            type="button"
-            onClick={(event) => {
-              event.stopPropagation();
-              onChat(person);
-            }}
-            className="absolute right-3 bottom-3 inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/85 px-3 py-1.5 text-xs font-semibold text-neutral-900 shadow-[0_10px_25px_rgba(0,0,0,0.16)] backdrop-blur active:scale-95"
-            aria-label={`Chat with ${person.name}`}
-          >
-            <MessageCircle className="h-3.5 w-3.5" />
-            Chat
-          </button>
-        )}
-
-        <div className="absolute bottom-3 left-3 right-16">
-          <p className="truncate text-sm font-semibold text-white drop-shadow-[0_10px_22px_rgba(0,0,0,0.55)]">{person.name}</p>
-          <p className="truncate text-xs text-white/80">@{person.ig || "—"}</p>
-        </div>
-      </motion.button>
-    );
-  };
+      <div className="absolute bottom-3 left-3 right-3">
+        <p className="truncate text-sm font-semibold text-white drop-shadow-[0_10px_22px_rgba(0,0,0,0.55)]">{person.name}</p>
+        
+      </div>
+    </article>
+  );
 
   return (
     <motion.section
@@ -142,7 +88,9 @@ function ParticipantsStrip({
       {people.length <= 2 ? (
         <div className="grid grid-cols-2 gap-3">
           {people.map((person) => (
-            <Card key={person.id} person={person} />
+            <div key={person.id} className={CARD_W_GRID}>
+              <Card person={person} />
+            </div>
           ))}
         </div>
       ) : (
@@ -392,7 +340,6 @@ export default function ActivityDetail() {
   const [search, setSearch] = useState("");
   const [showRejected, setShowRejected] = useState(false);
   const [inviteModelsOpen, setInviteModelsOpen] = useState(false);
-  const [newParticipantIds, setNewParticipantIds] = useState<string[]>([]);
   const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; cityName?: string; total: number; delta: number; avatars: Array<{ id: number; name: string; url: string | null }>; hostAvatarUrl?: string | null }>({
     open: false,
     tripName: "",
@@ -702,16 +649,7 @@ export default function ActivityDetail() {
           </div>
         </motion.section>
 
-        <ParticipantsStrip
-          people={participantsPeople}
-          newIds={newParticipantIds}
-          onOpenProfile={(person) => {
-            navigate(`/creators/${person.id}`);
-          }}
-          onChat={(person) => {
-            navigate(`/chat/${person.id}`);
-          }}
-        />
+        <ParticipantsStrip people={participantsPeople} />
 
         <motion.section
           initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
@@ -958,9 +896,6 @@ export default function ActivityDetail() {
           try {
             const creatorIds = selected.map((c) => Number(c.id));
             const response = await putTripsInvite(Number(activityId), creatorIds);
-            const justAddedIds = selected.map((creator) => String(creator.id));
-            setNewParticipantIds(justAddedIds);
-            window.setTimeout(() => setNewParticipantIds([]), 6000);
             const trip = response.result1 && typeof response.result1 === "object" ? response.result1 : {};
             const validInvitedUsers = getValidInvitedUsers(trip.InvitedUsers);
             const delta = Number(response.invite) || 0;
