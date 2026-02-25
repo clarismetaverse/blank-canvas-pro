@@ -6,6 +6,18 @@ import { searchCreatorsTurbo } from "@/services/creatorSearchTurbo";
 import { fetchNewInTown } from "@/services/newInTown";
 import CreatorProfileSheet from "@/components/memberspass/CreatorProfileSheet";
 
+type TabKey = "discover" | "invited" | "pending" | "accepted" | "rejected";
+
+type PersonLiteStatus = "invited" | "pending" | "accepted" | "rejected";
+
+type PersonLite = {
+  id: string | number;
+  name: string;
+  ig?: string;
+  avatarUrl?: string | null;
+  status: PersonLiteStatus;
+};
+
 type Props = {
   open: boolean;
   onClose: () => void;
@@ -15,6 +27,8 @@ type Props = {
   initialSelected?: CreatorLite[];
   selectedTopicIds?: number[];
   onConfirm: (selected: CreatorLite[]) => void;
+  initialTab?: TabKey;
+  peopleByTab?: Partial<Record<Exclude<TabKey, "discover">, PersonLite[]>>;
 };
 
 const backdrop = {
@@ -47,8 +61,11 @@ export default function LocalActivityInviteModelsModal({
   initialSelected = [],
   selectedTopicIds = [],
   onConfirm,
+  initialTab,
+  peopleByTab,
 }: Props) {
   const [q, setQ] = useState("");
+  const [tab, setTab] = useState<TabKey>("discover");
   const dq = useDebounced(q, 260);
   const [loading, setLoading] = useState(false);
   const [newInTownLoading, setNewInTownLoading] = useState(false);
@@ -76,6 +93,8 @@ export default function LocalActivityInviteModelsModal({
   useEffect(() => {
     if (!open) return;
 
+    setTab(initialTab ?? "discover");
+
     const m = new Map<number, CreatorLite>();
     initialSelected.forEach((x) => m.set(Number(x.id), x));
     setSelected(m);
@@ -83,6 +102,11 @@ export default function LocalActivityInviteModelsModal({
     setQ("");
     setResults([]);
     window.setTimeout(() => inputRef.current?.focus(), 50);
+  }, [open, initialSelectedKey, initialTab]);
+
+  useEffect(() => {
+    if (!open) return;
+    if (tab !== "discover") return;
 
     let active = true;
     const load = async () => {
@@ -103,7 +127,7 @@ export default function LocalActivityInviteModelsModal({
     return () => {
       active = false;
     };
-  }, [open, initialSelectedKey]);
+  }, [open, initialSelectedKey, tab]);
 
   useEffect(() => {
     if (!open) return;
@@ -118,6 +142,7 @@ export default function LocalActivityInviteModelsModal({
 
   useEffect(() => {
     if (!open) return;
+    if (tab !== "discover") return;
 
     const query = dq.trim();
     if (query.length < 2) {
@@ -159,7 +184,7 @@ export default function LocalActivityInviteModelsModal({
       cancelled = true;
       abortController.abort();
     };
-  }, [dq, normalizedTopicIds, open]);
+  }, [dq, normalizedTopicIds, open, tab]);
 
   const selectedCount = selected.size;
   const invitesLeft = Math.max(0, maxInvites - selectedCount);
@@ -180,6 +205,31 @@ export default function LocalActivityInviteModelsModal({
     return out;
   }, [baseList, selected]);
 
+  const statusBaseList = useMemo<PersonLite[]>(() => {
+    if (tab === "discover") return [];
+    const list = peopleByTab?.[tab as Exclude<TabKey, "discover">] ?? [];
+    return Array.isArray(list) ? list : [];
+  }, [peopleByTab, tab]);
+
+  const statusDisplayList = useMemo<PersonLite[]>(() => {
+    if (tab === "discover") return [];
+    const query = q.trim().toLowerCase();
+    if (!query) return statusBaseList;
+
+    return statusBaseList.filter((p) => {
+      const name = (p.name || "").toLowerCase();
+      const ig = (p.ig || "").toLowerCase();
+      return name.includes(query) || ig.includes(query);
+    });
+  }, [q, statusBaseList, tab]);
+
+  const statusPillStyles: Record<PersonLiteStatus, string> = {
+    accepted: "border-emerald-200 bg-emerald-50 text-emerald-700",
+    pending: "border-amber-200 bg-amber-50 text-amber-700",
+    invited: "border-sky-200 bg-sky-50 text-sky-700",
+    rejected: "border-rose-200 bg-rose-50 text-rose-700",
+  };
+
   const toggle = (c: CreatorLite) => {
     const id = Number(c.id);
     setSelected((prev) => {
@@ -199,8 +249,13 @@ export default function LocalActivityInviteModelsModal({
     onClose();
   };
 
-  const headerTitle = dq.trim().length >= 2 ? "Search results" : `New in ${cityName}`;
-  const showSkeletons = newInTownLoading && dq.trim().length < 2 && !newInTown.length;
+  const headerTitle =
+    tab === "discover"
+      ? dq.trim().length >= 2
+        ? "Search results"
+        : `New in ${cityName}`
+      : `${tab.charAt(0).toUpperCase()}${tab.slice(1)} models`;
+  const showSkeletons = tab === "discover" && newInTownLoading && dq.trim().length < 2 && !newInTown.length;
 
   return (
     <AnimatePresence>
@@ -258,22 +313,52 @@ export default function LocalActivityInviteModelsModal({
                   placeholder="Search by name or IG…"
                   className="w-full bg-transparent text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
                 />
-                {loading && <span className="text-[11px] font-semibold text-neutral-400">Searching…</span>}
-              </div>
-
-              <div className="mt-3 flex items-center gap-2">
-                <span className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1 text-[11px] font-semibold text-neutral-500">
-                  Selected <span className="text-neutral-900">{selectedCount}</span>
-                </span>
-                <span className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1 text-[11px] font-semibold text-neutral-500">
-                  Invites left <span className="text-neutral-900">{invitesLeft}</span>
-                </span>
-                {!canAddMore && (
-                  <span className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-[11px] font-semibold text-red-500">
-                    Max reached
-                  </span>
+                {loading && tab === "discover" && (
+                  <span className="text-[11px] font-semibold text-neutral-400">Searching…</span>
                 )}
               </div>
+
+              <div className="mt-3 flex flex-wrap items-center gap-2">
+                {([
+                  ["discover", "Discover"],
+                  ["invited", "Invited"],
+                  ["pending", "Pending"],
+                  ["accepted", "Accepted"],
+                  ["rejected", "Rejected"],
+                ] as Array<[TabKey, string]>).map(([key, label]) => {
+                  const active = tab === key;
+                  return (
+                    <button
+                      key={key}
+                      type="button"
+                      onClick={() => setTab(key)}
+                      className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                        active
+                          ? "border-neutral-900 bg-neutral-900 text-white"
+                          : "border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-100"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  );
+                })}
+              </div>
+
+              {tab === "discover" && (
+                <div className="mt-3 flex items-center gap-2">
+                  <span className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1 text-[11px] font-semibold text-neutral-500">
+                    Selected <span className="text-neutral-900">{selectedCount}</span>
+                  </span>
+                  <span className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-3 py-1 text-[11px] font-semibold text-neutral-500">
+                    Invites left <span className="text-neutral-900">{invitesLeft}</span>
+                  </span>
+                  {!canAddMore && (
+                    <span className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-1 text-[11px] font-semibold text-red-500">
+                      Max reached
+                    </span>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="px-5 pb-2">
@@ -290,84 +375,128 @@ export default function LocalActivityInviteModelsModal({
                     />
                   ))}
                 </div>
-              ) : displayList.length === 0 && !loading ? (
+              ) : tab === "discover" && displayList.length === 0 && !loading ? (
                 <div className="rounded-3xl border border-neutral-200 bg-white p-4">
                   <p className="text-sm font-semibold text-neutral-900">No results</p>
                   <p className="mt-1 text-xs text-neutral-500">Try a different keyword.</p>
                 </div>
+              ) : tab !== "discover" && statusDisplayList.length === 0 ? (
+                <div className="rounded-3xl border border-neutral-200 bg-white p-4">
+                  <p className="text-sm font-semibold text-neutral-900">No {tab} people</p>
+                  <p className="mt-1 text-xs text-neutral-500">Try a different keyword.</p>
+                </div>
               ) : (
                 <div className="space-y-3">
-                  {displayList.map((m) => {
-                    const id = Number(m.id);
-                    const isSelected = selected.has(id);
-                    const disabled = !isSelected && !canAddMore;
-                    const avatarUrl = m?.Profile_pic?.url;
-                    const ig = m?.IG_account;
+                  {tab === "discover" &&
+                    displayList.map((m) => {
+                      const id = Number(m.id);
+                      const isSelected = selected.has(id);
+                      const disabled = !isSelected && !canAddMore;
+                      const avatarUrl = m?.Profile_pic?.url;
 
-                    return (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => setProfileCreator(m)}
-                        disabled={disabled}
-                        className={`group flex w-full items-center gap-4 rounded-3xl border px-4 py-5 text-left transition ${
-                          isSelected
-                            ? "border-blue-200 bg-blue-50/60"
-                            : "border-neutral-200 bg-white hover:bg-neutral-50"
-                        } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                      return (
+                        <button
+                          key={id}
+                          type="button"
+                          onClick={() => setProfileCreator(m)}
+                          disabled={disabled}
+                          className={`group flex w-full items-center gap-4 rounded-3xl border px-4 py-5 text-left transition ${
+                            isSelected
+                              ? "border-blue-200 bg-blue-50/60"
+                              : "border-neutral-200 bg-white hover:bg-neutral-50"
+                          } ${disabled ? "opacity-50 cursor-not-allowed" : ""}`}
+                        >
+                          <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
+                            {avatarUrl ? (
+                              <img src={avatarUrl} alt={m.name ?? "Creator"} className="h-full w-full object-cover" />
+                            ) : (
+                              <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-neutral-400">
+                                {(m.name ?? "C").slice(0, 1).toUpperCase()}
+                              </div>
+                            )}
+                          </div>
+
+                          <div className="min-w-0 flex-1">
+                            <p className="truncate text-sm font-semibold text-neutral-900">{m.name ?? "Creator"}</p>
+                            <p className="truncate text-xs text-neutral-400">Model • Available</p>
+                          </div>
+
+                          <div className="flex items-center gap-2">
+                            {isSelected ? (
+                              <span className="inline-flex items-center gap-1 rounded-full bg-neutral-900 px-3 py-1 text-[11px] font-semibold text-white shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
+                                <Check className="h-3.5 w-3.5" />
+                                Selected
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-3 py-1 text-[11px] font-semibold text-neutral-500">
+                                Add <ChevronRight className="h-3.5 w-3.5" />
+                              </span>
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+
+                  {tab !== "discover" &&
+                    statusDisplayList.map((p) => (
+                      <div
+                        key={`${tab}-${p.id}`}
+                        className="flex w-full items-center gap-4 rounded-3xl border border-neutral-200 bg-white px-4 py-4"
                       >
-                        <div className="h-16 w-16 shrink-0 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
-                          {avatarUrl ? (
-                            <img src={avatarUrl} alt={m.name ?? "Creator"} className="h-full w-full object-cover" />
+                        <div className="h-14 w-14 shrink-0 overflow-hidden rounded-lg border border-neutral-200 bg-neutral-100">
+                          {p.avatarUrl ? (
+                            <img src={p.avatarUrl} alt={p.name ?? "Creator"} className="h-full w-full object-cover" />
                           ) : (
                             <div className="flex h-full w-full items-center justify-center text-xs font-semibold text-neutral-400">
-                              {(m.name ?? "C").slice(0, 1).toUpperCase()}
+                              {(p.name ?? "C").slice(0, 1).toUpperCase()}
                             </div>
                           )}
                         </div>
 
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-neutral-900">{m.name ?? "Creator"}</p>
-                          <p className="truncate text-xs text-neutral-400">Model • Available</p>
+                          <p className="truncate text-sm font-semibold text-neutral-900">{p.name ?? "Creator"}</p>
+                          <p className="truncate text-xs text-neutral-500">{p.ig ? `@${p.ig}` : "—"}</p>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                          {isSelected ? (
-                            <span className="inline-flex items-center gap-1 rounded-full bg-neutral-900 px-3 py-1 text-[11px] font-semibold text-white shadow-[0_4px_12px_rgba(0,0,0,0.15)]">
-                              <Check className="h-3.5 w-3.5" />
-                              Selected
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-1 rounded-full border border-neutral-200 bg-white px-3 py-1 text-[11px] font-semibold text-neutral-500">
-                              Add <ChevronRight className="h-3.5 w-3.5" />
-                            </span>
-                          )}
-                        </div>
-                      </button>
-                    );
-                  })}
+                        <span
+                          className={`inline-flex items-center rounded-full border px-2.5 py-1 text-[11px] font-semibold capitalize ${statusPillStyles[p.status]}`}
+                        >
+                          {p.status}
+                        </span>
+                      </div>
+                    ))}
                 </div>
               )}
             </div>
 
             <div className="border-t border-neutral-200 bg-[#FAFAFA]/95 px-4 pb-5 pt-3 backdrop-blur">
-              <div className="flex items-center justify-between gap-3">
+              {tab === "discover" ? (
+                <div className="flex items-center justify-between gap-3">
+                  <button
+                    type="button"
+                    onClick={onClose}
+                    className="h-11 flex-1 rounded-full border border-neutral-200 bg-white text-sm font-semibold text-neutral-600 hover:bg-neutral-50"
+                  >
+                    Cancel
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleConfirm}
+                    className="h-11 flex-1 rounded-full bg-neutral-900 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.15)] active:scale-[0.99]"
+                  >
+                    Send invites
+                  </button>
+                </div>
+              ) : (
                 <button
                   type="button"
                   onClick={onClose}
-                  className="h-11 flex-1 rounded-full border border-neutral-200 bg-white text-sm font-semibold text-neutral-600 hover:bg-neutral-50"
+                  className="h-11 w-full rounded-full border border-neutral-200 bg-white text-sm font-semibold text-neutral-600 hover:bg-neutral-50"
                 >
-                  Cancel
+                  Close
                 </button>
-
-                <button
-                  type="button"
-                  onClick={handleConfirm}
-                  className="h-11 flex-1 rounded-full bg-neutral-900 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.15)] active:scale-[0.99]"
-                >
-                  Send invites
-                </button>
-              </div>
+              )}
 
               <p className="mt-2 text-center text-[11px] text-neutral-400">Invitations will be linked to this table.</p>
             </div>

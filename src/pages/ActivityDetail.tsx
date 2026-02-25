@@ -538,6 +538,23 @@ export default function ActivityDetail() {
     });
   }, [activityRaw]);
 
+  const peopleByTab = useMemo(() => {
+    const invited = participantsPeople
+      .filter((person) => person.status === "invited")
+      .map((person) => ({ ...person, status: "invited" as const }));
+    const pending = participantsPeople
+      .filter((person) => person.status === "pending")
+      .map((person) => ({ ...person, status: "pending" as const }));
+    const accepted = participantsPeople
+      .filter((person) => person.status === "confirmed")
+      .map((person) => ({ ...person, status: "accepted" as const }));
+    const rejected = participantsPeople
+      .filter((person) => person.status === "rejected")
+      .map((person) => ({ ...person, status: "rejected" as const }));
+
+    return { invited, pending, accepted, rejected };
+  }, [participantsPeople]);
+
   const activeList = viewingStatus ? groupedInvites[viewingStatus] : [];
   const filteredList = activeList.filter((invite) => {
     const q = search.toLowerCase();
@@ -893,6 +910,7 @@ export default function ActivityDetail() {
         venueLabel={activity?.subtitle || activity?.title}
         cityName={activity?.locationLabel || "your city"}
         selectedTopicIds={[]}
+        peopleByTab={peopleByTab}
         onConfirm={async (selected) => {
           if (!activityId || selected.length === 0) return;
           try {
