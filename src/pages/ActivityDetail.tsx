@@ -657,7 +657,7 @@ export default function ActivityDetail() {
           transition={{ ...easeOut, delay: 0.055 }}
           className="rounded-3xl border border-neutral-200 bg-white p-4 shadow-[0_10px_30px_rgba(0,0,0,0.06)]"
         >
-          <p className="text-xs text-neutral-500">Plan a table to start inviting.</p>
+          
           <div className="mt-3 grid grid-cols-2 gap-2">
             <button
               type="button"
