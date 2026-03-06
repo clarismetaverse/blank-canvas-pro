@@ -84,7 +84,7 @@ export default function CreatorCard({
                 {isVicSearch && (
                   <span
                     aria-hidden
-                    className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[120%] w-[110%] rounded-[50%] bg-black/25 blur-xl"
+                    className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[180px] h-[60px] rounded-[50%] bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.50)_0%,transparent_70%)] blur-2xl"
                   />
                 )}
                 <p
@@ -114,11 +114,11 @@ export default function CreatorCard({
               )}
 
               {isVicSearch && interests && interests.length > 0 && (
-                <div className="mt-2.5 flex flex-wrap gap-x-2.5 gap-y-1.5">
+                <div className="mt-[10px] flex flex-wrap gap-x-2 gap-y-1.5">
                   {interests.map((interest) => (
                     <span
                       key={`${creator.id}-${interest}`}
-                      className="text-[10px] font-light tracking-wide text-white/50"
+                      className="rounded-sm bg-white/10 backdrop-blur-sm px-2 py-[3px] text-[12.5px] font-normal tracking-[0.02em] text-[#F5F0EA]"
                     >
                       #{normalizeInterestTag(interest)}
                     </span>
