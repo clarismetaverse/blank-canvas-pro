@@ -131,8 +131,8 @@ export default function CreatorCard({
 
         {isVicSearch && (
           <div className="border-t border-black/5 bg-white px-4 py-3.5">
-            <p className="truncate text-[12.5px] font-medium leading-relaxed text-neutral-500">
-              {luxuryTagline}
+            <p className="truncate text-[12px] font-normal italic leading-relaxed text-neutral-400">
+              {bioLine}
             </p>
           </div>
         )}
