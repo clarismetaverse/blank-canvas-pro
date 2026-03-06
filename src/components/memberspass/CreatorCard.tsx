@@ -33,7 +33,7 @@ export default function CreatorCard({
   const isVicSurface = isVic || isVicSearch;
 
   const displayName = formatCreatorDisplayName(creator.name);
-  const luxuryTagline = getLuxuryTagline(creator.id);
+  const bioLine = getCreatorBio(creator, creator.id);
 
   return (
     <div className="relative w-full shrink-0 snap-start">
@@ -80,15 +80,23 @@ export default function CreatorCard({
             }`}
           >
             <div className="text-left">
-              <p
-                className={`${
-                  isVicSearch
-                    ? "text-[27px] font-semibold leading-[0.95] tracking-[-0.03em] text-[#FFF9F2] drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)]"
-                    : "text-lg font-semibold text-white"
-                }`}
-              >
-                {isVicSearch ? displayName : creator.name || "Unnamed creator"}
-              </p>
+              <div className="relative inline-block">
+                {isVicSearch && (
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[120%] w-[110%] rounded-[50%] bg-black/25 blur-xl"
+                  />
+                )}
+                <p
+                  className={`relative ${
+                    isVicSearch
+                      ? "text-[27px] font-semibold leading-[0.95] tracking-[-0.03em] text-[#FFF9F2] drop-shadow-[0_2px_12px_rgba(0,0,0,0.4)]"
+                      : "text-lg font-semibold text-white"
+                  }`}
+                >
+                  {isVicSearch ? displayName : creator.name || "Unnamed creator"}
+                </p>
+              </div>
 
               {!isVicSurface && (
                 <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -106,11 +114,11 @@ export default function CreatorCard({
               )}
 
               {isVicSearch && interests && interests.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1.5">
+                <div className="mt-2.5 flex flex-wrap gap-x-2.5 gap-y-1.5">
                   {interests.map((interest) => (
                     <span
                       key={`${creator.id}-${interest}`}
-                      className="inline-flex items-center rounded-md bg-white/12 px-1.5 py-[2px] text-[11px] font-medium tracking-tight text-[#F2DCC8] backdrop-blur-md shadow-[0_1px_8px_rgba(255,255,255,0.06)]"
+                      className="text-[10px] font-light tracking-wide text-white/50"
                     >
                       #{normalizeInterestTag(interest)}
                     </span>
@@ -123,8 +131,8 @@ export default function CreatorCard({
 
         {isVicSearch && (
           <div className="border-t border-black/5 bg-white px-4 py-3.5">
-            <p className="truncate text-[12.5px] font-medium leading-relaxed text-neutral-500">
-              {luxuryTagline}
+            <p className="truncate text-[12px] font-normal italic leading-relaxed text-neutral-400">
+              {bioLine}
             </p>
           </div>
         )}
@@ -164,7 +172,7 @@ export default function CreatorCard({
   );
 }
 
-const luxuryTaglines = [
+const fallbackTaglines = [
   "Curates elevated nights between beach clubs and private tables.",
   "Known for discreet access to fashion dinners and art salons.",
   "Moves between yachting weekends and members-only city moments.",
@@ -172,8 +180,14 @@ const luxuryTaglines = [
   "Shapes polished social scenes with understated luxury taste.",
 ];
 
-function getLuxuryTagline(creatorId: number) {
-  return luxuryTaglines[Math.abs(creatorId) % luxuryTaglines.length];
+function getCreatorBio(creator: CreatorLite, id: number): string {
+  const bio = (creator.bio || "").trim();
+  if (bio) return bio;
+  const tagline = ((creator as any).tagline || "").trim();
+  if (tagline) return tagline;
+  const desc = ((creator as any).description || "").trim();
+  if (desc) return desc;
+  return fallbackTaglines[Math.abs(id) % fallbackTaglines.length];
 }
 
 function formatCreatorDisplayName(name?: string) {
