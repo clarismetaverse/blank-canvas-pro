@@ -80,15 +80,23 @@ export default function CreatorCard({
             }`}
           >
             <div className="text-left">
-              <p
-                className={`${
-                  isVicSearch
-                    ? "text-[27px] font-semibold leading-[0.95] tracking-[-0.03em] text-[#FFF9F2] drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)]"
-                    : "text-lg font-semibold text-white"
-                }`}
-              >
-                {isVicSearch ? displayName : creator.name || "Unnamed creator"}
-              </p>
+              <div className="relative inline-block">
+                {isVicSearch && (
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[120%] w-[110%] rounded-[50%] bg-black/25 blur-xl"
+                  />
+                )}
+                <p
+                  className={`relative ${
+                    isVicSearch
+                      ? "text-[27px] font-semibold leading-[0.95] tracking-[-0.03em] text-[#FFF9F2] drop-shadow-[0_2px_12px_rgba(0,0,0,0.4)]"
+                      : "text-lg font-semibold text-white"
+                  }`}
+                >
+                  {isVicSearch ? displayName : creator.name || "Unnamed creator"}
+                </p>
+              </div>
 
               {!isVicSurface && (
                 <div className="mt-2 flex flex-wrap items-center gap-2">
