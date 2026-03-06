@@ -108,4 +108,84 @@ export default function CreatorCard({
                   {interests.map((interest) => (
                     <span
                       key={`${creator.id}-${interest}`}
-                      className="inline-flex items-center rou
+                      className="inline-flex items-center rounded-md bg-black/14 px-1.5 py-0.5 text-[11px] font-medium tracking-tight text-white/78 backdrop-blur-sm"
+                    >
+                      #{normalizeInterestTag(interest)}
+                    </span>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {isVicSearch && (
+          <div className="border-t border-black/5 bg-white px-4 py-3.5">
+            <p className="truncate text-[12.5px] font-medium leading-relaxed text-neutral-500">
+              {luxuryTagline}
+            </p>
+          </div>
+        )}
+      </button>
+
+      {isVicSurface && mode !== "select" && (
+        <button
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            setIsFavorite((prev) => !prev);
+          }}
+          aria-pressed={isFavorite}
+          aria-label={isFavorite ? "Remove favourite" : "Add favourite"}
+          className="absolute right-3 top-3 z-10 rounded-full bg-white/90 p-2 text-neutral-800 shadow-md transition hover:scale-105 active:scale-95"
+        >
+          <Star className={isFavorite ? "h-4 w-4 fill-neutral-900" : "h-4 w-4"} />
+        </button>
+      )}
+
+      <CreatorProfileSheet
+        creator={creator}
+        open={open}
+        onClose={() => setOpen(false)}
+        locked={locked}
+        variant={variant}
+        mode={mode}
+        isInvited={isInvited}
+        onInvite={(selectedCreator) => {
+          onInvite?.(selectedCreator);
+          setOpen(false);
+        }}
+        isFavorite={isFavorite}
+        onToggleFavorite={() => setIsFavorite((prev) => !prev)}
+      />
+    </div>
+  );
+}
+
+const luxuryTaglines = [
+  "Curates elevated nights between beach clubs and private tables.",
+  "Known for discreet access to fashion dinners and art salons.",
+  "Moves between yachting weekends and members-only city moments.",
+  "Hosts refined escapes blending wellness, design, and travel.",
+  "Shapes polished social scenes with understated luxury taste.",
+];
+
+function getLuxuryTagline(creatorId: number) {
+  return luxuryTaglines[Math.abs(creatorId) % luxuryTaglines.length];
+}
+
+function formatCreatorDisplayName(name?: string) {
+  const trimmed = (name || "").trim();
+  if (!trimmed) return "Unnamed creator";
+  const parts = trimmed.split(/\s+/).filter(Boolean);
+  if (parts.length <= 1) return parts[0];
+  return `${parts[0]} ${parts[1][0]}.`;
+}
+
+function normalizeInterestTag(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/^#/, "")
+    .replace(/\s+/g, "");
+}
