@@ -84,7 +84,7 @@ export default function CreatorCard({
                 {isVicSearch && (
                   <span
                     aria-hidden
-                    className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 h-[120%] w-[110%] rounded-[50%] bg-black/25 blur-xl"
+                    className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[180px] h-[60px] rounded-[50%] bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.50)_0%,transparent_70%)] blur-2xl"
                   />
                 )}
                 <p
