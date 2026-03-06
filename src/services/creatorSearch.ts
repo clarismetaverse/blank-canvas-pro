@@ -5,8 +5,6 @@ export type CreatorLite = {
   name?: string;
   IG_account?: string;
   Tiktok_account?: string;
-  bio?: string;
-  user_interest_topics_turbo_id?: number[];
   Profile_pic?: { url?: string } | null;
 };
 

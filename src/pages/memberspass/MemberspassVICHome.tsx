@@ -1,11 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, Instagram, Lock, Music2, Search, Sparkles, X } from "lucide-react";
+import { ChevronLeft, Lock, Sparkles } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CreatorCard from "@/components/memberspass/CreatorCard";
-import CreatorProfileSheet from "@/components/memberspass/CreatorProfileSheet";
+import CreatorSearchSelect from "@/components/memberspass/CreatorSearchSelect";
 import type { CreatorLite } from "@/services/creatorSearch";
-import { searchCreatorsTurbo } from "@/services/creatorSearchTurbo";
-import { fetchInterestTopics, type InterestTopic } from "@/services/interestTopics";
 import { fetchNewInTown } from "@/services/newInTown";
 
 const placeholderCreators: CreatorLite[] = [
@@ -13,6 +11,7 @@ const placeholderCreators: CreatorLite[] = [
     id: 1,
     name: "Aria Vela",
     IG_account: "aria.ugc",
+    Tiktok_account: "ariaugc",
     Profile_pic: {
       url: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=600&q=80",
     },
@@ -64,27 +63,6 @@ const featuredContent = [
   },
 ];
 
-function useDebounced(value: string, delay = 350) {
-  const [debounced, setDebounced] = useState(value);
-  useEffect(() => {
-    const timer = window.setTimeout(() => setDebounced(value), delay);
-    return () => window.clearTimeout(timer);
-  }, [delay, value]);
-  return debounced;
-}
-
-function creatorHandle(creator: CreatorLite) {
-  if (creator.IG_account) {
-    const handle = creator.IG_account.split("/").filter(Boolean).pop()?.replace("@", "") || creator.IG_account;
-    return `@${handle}`;
-  }
-  if (creator.Tiktok_account) {
-    const handle = creator.Tiktok_account.split("/").filter(Boolean).pop()?.replace("@", "") || creator.Tiktok_account;
-    return `@${handle}`;
-  }
-  return "No social handle";
-}
-
 export default function MemberspassVICHome() {
   const navigate = useNavigate();
   const [points] = useState(2450);
@@ -93,14 +71,8 @@ export default function MemberspassVICHome() {
     return localStorage.getItem("owner_city") || "your city";
   });
 
-  const [searchOpen, setSearchOpen] = useState(false);
-  const [rawQuery, setRawQuery] = useState("");
-  const debouncedQuery = useDebounced(rawQuery, 300);
-  const [selectedTopicIds, setSelectedTopicIds] = useState<number[]>([]);
-  const [interestTopics, setInterestTopics] = useState<InterestTopic[]>([]);
-  const [searchLoading, setSearchLoading] = useState(false);
-  const [searchResults, setSearchResults] = useState<CreatorLite[]>([]);
-  const [hasSearched, setHasSearched] = useState(false);
+  const [query, setQuery] = useState("");
+  const [lastResults, setLastResults] = useState<CreatorLite[]>([]);
   const [selectedCreator, setSelectedCreator] = useState<CreatorLite | null>(null);
   const [newInTown, setNewInTown] = useState<CreatorLite[]>([]);
   const [newInTownLoading, setNewInTownLoading] = useState(true);
@@ -126,82 +98,15 @@ export default function MemberspassVICHome() {
     };
   }, []);
 
-  useEffect(() => {
-    const controller = new AbortController();
-
-    const loadTopics = async () => {
-      try {
-        const items = await fetchInterestTopics(controller.signal);
-        setInterestTopics(items);
-      } catch (error) {
-        if ((error as Error).name === "AbortError") return;
-        console.error("Failed to load interest topics", error);
-      }
-    };
-
-    loadTopics();
-
-    return () => controller.abort();
-  }, []);
-
-  useEffect(() => {
-    if (!searchOpen) return;
-
-    const hasQuery = Boolean(debouncedQuery.trim());
-    const hasTopics = selectedTopicIds.length > 0;
-
-    if (!hasQuery && !hasTopics) {
-      setSearchResults([]);
-      setSearchLoading(false);
-      setHasSearched(false);
-      return;
-    }
-
-    const controller = new AbortController();
-    let active = true;
-
-    const runSearch = async () => {
-      setSearchLoading(true);
-      setHasSearched(true);
-      try {
-        const results = await searchCreatorsTurbo({
-          q: debouncedQuery,
-          topicIds: selectedTopicIds,
-          signal: controller.signal,
-        });
-        if (!active) return;
-        setSearchResults(results);
-      } catch (error) {
-        if ((error as Error).name === "AbortError") return;
-        console.error("Creator search failed", error);
-        if (active) setSearchResults([]);
-      } finally {
-        if (active) setSearchLoading(false);
-      }
-    };
-
-    runSearch();
-
-    return () => {
-      active = false;
-      controller.abort();
-    };
-  }, [debouncedQuery, searchOpen, selectedTopicIds]);
-
   const displayCreators = useMemo(() => {
-    if (searchResults.length) return searchResults.slice(0, 10);
+    if (lastResults.length) return lastResults.slice(0, 10);
     if (newInTown.length) return newInTown.slice(0, 10);
     return placeholderCreators;
-  }, [searchResults, newInTown]);
+  }, [lastResults, newInTown]);
 
-  const showNewInTownSkeletons = newInTownLoading && !searchResults.length && !newInTown.length;
+  const showNewInTownSkeletons = newInTownLoading && !lastResults.length && !newInTown.length;
 
   const premiumCreators = useMemo(() => placeholderCreators.slice(0, 3), []);
-
-  const topicLabelById = useMemo(
-    () => new Map(interestTopics.map((topic) => [topic.id, topic.interest_topics])),
-    [interestTopics]
-  );
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-[#0B0B0F]">
@@ -232,16 +137,18 @@ export default function MemberspassVICHome() {
             </span>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setSearchOpen(true)}
-            className="flex w-full items-center gap-3 rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-left shadow-[0_10px_30px_rgba(0,0,0,0.08)]"
-          >
-            <Search className="h-4 w-4 text-neutral-400" />
-            <span className={`text-sm ${rawQuery ? "text-neutral-900" : "text-neutral-400"}`}>
-              {rawQuery || "Search creators"}
-            </span>
-          </button>
+
+          <CreatorSearchSelect
+            value={query}
+            onChange={setQuery}
+            onSelect={(creator) => {
+              setSelectedCreator(creator);
+              setQuery(creator.name || "");
+            }}
+            onResults={(results) => {
+              if (results.length) setLastResults(results);
+            }}
+          />
 
           {selectedCreator && (
             <div className="flex items-center justify-between rounded-2xl border border-neutral-200 bg-[#FAFAFA] px-4 py-2 text-xs text-neutral-600">
@@ -253,7 +160,7 @@ export default function MemberspassVICHome() {
                 className="text-xs text-neutral-500 hover:text-neutral-900"
                 onClick={() => {
                   setSelectedCreator(null);
-                  setRawQuery("");
+                  setQuery("");
                 }}
               >
                 Clear
@@ -336,115 +243,6 @@ export default function MemberspassVICHome() {
           </div>
         </section>
       </div>
-
-      {searchOpen && (
-        <div className="fixed inset-0 z-50 bg-black/40 px-4 py-6">
-          <div className="mx-auto flex h-full w-full max-w-md flex-col rounded-3xl border border-neutral-200 bg-white shadow-2xl">
-            <div className="flex items-center gap-2 border-b border-neutral-200 p-4">
-              <div className="flex flex-1 items-center gap-2 rounded-2xl border border-neutral-200 px-3 py-2">
-                <Search className="h-4 w-4 text-neutral-400" />
-                <input
-                  autoFocus
-                  value={rawQuery}
-                  onChange={(event) => setRawQuery(event.target.value)}
-                  placeholder="Search creator, Instagram, or TikTok"
-                  className="w-full bg-transparent text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
-                />
-              </div>
-              <button
-                type="button"
-                onClick={() => setSearchOpen(false)}
-                className="rounded-full border border-neutral-200 p-2 text-neutral-600"
-                aria-label="Close search"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="border-b border-neutral-200 px-4 py-3">
-              <div className="flex gap-2 overflow-x-auto pb-1">
-                {interestTopics.map((topic) => {
-                  const selected = selectedTopicIds.includes(topic.id);
-                  return (
-                    <button
-                      key={topic.id}
-                      type="button"
-                      onClick={() =>
-                        setSelectedTopicIds((prev) =>
-                          prev.includes(topic.id) ? prev.filter((id) => id !== topic.id) : [...prev, topic.id]
-                        )
-                      }
-                      className={`whitespace-nowrap rounded-full border px-3 py-1 text-xs font-medium ${
-                        selected
-                          ? "border-neutral-900 bg-neutral-900 text-white"
-                          : "border-neutral-200 bg-white text-neutral-600"
-                      }`}
-                    >
-                      {topic.interest_topics}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-3">
-              {!hasSearched && (
-                <p className="px-2 py-5 text-sm text-neutral-500">Start typing or choose interests to discover creators.</p>
-              )}
-              {searchLoading && <p className="px-2 py-3 text-sm text-neutral-500">Searching creators…</p>}
-              {!searchLoading && hasSearched && searchResults.length === 0 && (
-                <p className="px-2 py-3 text-sm text-neutral-500">No creators found. Try another keyword or interest.</p>
-              )}
-              {!searchLoading &&
-                searchResults.map((creator) => {
-                  const hasTikTok = Boolean(creator.Tiktok_account);
-                  const interestLabels = (creator.user_interest_topics_turbo_id || [])
-                    .map((id) => topicLabelById.get(id))
-                    .filter(Boolean)
-                    .slice(0, 3);
-
-                  return (
-                    <button
-                      key={creator.id}
-                      type="button"
-                      onClick={() => {
-                        setSelectedCreator(creator);
-                        setSearchOpen(false);
-                      }}
-                      className="mb-2 w-full rounded-2xl border border-neutral-200 bg-white p-3 text-left hover:bg-neutral-50"
-                    >
-                      <div className="flex items-start gap-3">
-                        {creator.Profile_pic?.url ? (
-                          <img src={creator.Profile_pic.url} alt={creator.name || "Creator"} className="h-11 w-11 rounded-full object-cover" />
-                        ) : (
-                          <div className="h-11 w-11 rounded-full bg-neutral-200" />
-                        )}
-                        <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-neutral-900">{creator.name || "Unnamed creator"}</p>
-                          <p className="mt-0.5 text-xs text-neutral-500">{creatorHandle(creator)}</p>
-                          {creator.bio && <p className="mt-1 line-clamp-2 text-xs text-neutral-600">{creator.bio}</p>}
-                          <div className="mt-2 flex flex-wrap items-center gap-1.5 text-[11px] text-neutral-500">
-                            <span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5">
-                              {hasTikTok ? <Music2 className="h-3 w-3" /> : <Instagram className="h-3 w-3" />}
-                              {hasTikTok ? "TikTok" : "Instagram"}
-                            </span>
-                            {interestLabels.map((label) => (
-                              <span key={`${creator.id}-${label}`} className="rounded-full bg-neutral-100 px-2 py-0.5">
-                                {label}
-                              </span>
-                            ))}
-                          </div>
-                        </div>
-                      </div>
-                    </button>
-                  );
-                })}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <CreatorProfileSheet creator={selectedCreator} open={Boolean(selectedCreator)} onClose={() => setSelectedCreator(null)} variant="vic" />
     </div>
   );
 }
