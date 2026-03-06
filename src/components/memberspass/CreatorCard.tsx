@@ -56,10 +56,14 @@ export default function CreatorCard({
           <div
             className={`absolute inset-0 ${
               isVicSearch
-                ? "bg-gradient-to-t from-black/90 via-black/38 to-transparent"
+                ? "bg-gradient-to-t from-black/82 via-black/28 via-[58%] to-transparent"
                 : "bg-gradient-to-t from-black/90 via-black/40 to-transparent"
             }`}
           />
+
+          {isVicSearch && (
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[120px] bg-[radial-gradient(ellipse_at_bottom,rgba(0,0,0,0.45)_0%,rgba(0,0,0,0.22)_38%,rgba(0,0,0,0)_78%)] blur-xl" />
+          )}
 
           {locked && (
             <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/85 px-2 py-1 text-[10px] font-semibold text-neutral-900">
@@ -84,13 +88,14 @@ export default function CreatorCard({
                 {isVicSearch && (
                   <span
                     aria-hidden
-                    className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[180px] h-[60px] rounded-[50%] bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.50)_0%,transparent_70%)] blur-2xl"
+                    className="pointer-events-none absolute left-[-10px] top-1/2 h-[76px] w-[220px] -translate-y-1/2 rounded-[999px] bg-[radial-gradient(ellipse_at_center,rgba(0,0,0,0.58)_0%,rgba(0,0,0,0.28)_42%,rgba(0,0,0,0)_76%)] blur-2xl"
                   />
                 )}
+
                 <p
                   className={`relative ${
                     isVicSearch
-                      ? "text-[27px] font-semibold leading-[0.95] tracking-[-0.03em] text-[#FFF9F2] drop-shadow-[0_2px_12px_rgba(0,0,0,0.4)]"
+                      ? "text-[29px] font-semibold leading-[0.94] tracking-[-0.035em] text-[#FFF8F0] drop-shadow-[0_2px_14px_rgba(0,0,0,0.38)]"
                       : "text-lg font-semibold text-white"
                   }`}
                 >
@@ -114,11 +119,11 @@ export default function CreatorCard({
               )}
 
               {isVicSearch && interests && interests.length > 0 && (
-                <div className="mt-[10px] flex flex-wrap gap-x-2 gap-y-1.5">
+                <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1.5">
                   {interests.map((interest) => (
                     <span
                       key={`${creator.id}-${interest}`}
-                      className="rounded-sm bg-white/10 backdrop-blur-sm px-2 py-[3px] text-[12.5px] font-normal tracking-[0.02em] text-[#F5F0EA]"
+                      className="text-[13px] font-normal tracking-[0.025em] text-[#F7EEDF]/92 drop-shadow-[0_1px_8px_rgba(0,0,0,0.28)]"
                     >
                       #{normalizeInterestTag(interest)}
                     </span>
@@ -131,7 +136,7 @@ export default function CreatorCard({
 
         {isVicSearch && (
           <div className="border-t border-black/5 bg-white px-4 py-3.5">
-            <p className="truncate text-[12px] font-normal italic leading-relaxed text-neutral-400">
+            <p className="truncate text-[12.5px] font-normal italic leading-relaxed text-neutral-400">
               {bioLine}
             </p>
           </div>
@@ -183,10 +188,13 @@ const fallbackTaglines = [
 function getCreatorBio(creator: CreatorLite, id: number): string {
   const bio = (creator.bio || "").trim();
   if (bio) return bio;
+
   const tagline = ((creator as any).tagline || "").trim();
   if (tagline) return tagline;
+
   const desc = ((creator as any).description || "").trim();
   if (desc) return desc;
+
   return fallbackTaglines[Math.abs(id) % fallbackTaglines.length];
 }
 
