@@ -33,7 +33,7 @@ export default function CreatorCard({
   const isVicSurface = isVic || isVicSearch;
 
   const displayName = formatCreatorDisplayName(creator.name);
-  const luxuryTagline = getLuxuryTagline(creator.id);
+  const bioLine = getCreatorBio(creator, creator.id);
 
   return (
     <div className="relative w-full shrink-0 snap-start">
