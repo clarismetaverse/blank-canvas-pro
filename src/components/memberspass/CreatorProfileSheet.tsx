@@ -32,7 +32,7 @@ type CreatorProfileSheetProps = {
   creator: CreatorProfile | null;
   open: boolean;
   locked?: boolean;
-  variant?: "default" | "vic";
+  variant?: "default" | "vic" | "vic-search";
   mode?: "default" | "select";
   isInvited?: boolean;
   onInvite?: (creator: CreatorLite) => void;
