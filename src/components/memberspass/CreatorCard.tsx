@@ -172,7 +172,7 @@ export default function CreatorCard({
   );
 }
 
-const luxuryTaglines = [
+const fallbackTaglines = [
   "Curates elevated nights between beach clubs and private tables.",
   "Known for discreet access to fashion dinners and art salons.",
   "Moves between yachting weekends and members-only city moments.",
@@ -180,8 +180,14 @@ const luxuryTaglines = [
   "Shapes polished social scenes with understated luxury taste.",
 ];
 
-function getLuxuryTagline(creatorId: number) {
-  return luxuryTaglines[Math.abs(creatorId) % luxuryTaglines.length];
+function getCreatorBio(creator: CreatorLite, id: number): string {
+  const bio = (creator.bio || "").trim();
+  if (bio) return bio;
+  const tagline = ((creator as any).tagline || "").trim();
+  if (tagline) return tagline;
+  const desc = ((creator as any).description || "").trim();
+  if (desc) return desc;
+  return fallbackTaglines[Math.abs(id) % fallbackTaglines.length];
 }
 
 function formatCreatorDisplayName(name?: string) {
