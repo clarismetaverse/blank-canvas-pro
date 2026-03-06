@@ -6,6 +6,9 @@ type NewInTownResponse = {
     items?: Array<{
       id?: number;
       name?: string;
+      bio?: string;
+      tagline?: string;
+      description?: string;
       IG_account?: string;
       Tiktok_account?: string;
       Profile_pic?: { url?: string } | null;
