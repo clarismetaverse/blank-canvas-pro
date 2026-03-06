@@ -27,6 +27,9 @@ export async function fetchNewInTown(): Promise<CreatorLite[]> {
       .map((item) => ({
         id: Number(item.id),
         name: item.name,
+        bio: item.bio,
+        tagline: item.tagline,
+        description: item.description,
         IG_account: item.IG_account,
         Tiktok_account: item.Tiktok_account,
         Profile_pic: item.Profile_pic,
