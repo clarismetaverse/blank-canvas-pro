@@ -6,7 +6,8 @@ import CreatorProfileSheet from "@/components/memberspass/CreatorProfileSheet";
 type CreatorCardProps = {
   creator: CreatorLite;
   locked?: boolean;
-  variant?: "default" | "vic";
+  variant?: "default" | "vic" | "vic-search";
+  interests?: string[];
   mode?: "default" | "select";
   isInvited?: boolean;
   onInvite?: (creator: CreatorLite) => void;
@@ -16,6 +17,7 @@ export default function CreatorCard({
   creator,
   locked,
   variant = "default",
+  interests,
   mode = "default",
   isInvited = false,
   onInvite,
@@ -26,6 +28,8 @@ export default function CreatorCard({
   const isUgcReady = true;
   const isUgcFirst = true;
   const isVic = variant === "vic";
+  const isVicSearch = variant === "vic-search";
+  const isVicSurface = isVic || isVicSearch;
 
   return (
     <div className="relative w-full shrink-0 snap-start">
@@ -34,7 +38,7 @@ export default function CreatorCard({
         onClick={() => setOpen(true)}
         className="group relative w-full overflow-hidden rounded-3xl text-left shadow-[0_12px_40px_rgba(0,0,0,0.16)] transition-transform duration-200 ease-out hover:scale-[1.01] active:scale-[0.98]"
       >
-        <div className="relative h-[348px] w-full">
+        <div className={`relative w-full ${isVicSearch ? "h-[308px]" : "h-[348px]"}`}>
           {img ? (
             <img src={img} alt={creator.name || "Creator"} className="h-full w-full object-cover" />
           ) : (
@@ -57,7 +61,7 @@ export default function CreatorCard({
               <p className="text-lg font-semibold text-white">
                 {creator.name || "Unnamed creator"}
               </p>
-              {!isVic && (
+              {!isVicSurface && (
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {isUgcReady && (
                     <span className="rounded-full bg-white/85 px-2 py-1 text-[11px] font-medium text-neutral-900">
@@ -73,9 +77,22 @@ export default function CreatorCard({
               )}
             </div>
           </div>
+
+          {isVicSearch && interests && interests.length > 0 && (
+            <div className="absolute bottom-3 left-4 right-4 flex flex-wrap gap-2">
+              {interests.slice(0, 4).map((interest) => (
+                <span
+                  key={`${creator.id}-${interest}`}
+                  className="rounded-full border border-white/40 bg-white/85 px-2.5 py-1 text-[11px] font-medium text-neutral-800 backdrop-blur-sm"
+                >
+                  {interest}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </button>
-      {isVic && mode !== "select" && (
+      {isVicSurface && mode !== "select" && (
         <button
           type="button"
           onClick={(event) => {

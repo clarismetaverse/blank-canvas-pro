@@ -63,6 +63,33 @@ const featuredContent = [
   },
 ];
 
+const searchInterestPool = [
+  "Fashion",
+  "Travel",
+  "Dining",
+  "Wellness",
+  "Beach",
+  "Art",
+  "Nightlife",
+  "Yachting",
+];
+
+const getDeterministicInterests = (creator: CreatorLite) => {
+  const seedBase = `${creator.id}-${creator.name || "vic"}`;
+  let hash = 0;
+  for (let index = 0; index < seedBase.length; index += 1) {
+    hash = (hash * 31 + seedBase.charCodeAt(index)) >>> 0;
+  }
+
+  const chipsCount = 2 + (hash % 2);
+  const interests: string[] = [];
+  for (let index = 0; index < chipsCount; index += 1) {
+    const interest = searchInterestPool[(hash + index * 3) % searchInterestPool.length];
+    if (!interests.includes(interest)) interests.push(interest);
+  }
+  return interests;
+};
+
 export default function MemberspassVICHome() {
   const navigate = useNavigate();
   const [points] = useState(2450);
@@ -76,6 +103,7 @@ export default function MemberspassVICHome() {
   const [selectedCreator, setSelectedCreator] = useState<CreatorLite | null>(null);
   const [newInTown, setNewInTown] = useState<CreatorLite[]>([]);
   const [newInTownLoading, setNewInTownLoading] = useState(true);
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -107,6 +135,7 @@ export default function MemberspassVICHome() {
   const showNewInTownSkeletons = newInTownLoading && !lastResults.length && !newInTown.length;
 
   const premiumCreators = useMemo(() => placeholderCreators.slice(0, 3), []);
+  const isSearchActive = isSearchFocused || query.trim().length > 0;
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-[#0B0B0F]">
@@ -141,13 +170,15 @@ export default function MemberspassVICHome() {
           <CreatorSearchSelect
             value={query}
             onChange={setQuery}
+            onFocusChange={setIsSearchFocused}
             onSelect={(creator) => {
               setSelectedCreator(creator);
               setQuery(creator.name || "");
             }}
             onResults={(results) => {
-              if (results.length) setLastResults(results);
+              setLastResults(results);
             }}
+            showDropdown={false}
           />
 
           {selectedCreator && (
@@ -169,79 +200,103 @@ export default function MemberspassVICHome() {
           )}
         </section>
 
-        <section className="space-y-3">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-base font-semibold text-neutral-900">New in {cityName}</h2>
-            <span className="text-xs text-neutral-400">Swipe</span>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory">
-            {showNewInTownSkeletons
-              ? Array.from({ length: 3 }).map((_, index) => (
-                  <div key={`new-in-town-skeleton-${index}`} className="w-[75%] shrink-0 snap-start">
-                    <div className="h-[290px] w-full rounded-3xl border border-neutral-200 bg-neutral-100 shadow-[0_10px_30px_rgba(0,0,0,0.08)]" />
-                  </div>
-                ))
-              : displayCreators.map((creator) => (
-                  <div key={creator.id} className="w-[75%] shrink-0 snap-start">
-                    <CreatorCard creator={creator} variant="vic" />
+        {isSearchActive ? (
+          <section className="space-y-3" aria-label="Search results">
+            <div className="flex items-center justify-between px-1">
+              <h2 className="text-base font-semibold text-neutral-900">
+                {query.trim().length > 0 ? "Search results" : "Browse creators"}
+              </h2>
+              <span className="text-xs text-neutral-400">{displayCreators.length} shown</span>
+            </div>
+
+            <div className="space-y-4 pb-2">
+              {displayCreators.map((creator) => (
+                <CreatorCard
+                  key={`search-${creator.id}`}
+                  creator={creator}
+                  variant="vic-search"
+                  interests={getDeterministicInterests(creator)}
+                />
+              ))}
+            </div>
+          </section>
+        ) : (
+          <>
+            <section className="space-y-3">
+              <div className="flex items-center justify-between px-1">
+                <h2 className="text-base font-semibold text-neutral-900">New in {cityName}</h2>
+                <span className="text-xs text-neutral-400">Swipe</span>
+              </div>
+              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory">
+                {showNewInTownSkeletons
+                  ? Array.from({ length: 3 }).map((_, index) => (
+                      <div key={`new-in-town-skeleton-${index}`} className="w-[75%] shrink-0 snap-start">
+                        <div className="h-[290px] w-full rounded-3xl border border-neutral-200 bg-neutral-100 shadow-[0_10px_30px_rgba(0,0,0,0.08)]" />
+                      </div>
+                    ))
+                  : displayCreators.map((creator) => (
+                      <div key={creator.id} className="w-[75%] shrink-0 snap-start">
+                        <CreatorCard creator={creator} variant="vic" />
+                      </div>
+                    ))}
+              </div>
+            </section>
+
+            <section className="space-y-3">
+              <div className="flex items-center justify-between px-1">
+                <h2 className="text-base font-semibold text-neutral-900">Featured profiles</h2>
+                <span className="text-xs text-neutral-400">Swipe</span>
+              </div>
+              <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory">
+                {featuredContent.map((item) => (
+                  <div
+                    key={item.title}
+                    className="w-72 shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.08)]"
+                  >
+                    <div className="relative h-48 w-full">
+                      <img src={item.imageUrl} alt={item.title} className="h-full w-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                      <div className="absolute bottom-4 left-4">
+                        <p className="text-sm font-semibold text-white">{item.title}</p>
+                        <p className="text-xs text-white/80">{item.creatorName}</p>
+                      </div>
+                      <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/85 px-2 py-1 text-[10px] font-semibold text-neutral-800">
+                        <Sparkles className="h-3 w-3" />
+                        Experience
+                      </span>
+                    </div>
                   </div>
                 ))}
-          </div>
-        </section>
+              </div>
+            </section>
 
-        <section className="space-y-3">
-          <div className="flex items-center justify-between px-1">
-            <h2 className="text-base font-semibold text-neutral-900">Featured profiles</h2>
-            <span className="text-xs text-neutral-400">Swipe</span>
-          </div>
-          <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory">
-            {featuredContent.map((item) => (
-              <div
-                key={item.title}
-                className="w-72 shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.08)]"
-              >
-                <div className="relative h-48 w-full">
-                  <img src={item.imageUrl} alt={item.title} className="h-full w-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-                  <div className="absolute bottom-4 left-4">
-                    <p className="text-sm font-semibold text-white">{item.title}</p>
-                    <p className="text-xs text-white/80">{item.creatorName}</p>
-                  </div>
-                  <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/85 px-2 py-1 text-[10px] font-semibold text-neutral-800">
-                    <Sparkles className="h-3 w-3" />
-                    Experience
-                  </span>
+            <section className="space-y-3">
+              <div className="flex items-center justify-between px-1">
+                <div>
+                  <h2 className="text-base font-semibold text-neutral-900">Private list</h2>
+                  <p className="mt-1 flex items-center gap-2 text-xs text-neutral-500">
+                    <Lock className="h-3 w-3" />
+                    Locked — Pro Models & Key Influencers
+                  </p>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => window.alert("Unlock flow coming soon.")}
+                  className="rounded-full border border-neutral-200 bg-white px-3 py-1 text-xs font-semibold text-neutral-700"
+                >
+                  Unlock
+                </button>
               </div>
-            ))}
-          </div>
-        </section>
-
-        <section className="space-y-3">
-          <div className="flex items-center justify-between px-1">
-            <div>
-              <h2 className="text-base font-semibold text-neutral-900">Private list</h2>
-              <p className="mt-1 flex items-center gap-2 text-xs text-neutral-500">
-                <Lock className="h-3 w-3" />
-                Locked — Pro Models & Key Influencers
-              </p>
-            </div>
-            <button
-              type="button"
-              onClick={() => window.alert("Unlock flow coming soon.")}
-              className="rounded-full border border-neutral-200 bg-white px-3 py-1 text-xs font-semibold text-neutral-700"
-            >
-              Unlock
-            </button>
-          </div>
-          <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory">
-            {premiumCreators.map((creator) => (
-              <div key={creator.id} className="w-[75%] shrink-0 snap-start">
-                <CreatorCard creator={creator} locked variant="vic" />
+              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory">
+                {premiumCreators.map((creator) => (
+                  <div key={creator.id} className="w-[75%] shrink-0 snap-start">
+                    <CreatorCard creator={creator} locked variant="vic" />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
-        </section>
+            </section>
+          </>
+        )}
       </div>
     </div>
   );
