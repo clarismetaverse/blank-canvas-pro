@@ -30,6 +30,8 @@ export default function CreatorCard({
   const isVic = variant === "vic";
   const isVicSearch = variant === "vic-search";
   const isVicSurface = isVic || isVicSearch;
+  const displayName = formatCreatorDisplayName(creator.name);
+  const luxuryTagline = getLuxuryTagline(creator.id);
 
   return (
     <div className="relative w-full shrink-0 snap-start">
@@ -44,7 +46,7 @@ export default function CreatorCard({
           ) : (
             <div className="h-full w-full bg-neutral-100" />
           )}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent" />
+          <div className={`absolute inset-0 ${isVicSearch ? "bg-gradient-to-t from-black/85 via-black/35 to-transparent" : "bg-gradient-to-t from-black/90 via-black/40 to-transparent"}`} />
           {locked && (
             <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/85 px-2 py-1 text-[10px] font-semibold text-neutral-900">
               <Lock className="h-3 w-3" />
@@ -56,10 +58,10 @@ export default function CreatorCard({
               Invited ✓
             </span>
           )}
-          <div className="absolute bottom-0 left-0 right-0 p-4">
+          <div className={`absolute bottom-0 left-0 right-0 ${isVicSearch ? "p-3.5 pb-4" : "p-4"}`}>
             <div className="text-left">
               <p className="text-lg font-semibold text-white">
-                {creator.name || "Unnamed creator"}
+                {isVicSearch ? displayName : creator.name || "Unnamed creator"}
               </p>
               {!isVicSurface && (
                 <div className="mt-2 flex flex-wrap items-center gap-2">
@@ -79,18 +81,24 @@ export default function CreatorCard({
           </div>
 
           {isVicSearch && interests && interests.length > 0 && (
-            <div className="absolute bottom-3 left-4 right-4 flex flex-wrap gap-2">
-              {interests.slice(0, 4).map((interest) => (
+            <div className="absolute bottom-1.5 left-3.5 right-4 flex flex-wrap gap-1.5">
+              {interests.slice(0, 2).map((interest) => (
                 <span
                   key={`${creator.id}-${interest}`}
-                  className="rounded-full border border-white/40 bg-white/85 px-2.5 py-1 text-[11px] font-medium text-neutral-800 backdrop-blur-sm"
+                  className="rounded-md bg-black/18 px-1.5 py-0.5 text-[11px] font-medium text-white/80 backdrop-blur-sm"
                 >
-                  {interest}
+                  #{interest.toLowerCase()}
                 </span>
               ))}
             </div>
           )}
         </div>
+
+        {isVicSearch && (
+          <div className="border-t border-black/5 bg-white px-4 py-3">
+            <p className="truncate text-[12px] font-medium text-neutral-600">{luxuryTagline}</p>
+          </div>
+        )}
       </button>
       {isVicSurface && mode !== "select" && (
         <button
@@ -124,4 +132,24 @@ export default function CreatorCard({
       />
     </div>
   );
+}
+
+const luxuryTaglines = [
+  "Curates elevated nights between beach clubs and private tables.",
+  "Known for discreet access to fashion dinners and art salons.",
+  "Moves between yachting weekends and members-only city moments.",
+  "Hosts refined escapes blending wellness, design, and travel.",
+  "Shapes polished social scenes with understated luxury taste.",
+];
+
+function getLuxuryTagline(creatorId: number) {
+  return luxuryTaglines[Math.abs(creatorId) % luxuryTaglines.length];
+}
+
+function formatCreatorDisplayName(name?: string) {
+  const trimmed = (name || "").trim();
+  if (!trimmed) return "Unnamed creator";
+  const parts = trimmed.split(/\s+/).filter(Boolean);
+  if (parts.length <= 1) return parts[0];
+  return `${parts[0]} ${parts[1][0]}.`;
 }
