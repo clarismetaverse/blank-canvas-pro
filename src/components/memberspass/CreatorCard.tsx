@@ -114,11 +114,11 @@ export default function CreatorCard({
               )}
 
               {isVicSearch && interests && interests.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1.5">
+                <div className="mt-2.5 flex flex-wrap gap-x-2.5 gap-y-1.5">
                   {interests.map((interest) => (
                     <span
                       key={`${creator.id}-${interest}`}
-                      className="inline-flex items-center rounded-md bg-white/12 px-1.5 py-[2px] text-[11px] font-medium tracking-tight text-[#F2DCC8] backdrop-blur-md shadow-[0_1px_8px_rgba(255,255,255,0.06)]"
+                      className="text-[10px] font-light tracking-wide text-white/50"
                     >
                       #{normalizeInterestTag(interest)}
                     </span>
