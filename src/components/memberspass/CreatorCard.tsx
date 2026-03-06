@@ -110,7 +110,7 @@ export default function CreatorCard({
                   {interests.map((interest) => (
                     <span
                       key={`${creator.id}-${interest}`}
-                      className="inline-flex items-center rounded-md bg-white/12 px-1.5 py-[2px] text-[11px] font-medium tracking-tight text-[#FFF8EE]/88 backdrop-blur-md shadow-[0_1px_8px_rgba(255,255,255,0.06)]"
+                      className="inline-flex items-center rounded-md bg-white/12 px-1.5 py-[2px] text-[11px] font-medium tracking-tight text-[#F5E6D3] backdrop-blur-md shadow-[0_1px_8px_rgba(255,255,255,0.06)]"
                     >
                       #{normalizeInterestTag(interest)}
                     </span>
