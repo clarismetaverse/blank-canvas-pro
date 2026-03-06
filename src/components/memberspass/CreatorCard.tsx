@@ -24,12 +24,14 @@ export default function CreatorCard({
 }: CreatorCardProps) {
   const [open, setOpen] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+
   const img = creator.Profile_pic?.url;
   const isUgcReady = true;
   const isUgcFirst = true;
   const isVic = variant === "vic";
   const isVicSearch = variant === "vic-search";
   const isVicSurface = isVic || isVicSearch;
+
   const displayName = formatCreatorDisplayName(creator.name);
   const luxuryTagline = getLuxuryTagline(creator.id);
 
@@ -79,10 +81,10 @@ export default function CreatorCard({
           >
             <div className="text-left">
               <p
-                className={`text-white ${
+                className={`${
                   isVicSearch
-                    ? "text-[24px] font-semibold leading-none tracking-[-0.02em]"
-                    : "text-lg font-semibold"
+                    ? "text-[27px] font-semibold leading-[0.95] tracking-[-0.03em] text-[#FFF9F2] drop-shadow-[0_2px_10px_rgba(0,0,0,0.35)]"
+                    : "text-lg font-semibold text-white"
                 }`}
               >
                 {isVicSearch ? displayName : creator.name || "Unnamed creator"}
@@ -104,11 +106,11 @@ export default function CreatorCard({
               )}
 
               {isVicSearch && interests && interests.length > 0 && (
-                <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1">
+                <div className="mt-2 flex flex-wrap gap-x-2 gap-y-1.5">
                   {interests.map((interest) => (
                     <span
                       key={`${creator.id}-${interest}`}
-                      className="inline-flex items-center rounded-md bg-black/14 px-1.5 py-0.5 text-[11px] font-medium tracking-tight text-white/78 backdrop-blur-sm"
+                      className="inline-flex items-center rounded-md bg-white/12 px-1.5 py-[2px] text-[11px] font-medium tracking-tight text-[#FFF8EE]/88 backdrop-blur-md shadow-[0_1px_8px_rgba(255,255,255,0.06)]"
                     >
                       #{normalizeInterestTag(interest)}
                     </span>
@@ -177,9 +179,14 @@ function getLuxuryTagline(creatorId: number) {
 function formatCreatorDisplayName(name?: string) {
   const trimmed = (name || "").trim();
   if (!trimmed) return "Unnamed creator";
+
   const parts = trimmed.split(/\s+/).filter(Boolean);
-  if (parts.length <= 1) return parts[0];
-  return `${parts[0]} ${parts[1][0]}.`;
+  if (parts.length === 1) return parts[0];
+
+  const firstName = parts[0];
+  const surnameInitial = parts[1]?.charAt(0).toUpperCase();
+
+  return `${firstName} ${surnameInitial}.`;
 }
 
 function normalizeInterestTag(value: string) {
