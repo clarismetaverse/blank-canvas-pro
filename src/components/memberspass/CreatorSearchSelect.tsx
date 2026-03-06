@@ -7,8 +7,10 @@ type CreatorSearchSelectProps = {
   onChange: (value: string) => void;
   onSelect: (creator: CreatorLite) => void;
   onResults?: (results: CreatorLite[]) => void;
+  onFocusChange?: (isFocused: boolean) => void;
   placeholder?: string;
   disabled?: boolean;
+  showDropdown?: boolean;
 };
 
 export default function CreatorSearchSelect({
@@ -16,8 +18,10 @@ export default function CreatorSearchSelect({
   onChange,
   onSelect,
   onResults,
+  onFocusChange,
   placeholder = "Search creators",
   disabled,
+  showDropdown = true,
 }: CreatorSearchSelectProps) {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -31,6 +35,7 @@ export default function CreatorSearchSelect({
     if (!term) {
       setResults([]);
       setLoading(false);
+      onResults?.([]);
       return;
     }
 
@@ -47,11 +52,12 @@ export default function CreatorSearchSelect({
       try {
         const data = await searchCreators(term, abortRef.current.signal);
         setResults(data);
-        if (data.length) onResults?.(data);
+        onResults?.(data);
       } catch (error) {
         if ((error as Error).name === "AbortError") return;
         console.error("Creator search failed", error);
         setResults([]);
+        onResults?.([]);
       } finally {
         setLoading(false);
       }
@@ -86,14 +92,18 @@ export default function CreatorSearchSelect({
             onChange(event.target.value);
             setOpen(true);
           }}
-          onFocus={() => setOpen(true)}
+          onFocus={() => {
+            setOpen(true);
+            onFocusChange?.(true);
+          }}
+          onBlur={() => onFocusChange?.(false)}
           placeholder={placeholder}
           disabled={disabled}
           className="w-full bg-transparent text-sm text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
         />
       </div>
 
-      {open && (loading || results.length > 0 || value.trim()) && (
+      {showDropdown && open && (loading || results.length > 0 || value.trim()) && (
         <div className="absolute z-20 mt-2 w-full overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_20px_50px_rgba(0,0,0,0.12)]">
           {loading && (
             <div className="px-4 py-3 text-sm text-neutral-500">Searching creators…</div>
