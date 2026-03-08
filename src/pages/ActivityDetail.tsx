@@ -356,6 +356,7 @@ export default function ActivityDetail() {
   const [showRejected, setShowRejected] = useState(false);
   const [inviteModelsOpen, setInviteModelsOpen] = useState(false);
   const [inviteModalInitialTab, setInviteModalInitialTab] = useState<InviteModalTabKey>("discover");
+  const [profileSheetCreator, setProfileSheetCreator] = useState<CreatorLite | null>(null);
   const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; cityName?: string; total: number; delta: number; avatars: Array<{ id: number; name: string; url: string | null }>; hostAvatarUrl?: string | null }>({
     open: false,
     tripName: "",
