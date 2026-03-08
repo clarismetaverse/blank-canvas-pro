@@ -703,6 +703,14 @@ export default function ActivityDetail() {
             setInviteModalInitialTab("participants");
             setInviteModelsOpen(true);
           }}
+          onSelect={(person) => {
+            setProfileSheetCreator({
+              id: Number(person.id) || 0,
+              name: person.name,
+              IG_account: person.ig || undefined,
+              Profile_pic: person.avatarUrl ? { url: person.avatarUrl } : null,
+            });
+          }}
         />
 
         <motion.section
