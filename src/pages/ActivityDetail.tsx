@@ -993,6 +993,12 @@ export default function ActivityDetail() {
           setInviteModelsOpen(false);
         }}
       />
+      <CreatorProfileSheet
+        creator={profileSheetCreator}
+        open={!!profileSheetCreator}
+        onClose={() => setProfileSheetCreator(null)}
+        variant="vic-search"
+      />
     </div>
   );
 }
