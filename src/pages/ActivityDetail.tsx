@@ -8,6 +8,8 @@ import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { Building2, Calendar, ChevronLeft, MapPin, MessageCircle, Search, User, X } from "lucide-react";
 import { useNavigate, useParams } from "react-router-dom";
+import CreatorProfileSheet from "@/components/memberspass/CreatorProfileSheet";
+import type { CreatorLite } from "@/services/creatorSearch";
 import { fetchActivityById, type ActivityDetailResponse, type InviteLite, type InviteStatus, type TripActivity } from "@/services/activities";
 import { getValidInvitedUsers, putTripsInvite } from "@/services/tripsInvite";
 import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityInviteModelsModal";
@@ -43,7 +45,7 @@ type PersonLite = {
   status: PersonLiteStatus;
 };
 
-function ParticipantsStrip({ people, onViewAll }: { people: PersonLite[]; onViewAll: () => void }) {
+function ParticipantsStrip({ people, onViewAll, onSelect }: { people: PersonLite[]; onViewAll: () => void; onSelect?: (person: PersonLite) => void }) {
   if (!people.length) return null;
 
   const statusPillStyles: Record<PersonLiteStatus, string> = {
@@ -58,16 +60,17 @@ function ParticipantsStrip({ people, onViewAll }: { people: PersonLite[]; onView
   const CARD_W_GRID = "w-full";
 
   const Card = ({ person }: { person: PersonLite }) => (
-    <article className={`relative overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 shadow-[0_18px_48px_rgba(0,0,0,0.10)] ${CARD_H}`}>
+    <article
+      className={`relative overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 shadow-[0_18px_48px_rgba(0,0,0,0.10)] ${CARD_H} cursor-pointer active:scale-[0.97] transition-transform`}
+      onClick={() => onSelect?.(person)}
+    >
       <img src={person.avatarUrl} alt={person.name} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
 
       <div className="absolute inset-0 bg-black/10" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
 
-
       <div className="absolute bottom-3 left-3 right-3">
         <p className="truncate text-sm font-semibold text-white drop-shadow-[0_10px_22px_rgba(0,0,0,0.55)]">{person.name}</p>
-        
       </div>
     </article>
   );
@@ -353,6 +356,7 @@ export default function ActivityDetail() {
   const [showRejected, setShowRejected] = useState(false);
   const [inviteModelsOpen, setInviteModelsOpen] = useState(false);
   const [inviteModalInitialTab, setInviteModalInitialTab] = useState<InviteModalTabKey>("discover");
+  const [profileSheetCreator, setProfileSheetCreator] = useState<CreatorLite | null>(null);
   const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; cityName?: string; total: number; delta: number; avatars: Array<{ id: number; name: string; url: string | null }>; hostAvatarUrl?: string | null }>({
     open: false,
     tripName: "",
@@ -699,6 +703,14 @@ export default function ActivityDetail() {
             setInviteModalInitialTab("participants");
             setInviteModelsOpen(true);
           }}
+          onSelect={(person) => {
+            setProfileSheetCreator({
+              id: Number(person.id) || 0,
+              name: person.name,
+              IG_account: person.ig || undefined,
+              Profile_pic: person.avatarUrl ? { url: person.avatarUrl } : null,
+            });
+          }}
         />
 
         <motion.section
@@ -980,6 +992,12 @@ export default function ActivityDetail() {
           }
           setInviteModelsOpen(false);
         }}
+      />
+      <CreatorProfileSheet
+        creator={profileSheetCreator}
+        open={!!profileSheetCreator}
+        onClose={() => setProfileSheetCreator(null)}
+        variant="vic-search"
       />
     </div>
   );
