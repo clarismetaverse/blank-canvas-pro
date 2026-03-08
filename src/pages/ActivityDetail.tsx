@@ -60,16 +60,17 @@ function ParticipantsStrip({ people, onViewAll, onSelect }: { people: PersonLite
   const CARD_W_GRID = "w-full";
 
   const Card = ({ person }: { person: PersonLite }) => (
-    <article className={`relative overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 shadow-[0_18px_48px_rgba(0,0,0,0.10)] ${CARD_H}`}>
+    <article
+      className={`relative overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 shadow-[0_18px_48px_rgba(0,0,0,0.10)] ${CARD_H} cursor-pointer active:scale-[0.97] transition-transform`}
+      onClick={() => onSelect?.(person)}
+    >
       <img src={person.avatarUrl} alt={person.name} className="absolute inset-0 h-full w-full object-cover" loading="lazy" />
 
       <div className="absolute inset-0 bg-black/10" />
       <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
 
-
       <div className="absolute bottom-3 left-3 right-3">
         <p className="truncate text-sm font-semibold text-white drop-shadow-[0_10px_22px_rgba(0,0,0,0.55)]">{person.name}</p>
-        
       </div>
     </article>
   );
