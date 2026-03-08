@@ -45,7 +45,7 @@ type PersonLite = {
   status: PersonLiteStatus;
 };
 
-function ParticipantsStrip({ people, onViewAll }: { people: PersonLite[]; onViewAll: () => void }) {
+function ParticipantsStrip({ people, onViewAll, onSelect }: { people: PersonLite[]; onViewAll: () => void; onSelect?: (person: PersonLite) => void }) {
   if (!people.length) return null;
 
   const statusPillStyles: Record<PersonLiteStatus, string> = {
