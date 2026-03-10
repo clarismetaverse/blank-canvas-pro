@@ -6,9 +6,18 @@ export type CreatorLite = {
   bio?: string;
   tagline?: string;
   description?: string;
+  nationality?: string;
+  user_interest_topics_turbo_id?: number[];
   IG_account?: string;
   Tiktok_account?: string;
-  Profile_pic?: { url?: string } | null;
+  Profile_pic?: {
+    url?: string;
+    mime?: string;
+    meta?: {
+      width?: number;
+      height?: number;
+    };
+  } | null;
 };
 
 function getToken() {

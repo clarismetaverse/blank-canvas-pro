@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lock, Star } from "lucide-react";
+import { Instagram, Lock, Music2, Star } from "lucide-react";
 import type { CreatorLite } from "@/services/creatorSearch";
 import CreatorProfileSheet from "@/components/memberspass/CreatorProfileSheet";
 
@@ -25,7 +25,7 @@ export default function CreatorCard({
   const [open, setOpen] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const img = creator.Profile_pic?.url;
+  const img = creator.Profile_pic?.url || CREATOR_PLACEHOLDER_IMAGE;
   const isUgcReady = true;
   const isUgcFirst = true;
   const isVic = variant === "vic";
@@ -33,7 +33,11 @@ export default function CreatorCard({
   const isVicSurface = isVic || isVicSearch;
 
   const displayName = formatCreatorDisplayName(creator.name);
-  const bioLine = getCreatorBio(creator, creator.id);
+  const bioLine = getCreatorBio(creator);
+  const hasInstagram = Boolean((creator.IG_account || "").trim());
+  const hasTiktok = Boolean((creator.Tiktok_account || "").trim());
+  const nationality = (creator.nationality || "").trim();
+  const interestTags = getCreatorInterestTags(creator, interests);
 
   return (
     <div className="relative w-full shrink-0 snap-start">
@@ -43,15 +47,11 @@ export default function CreatorCard({
         className="group relative w-full overflow-hidden rounded-3xl text-left shadow-[0_12px_40px_rgba(0,0,0,0.16)] transition-transform duration-200 ease-out hover:scale-[1.01] active:scale-[0.98]"
       >
         <div className={`relative w-full ${isVicSearch ? "h-[308px]" : "h-[348px]"}`}>
-          {img ? (
-            <img
-              src={img}
-              alt={creator.name || "Creator"}
-              className="h-full w-full object-cover"
-            />
-          ) : (
-            <div className="h-full w-full bg-neutral-100" />
-          )}
+          <img
+            src={img}
+            alt={creator.name || "Creator"}
+            className="h-full w-full object-cover"
+          />
 
           <div
             className={`absolute inset-0 ${
@@ -118,9 +118,9 @@ export default function CreatorCard({
                 </div>
               )}
 
-              {isVicSearch && interests && interests.length > 0 && (
+              {isVicSearch && interestTags.length > 0 && (
                 <div className="mt-2.5 flex flex-wrap gap-x-3 gap-y-1.5">
-                  {interests.map((interest) => (
+                  {interestTags.map((interest) => (
                     <span
                       key={`${creator.id}-${interest}`}
                       className="text-[13px] font-normal tracking-[0.025em] text-[#F5DEB3] drop-shadow-[0_1px_8px_rgba(0,0,0,0.28)]"
@@ -135,10 +135,31 @@ export default function CreatorCard({
         </div>
 
         {isVicSearch && (
-          <div className="border-t border-black/5 bg-white px-4 py-3.5">
-            <p className="truncate text-[12.5px] font-normal italic leading-relaxed text-neutral-400">
-              {bioLine}
-            </p>
+          <div className="space-y-2 border-t border-black/5 bg-white px-4 py-3.5">
+            {(hasInstagram || hasTiktok || nationality) && (
+              <div className="flex flex-wrap items-center gap-2 text-[11px] text-neutral-500">
+                {nationality && (
+                  <span className="rounded-full bg-neutral-100 px-2 py-0.5">{nationality}</span>
+                )}
+                {hasInstagram && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5">
+                    <Instagram className="h-3 w-3" />
+                    Instagram
+                  </span>
+                )}
+                {hasTiktok && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5">
+                    <Music2 className="h-3 w-3" />
+                    TikTok
+                  </span>
+                )}
+              </div>
+            )}
+            {bioLine && (
+              <p className="truncate text-[12.5px] font-normal italic leading-relaxed text-neutral-400">
+                {bioLine}
+              </p>
+            )}
           </div>
         )}
       </button>
@@ -177,25 +198,18 @@ export default function CreatorCard({
   );
 }
 
-const fallbackTaglines = [
-  "Curates elevated nights between beach clubs and private tables.",
-  "Known for discreet access to fashion dinners and art salons.",
-  "Moves between yachting weekends and members-only city moments.",
-  "Hosts refined escapes blending wellness, design, and travel.",
-  "Shapes polished social scenes with understated luxury taste.",
-];
 
-function getCreatorBio(creator: CreatorLite, id: number): string {
-  const bio = (creator.bio || "").trim();
-  if (bio) return bio;
 
-  const tagline = ((creator as any).tagline || "").trim();
-  if (tagline) return tagline;
+const CREATOR_PLACEHOLDER_IMAGE =
+  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='900' height='1200' viewBox='0 0 900 1200'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' x2='1' y1='0' y2='1'%3E%3Cstop offset='0%' stop-color='%23F3F4F6'/%3E%3Cstop offset='100%' stop-color='%23E5E7EB'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='900' height='1200' fill='url(%23g)'/%3E%3Ccircle cx='450' cy='420' r='150' fill='%23D1D5DB'/%3E%3Crect x='200' y='620' width='500' height='300' rx='150' fill='%23D1D5DB'/%3E%3C/svg%3E";
 
-  const desc = ((creator as any).description || "").trim();
-  if (desc) return desc;
+function getCreatorInterestTags(creator: CreatorLite, interests?: string[]) {
+  if (interests && interests.length > 0) return interests;
 
-  return fallbackTaglines[Math.abs(id) % fallbackTaglines.length];
+  return (creator.user_interest_topics_turbo_id || []).map((topicId) => `topic-${topicId}`);
+}
+function getCreatorBio(creator: CreatorLite): string {
+  return (creator.bio || "").trim();
 }
 
 function formatCreatorDisplayName(name?: string) {

@@ -63,33 +63,6 @@ const featuredContent = [
   },
 ];
 
-const searchInterestPool = [
-  "Fashion",
-  "Travel",
-  "Dining",
-  "Wellness",
-  "Beach",
-  "Art",
-  "Nightlife",
-  "Yachting",
-];
-
-const getDeterministicInterests = (creator: CreatorLite) => {
-  const seedBase = `${creator.id}-${creator.name || "vic"}`;
-  let hash = 0;
-  for (let index = 0; index < seedBase.length; index += 1) {
-    hash = (hash * 31 + seedBase.charCodeAt(index)) >>> 0;
-  }
-
-  const chipsCount = 2 + (hash % 2);
-  const interests: string[] = [];
-  for (let index = 0; index < chipsCount; index += 1) {
-    const interest = searchInterestPool[(hash + index * 3) % searchInterestPool.length];
-    if (!interests.includes(interest)) interests.push(interest);
-  }
-  return interests;
-};
-
 export default function MemberspassVICHome() {
   const navigate = useNavigate();
   const [points] = useState(2450);
@@ -215,7 +188,6 @@ export default function MemberspassVICHome() {
                   key={`search-${creator.id}`}
                   creator={creator}
                   variant="vic-search"
-                  interests={getDeterministicInterests(creator)}
                 />
               ))}
             </div>
