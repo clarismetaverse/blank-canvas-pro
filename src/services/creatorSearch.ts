@@ -57,9 +57,5 @@ export async function searchCreators(q: string, signal?: AbortSignal): Promise<C
   }
 
   const data = (await res.json()) as CreatorLite[];
-  const list = Array.isArray(data) ? data : [];
-  if (list.length > 0) {
-    console.log("[creatorSearch] sample interest data:", JSON.stringify(list[0]?.user_interest_topics_turbo_id));
-  }
-  return list;
+  return Array.isArray(data) ? data : [];
 }
