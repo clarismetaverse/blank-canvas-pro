@@ -184,7 +184,14 @@ const CREATOR_PLACEHOLDER_IMAGE =
 function getCreatorInterestTags(creator: CreatorLite, interests?: string[]) {
   if (interests && interests.length > 0) return interests;
 
-  return (creator.user_interest_topics_turbo_id || []).map((topicId) => `topic-${topicId}`);
+  return (creator.user_interest_topics_turbo_id || [])
+    .map((topic) => {
+      if (typeof topic === "object" && topic !== null && topic.interest_topics) {
+        return topic.interest_topics;
+      }
+      return null;
+    })
+    .filter((label): label is string => !!label);
 }
 function getCreatorBio(creator: CreatorLite): string {
   return (creator.bio || "").trim();

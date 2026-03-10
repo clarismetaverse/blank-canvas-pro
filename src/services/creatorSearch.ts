@@ -7,7 +7,7 @@ export type CreatorLite = {
   tagline?: string;
   description?: string;
   nationality?: string;
-  user_interest_topics_turbo_id?: number[];
+  user_interest_topics_turbo_id?: Array<number | { id?: number; interest_topics?: string }>;
   IG_account?: string;
   Tiktok_account?: string;
   Profile_pic?: {
