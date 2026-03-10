@@ -131,13 +131,11 @@ export default function CreatorCard({
           </div>
         </div>
 
-        {isVicSearch && (
-          <div className="space-y-2 border-t border-black/5 bg-white px-4 py-3.5">
-            {bioLine && (
-              <p className="truncate text-[12.5px] font-normal italic leading-relaxed text-neutral-400">
-                {bioLine}
-              </p>
-            )}
+        {isVicSearch && bioLine && (
+          <div className="space-y-2 bg-white px-4 py-3.5">
+            <p className="truncate text-[12.5px] font-normal italic leading-relaxed text-neutral-400">
+              {bioLine}
+            </p>
           </div>
         )}
       </button>
