@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Instagram, Lock, Music2, Star } from "lucide-react";
+import { Lock, Star } from "lucide-react";
 import type { CreatorLite } from "@/services/creatorSearch";
 import CreatorProfileSheet from "@/components/memberspass/CreatorProfileSheet";
 
@@ -25,7 +25,7 @@ export default function CreatorCard({
   const [open, setOpen] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
 
-  const img = creator.Profile_pic?.url || CREATOR_PLACEHOLDER_IMAGE;
+  const img = getCreatorAvatar(creator);
   const isUgcReady = true;
   const isUgcFirst = true;
   const isVic = variant === "vic";
@@ -34,9 +34,6 @@ export default function CreatorCard({
 
   const displayName = formatCreatorDisplayName(creator.name);
   const bioLine = getCreatorBio(creator);
-  const hasInstagram = Boolean((creator.IG_account || "").trim());
-  const hasTiktok = Boolean((creator.Tiktok_account || "").trim());
-  const nationality = (creator.nationality || "").trim();
   const interestTags = getCreatorInterestTags(creator, interests);
 
   return (
@@ -99,7 +96,7 @@ export default function CreatorCard({
                       : "text-lg font-semibold text-white"
                   }`}
                 >
-                  {isVicSearch ? displayName : creator.name || "Unnamed creator"}
+                  {isVicSurface ? displayName : creator.name || "Unnamed creator"}
                 </p>
               </div>
 
@@ -136,25 +133,6 @@ export default function CreatorCard({
 
         {isVicSearch && (
           <div className="space-y-2 border-t border-black/5 bg-white px-4 py-3.5">
-            {(hasInstagram || hasTiktok || nationality) && (
-              <div className="flex flex-wrap items-center gap-2 text-[11px] text-neutral-500">
-                {nationality && (
-                  <span className="rounded-full bg-neutral-100 px-2 py-0.5">{nationality}</span>
-                )}
-                {hasInstagram && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5">
-                    <Instagram className="h-3 w-3" />
-                    Instagram
-                  </span>
-                )}
-                {hasTiktok && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-2 py-0.5">
-                    <Music2 className="h-3 w-3" />
-                    TikTok
-                  </span>
-                )}
-              </div>
-            )}
             {bioLine && (
               <p className="truncate text-[12.5px] font-normal italic leading-relaxed text-neutral-400">
                 {bioLine}
@@ -210,6 +188,11 @@ function getCreatorInterestTags(creator: CreatorLite, interests?: string[]) {
 }
 function getCreatorBio(creator: CreatorLite): string {
   return (creator.bio || "").trim();
+}
+
+function getCreatorAvatar(creator: CreatorLite): string {
+  const avatarUrl = creator.Profile_pic?.url?.trim();
+  return avatarUrl || CREATOR_PLACEHOLDER_IMAGE;
 }
 
 function formatCreatorDisplayName(name?: string) {
