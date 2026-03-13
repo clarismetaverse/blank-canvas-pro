@@ -3,6 +3,8 @@ import { Bookmark, Gift, Instagram, Lock, Music2, Share2, Star, Ticket, X } from
 import { useState } from "react";
 import type { CreatorLite } from "@/services/creatorSearch";
 import InviteExperienceSheet from "@/components/vic/InviteExperienceSheet";
+import GiftDrawer from "@/components/memberspass/GiftDrawer";
+import type { GiftItem } from "@/components/memberspass/GiftEditorialCard";
 
 const backdrop = {
   hidden: { opacity: 0 },
@@ -60,6 +62,7 @@ export default function CreatorProfileSheet({
   onClose,
 }: CreatorProfileSheetProps) {
   const [inviteOpen, setInviteOpen] = useState(false);
+  const [isGiftDrawerOpen, setIsGiftDrawerOpen] = useState(false);
   const instagramUrl = buildSocialLink("instagram", creator?.IG_account);
   const tiktokUrl = buildSocialLink("tiktok", creator?.Tiktok_account);
   const hasTikTok = Boolean(creator?.Tiktok_account);
@@ -82,6 +85,43 @@ export default function CreatorProfileSheet({
     id: `close-friend-${index}`,
     src: heroImage,
   }));
+  const gifts: GiftItem[] = [
+    {
+      id: "fragrance",
+      name: "Signature Fragrance",
+      subtitle: "Curated scent",
+      image: "/images/gifts/fragrance.jpg",
+      size: "hero",
+    },
+    {
+      id: "jewelry",
+      name: "Delicate Jewelry",
+      subtitle: "Fine detail",
+      image: "/images/gifts/jewelry.jpg",
+      size: "regular",
+    },
+    {
+      id: "silk-accessory",
+      name: "Silk Accessory",
+      subtitle: "Timeless piece",
+      image: "/images/gifts/silk-accessory.jpg",
+      size: "hero",
+    },
+    {
+      id: "chocolate",
+      name: "Fine Chocolate",
+      subtitle: "Small indulgence",
+      image: "/images/gifts/chocolate.jpg",
+      size: "regular",
+    },
+    {
+      id: "intimates",
+      name: "Silk Intimates",
+      subtitle: "Private luxury",
+      image: "/images/gifts/intimates.jpg",
+      size: "hero",
+    },
+  ];
 
   return (
     <AnimatePresence>
@@ -265,7 +305,7 @@ export default function CreatorProfileSheet({
                     <button
                       type="button"
                       className="flex-1 rounded-full bg-neutral-900 px-4 py-3 text-sm font-semibold text-white"
-                      onClick={() => window.alert("Coming soon")}
+                      onClick={() => setIsGiftDrawerOpen(true)}
                     >
                       <span className="inline-flex items-center justify-center gap-2">
                         <Gift className="h-4 w-4" />
@@ -423,6 +463,13 @@ export default function CreatorProfileSheet({
               creator={creator}
             />
           )}
+          <GiftDrawer
+            open={isGiftDrawerOpen}
+            onClose={() => setIsGiftDrawerOpen(false)}
+            creatorName={creator?.name}
+            gifts={gifts}
+            onSelectGift={(gift) => window.alert(`${gift.name} details coming soon`)}
+          />
         </motion.div>
       )}
     </AnimatePresence>
