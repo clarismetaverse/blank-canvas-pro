@@ -173,6 +173,11 @@ export default function CreatorProfileSheet({
                       />
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
+                    <div className="absolute left-5 top-4 flex items-center gap-2">
+                      <span className="inline-flex items-center rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-neutral-900">
+                        {displayRole}
+                      </span>
+                    </div>
                     <div className="absolute right-4 top-4 flex items-center gap-2">
                       <button
                         type="button"
@@ -187,9 +192,6 @@ export default function CreatorProfileSheet({
                       <p className="text-3xl font-semibold text-white">
                         {creator?.name || "Creator profile"}
                       </p>
-                      <span className="mt-3 inline-flex items-center rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-neutral-900">
-                        {displayRole}
-                      </span>
                     </div>
                   </div>
 
