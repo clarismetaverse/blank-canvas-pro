@@ -2,8 +2,10 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Bookmark, Gift, Instagram, Lock, Music2, Share2, Star, Ticket, X } from "lucide-react";
 import { useState } from "react";
 import type { CreatorLite } from "@/services/creatorSearch";
+import ActivityPickerModal from "@/features/activities/ActivityPickerModal";
 import InviteExperienceSheet from "@/components/vic/InviteExperienceSheet";
 import GiftDrawer from "@/components/memberspass/GiftDrawer";
+import type { Activity } from "@/services/activityApi";
 import type { GiftItem } from "@/components/memberspass/GiftEditorialCard";
 
 const backdrop = {
