@@ -43,7 +43,7 @@ export default function CreatorCard({
     isVic && size === "candidate"
       ? "h-[300px] rounded-[22px]"
       : isVic && size === "large"
-        ? "h-[250px] rounded-[20px]"
+        ? "h-[330px] rounded-[20px]"
         : isVic
           ? "h-[230px] rounded-[20px]"
           : isVicSearch
