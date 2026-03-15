@@ -1,7 +1,9 @@
+import { useEffect, useState } from "react";
 import { ChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import CreatorCard from "@/components/memberspass/CreatorCard";
 import type { CreatorLite } from "@/services/creatorSearch";
+import { fetchNewInTown } from "@/services/newInTown";
 
 type SeeAllState = {
   title: string;
@@ -11,10 +13,19 @@ type SeeAllState = {
 export default function MembersSeeAll() {
   const navigate = useNavigate();
   const location = useLocation();
-  const state = (location.state as SeeAllState | null) ?? {
-    title: "Members",
-    creators: [],
-  };
+  const passedState = location.state as SeeAllState | null;
+
+  const [creators, setCreators] = useState<CreatorLite[]>(passedState?.creators ?? []);
+  const [loading, setLoading] = useState(!passedState?.creators?.length);
+  const title = passedState?.title ?? "Members";
+
+  useEffect(() => {
+    if (!passedState?.creators?.length) {
+      fetchNewInTown()
+        .then(setCreators)
+        .finally(() => setLoading(false));
+    }
+  }, []);
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-[#0B0B0F]">
@@ -28,13 +39,17 @@ export default function MembersSeeAll() {
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <h1 className="text-sm font-semibold text-neutral-900">{state.title}</h1>
+          <h1 className="text-sm font-semibold text-neutral-900">{title}</h1>
           <div className="h-8 w-8" />
         </div>
       </div>
 
       <div className="mx-auto w-full max-w-md space-y-4 px-4 pb-16 pt-6">
-        {state.creators.map((creator) => (
+        {loading && (
+          <p className="py-12 text-center text-sm text-neutral-400">Loading…</p>
+        )}
+
+        {!loading && creators.map((creator) => (
           <CreatorCard
             key={creator.id}
             creator={creator}
@@ -43,7 +58,7 @@ export default function MembersSeeAll() {
           />
         ))}
 
-        {state.creators.length === 0 && (
+        {!loading && creators.length === 0 && (
           <p className="py-12 text-center text-sm text-neutral-400">No members to show</p>
         )}
       </div>
