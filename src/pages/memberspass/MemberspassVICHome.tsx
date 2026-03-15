@@ -208,7 +208,13 @@ export default function MemberspassVICHome() {
             <section className="space-y-3 pt-1">
               <div className="flex items-center justify-between px-1">
                 <h2 className="text-base font-semibold text-neutral-900">Members in {cityName}</h2>
-                <span className="text-xs text-neutral-400">Swipe</span>
+                <button
+                  type="button"
+                  onClick={() => {/* TODO */}}
+                  className="text-xs font-medium text-neutral-500 hover:text-neutral-900 transition-colors"
+                >
+                  See all
+                </button>
               </div>
               <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-proximity">
                 {membersCreators.map((creator, index) => (
