@@ -337,7 +337,7 @@ export default function CreatorProfileSheet({
                         return;
                       }
 
-                      setInviteOpen(true);
+                      setActivityPickerOpen(true);
                     }}
                   >
                     {isInvited && isSelectMode ? "Deselect" : isInvited ? "Invited ✓" : (
