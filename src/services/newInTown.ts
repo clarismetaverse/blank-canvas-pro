@@ -40,6 +40,7 @@ export async function fetchNewInTown(): Promise<CreatorLite[]> {
           bio: u?.bio,
           tagline: u?.tagline,
           description: u?.description,
+          Agency: u?.Agency,
           IG_account: u?.IG_account,
           Tiktok_account: u?.Tiktok_account,
           Profile_pic: u?.Profile_pic,
