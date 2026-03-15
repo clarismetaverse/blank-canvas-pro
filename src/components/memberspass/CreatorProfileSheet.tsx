@@ -249,29 +249,6 @@ export default function CreatorProfileSheet({
                       </div>
                     </div>
 
-                    <div className="mt-6">
-                      <h3 className="text-sm font-semibold text-neutral-900">Socials</h3>
-                      <div className="mt-3 space-y-2">
-                        {[
-                          { label: "Instagram", icon: Instagram },
-                          { label: "TikTok", icon: Music2 },
-                        ].map(({ label, icon: Icon }) => (
-                          <div
-                            key={label}
-                            className="flex items-center justify-between rounded-2xl border border-neutral-200 bg-white px-4 py-3 text-sm text-neutral-600 shadow-sm"
-                          >
-                            <div className="flex items-center gap-2">
-                              <Icon className="h-4 w-4 text-neutral-400" />
-                              <span className="font-medium text-neutral-700">{label}</span>
-                            </div>
-                            <div className="flex items-center gap-2 text-xs font-semibold text-neutral-500">
-                              <Lock className="h-3 w-3" />
-                              Locked
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
 
                     <div className="mt-6 space-y-3">
                       <button
