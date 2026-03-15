@@ -173,15 +173,6 @@ export default function CreatorProfileSheet({
                     <div className="absolute right-4 top-4 flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={handleToggleFavorite}
-                        aria-pressed={isFavorite}
-                        aria-label={isFavorite ? "Remove favourite" : "Add favourite"}
-                        className="rounded-full bg-white/90 p-2 text-neutral-900 shadow-md transition hover:scale-105 active:scale-95"
-                      >
-                        <Star className={isFavorite ? "h-4 w-4 fill-neutral-900" : "h-4 w-4"} />
-                      </button>
-                      <button
-                        type="button"
                         className="rounded-full bg-white/90 p-2 text-neutral-900 shadow-md transition hover:scale-105 active:scale-95"
                         onClick={onClose}
                         aria-label="Close"
