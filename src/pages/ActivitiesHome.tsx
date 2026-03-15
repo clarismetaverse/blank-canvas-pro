@@ -243,6 +243,7 @@ export default function ActivitiesHome() {
                 type="button"
                 onClick={() => {
                   setInviteFilterType(item.type);
+                  setInviteActivityId(null);
                   setInviteSheetOpen(true);
                 }}
                 className="flex w-full items-center gap-3 rounded-2xl border border-neutral-200 bg-white px-4 py-3.5 text-left text-sm font-semibold text-neutral-800 shadow-[0_4px_12px_rgba(0,0,0,0.04)] transition active:scale-[0.98] hover:bg-neutral-50"
