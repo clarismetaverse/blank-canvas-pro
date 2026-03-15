@@ -216,7 +216,6 @@ export default function MemberspassVICHome() {
                   See all
                 </button>
               </div>
-              </div>
               <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-proximity">
                 {membersCreators.map((creator, index) => (
                   <div
