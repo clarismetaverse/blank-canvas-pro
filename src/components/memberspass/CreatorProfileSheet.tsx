@@ -461,11 +461,27 @@ export default function CreatorProfileSheet({
             )}
           </motion.div>
           {!isSelectMode && (
-            <InviteExperienceSheet
-              open={inviteOpen}
-              onClose={() => setInviteOpen(false)}
-              creator={creator}
-            />
+            <>
+              <ActivityPickerModal
+                open={activityPickerOpen}
+                onClose={() => setActivityPickerOpen(false)}
+                creatorName={creator?.name}
+                onSelect={(activity) => {
+                  setSelectedActivity(activity);
+                  setActivityPickerOpen(false);
+                  setInviteOpen(true);
+                }}
+              />
+              <InviteExperienceSheet
+                open={inviteOpen}
+                onClose={() => {
+                  setInviteOpen(false);
+                  setSelectedActivity(null);
+                }}
+                creator={creator}
+                preSelectedActivityId={selectedActivity?.id}
+              />
+            </>
           )}
           <GiftDrawer
             open={isGiftDrawerOpen}
