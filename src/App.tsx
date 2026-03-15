@@ -39,6 +39,13 @@ export default function App() {
           }
         />
         <Route
+          path="/members/all"
+          element={
+            <ProtectedLayout>
+              <MembersSeeAll />
+            </ProtectedLayout>
+          }
+        <Route
           path="/activities"
           element={
             <ProtectedLayout>
