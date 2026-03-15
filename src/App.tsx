@@ -45,6 +45,7 @@ export default function App() {
               <MembersSeeAll />
             </ProtectedLayout>
           }
+        />
         <Route
           path="/activities"
           element={
