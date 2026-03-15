@@ -63,6 +63,8 @@ export default function CreatorProfileSheet({
   onToggleFavorite,
   onClose,
 }: CreatorProfileSheetProps) {
+  const [activityPickerOpen, setActivityPickerOpen] = useState(false);
+  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [isGiftDrawerOpen, setIsGiftDrawerOpen] = useState(false);
   const instagramUrl = buildSocialLink("instagram", creator?.IG_account);
