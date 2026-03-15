@@ -555,6 +555,7 @@ export default function ActivitiesHome() {
         onClose={() => setInviteSheetOpen(false)}
         creator={null}
         filterType={inviteFilterType}
+        activityId={inviteActivityId}
         onInviteSuccess={loadActivities}
       />
     </div>
