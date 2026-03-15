@@ -140,6 +140,7 @@ export default function ActivitiesHome() {
   const [myActivitiesLoading, setMyActivitiesLoading] = useState(true);
   const [inviteSheetOpen, setInviteSheetOpen] = useState(false);
   const [inviteFilterType, setInviteFilterType] = useState<"local" | "trip" | "bali">("local");
+  const [inviteActivityId, setInviteActivityId] = useState<number | null>(null);
   const [eventTemps, setEventTemps] = useState<EventTemp[]>([]);
   const [eventTempsLoading, setEventTempsLoading] = useState(true);
 
