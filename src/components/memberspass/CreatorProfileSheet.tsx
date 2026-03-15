@@ -193,7 +193,7 @@ export default function CreatorProfileSheet({
                     </div>
                   </div>
 
-                  <div className="px-5 pb-10 pt-6">
+                  <div className="px-5 pb-4 pt-6">
                     <div>
                       <h3 className="text-sm font-semibold text-neutral-900">Bio</h3>
                       <p className="mt-2 text-sm leading-relaxed text-neutral-600">{bioText}</p>
