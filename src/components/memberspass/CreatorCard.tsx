@@ -7,6 +7,8 @@ type CreatorCardProps = {
   creator: CreatorLite;
   locked?: boolean;
   variant?: "default" | "vic" | "vic-search";
+  size?: "candidate" | "normal" | "large";
+  badge?: string;
   interests?: string[];
   mode?: "default" | "select";
   isInvited?: boolean;
@@ -17,6 +19,8 @@ export default function CreatorCard({
   creator,
   locked,
   variant = "default",
+  size = "normal",
+  badge,
   interests,
   mode = "default",
   isInvited = false,
@@ -31,6 +35,16 @@ export default function CreatorCard({
   const isVic = variant === "vic";
   const isVicSearch = variant === "vic-search";
   const isVicSurface = isVic || isVicSearch;
+  const cardSizeClasses =
+    isVic && size === "candidate"
+      ? "h-[300px] rounded-[22px]"
+      : isVic && size === "large"
+        ? "h-[250px] rounded-[20px]"
+        : isVic
+          ? "h-[230px] rounded-[20px]"
+          : isVicSearch
+            ? "h-[308px] rounded-3xl"
+            : "h-[348px] rounded-3xl";
 
   const displayName = formatCreatorDisplayName(creator.name);
   const bioLine = getCreatorBio(creator);
@@ -41,9 +55,9 @@ export default function CreatorCard({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="group relative w-full overflow-hidden rounded-3xl text-left shadow-[0_12px_40px_rgba(0,0,0,0.16)] transition-transform duration-200 ease-out hover:scale-[1.01] active:scale-[0.98]"
+        className={`group relative w-full overflow-hidden text-left shadow-[0_12px_40px_rgba(0,0,0,0.16)] transition-transform duration-200 ease-out hover:scale-[1.01] active:scale-[0.98] ${cardSizeClasses}`}
       >
-        <div className={`relative w-full ${isVicSearch ? "h-[308px]" : "h-[348px]"}`}>
+        <div className="relative h-full w-full">
           <img
             src={img}
             alt={creator.name || "Creator"}
@@ -69,6 +83,12 @@ export default function CreatorCard({
             </span>
           )}
 
+          {badge && !locked && (
+            <span className="absolute right-3 top-3 inline-flex items-center rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-neutral-800">
+              {badge}
+            </span>
+          )}
+
           {mode === "select" && isInvited && (
             <span className="absolute left-3 top-3 inline-flex items-center rounded-full bg-emerald-500/90 px-2.5 py-1 text-[10px] font-semibold text-white shadow">
               Invited ✓
@@ -77,7 +97,7 @@ export default function CreatorCard({
 
           <div
             className={`absolute left-0 right-0 ${
-              isVicSearch ? "bottom-0 p-4 pb-3" : "bottom-0 p-4"
+              isVicSearch ? "bottom-0 p-4 pb-3" : "bottom-0 p-4 pb-[14px]"
             }`}
           >
             <div className="text-left">
@@ -93,12 +113,18 @@ export default function CreatorCard({
                   className={`relative ${
                     isVicSearch
                       ? "text-[29px] font-semibold leading-[0.94] tracking-[-0.035em] text-[#FFF8F0] drop-shadow-[0_2px_14px_rgba(0,0,0,0.38)]"
-                      : "text-lg font-semibold text-white"
+                      : "mb-1 text-lg font-semibold text-white"
                   }`}
                 >
                   {isVicSurface ? displayName : creator.name || "Unnamed creator"}
                 </p>
               </div>
+
+              {isVic && (
+                <p className="text-xs text-white/75">
+                  {creator.nationality?.trim() || creator.tagline?.trim() || "Available locally"}
+                </p>
+              )}
 
               {!isVicSurface && (
                 <div className="mt-2 flex flex-wrap items-center gap-2">

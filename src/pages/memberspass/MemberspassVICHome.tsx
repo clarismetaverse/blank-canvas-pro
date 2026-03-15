@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, Lock, Sparkles } from "lucide-react";
+import { ChevronLeft, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CreatorCard from "@/components/memberspass/CreatorCard";
 import CreatorSearchSelect from "@/components/memberspass/CreatorSearchSelect";
@@ -39,27 +39,6 @@ const placeholderCreators: CreatorLite[] = [
     Profile_pic: {
       url: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80",
     },
-  },
-];
-
-const featuredContent = [
-  {
-    title: "Top Experiences — February",
-    imageUrl:
-      "https://images.unsplash.com/photo-1500530855697-b586d89ba3ee?auto=format&fit=crop&w=900&q=80",
-    creatorName: "Aria Vela",
-  },
-  {
-    title: "Weekend Venue Highlights",
-    imageUrl:
-      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80",
-    creatorName: "Kei Nakamura",
-  },
-  {
-    title: "Editors' Picks",
-    imageUrl:
-      "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80",
-    creatorName: "Nina Rossi",
   },
 ];
 
@@ -108,7 +87,15 @@ export default function MemberspassVICHome() {
   const showNewInTownSkeletons = newInTownLoading && !lastResults.length && !newInTown.length;
 
   const premiumCreators = useMemo(() => placeholderCreators.slice(0, 3), []);
+  const candidateCreators = useMemo(() => displayCreators.slice(0, 3), [displayCreators]);
+  const membersCreators = useMemo(() => displayCreators.slice(0, 6), [displayCreators]);
+  const suggestedCreators = useMemo(() => [...placeholderCreators, ...displayCreators].slice(0, 6), [displayCreators]);
   const isSearchActive = isSearchFocused || query.trim().length > 0;
+
+  const membersLargeIndexes = new Set([0, 3]);
+  const suggestedLargeIndexes = new Set([1]);
+  const memberBadges = ["LOCAL", "NEW", "FEATURED"];
+  const suggestedBadges = ["FEATURED", "NEW"];
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-[#0B0B0F]">
@@ -127,7 +114,7 @@ export default function MemberspassVICHome() {
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-md space-y-6 px-4 pb-16 pt-6">
+      <div className="mx-auto w-full max-w-md space-y-10 px-4 pb-16 pt-6">
         <section className="space-y-4 rounded-3xl border border-neutral-200 bg-white p-5 shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -138,7 +125,6 @@ export default function MemberspassVICHome() {
               {points.toLocaleString()} pts
             </span>
           </div>
-
 
           <CreatorSearchSelect
             value={query}
@@ -184,11 +170,7 @@ export default function MemberspassVICHome() {
 
             <div className="space-y-4 pb-2">
               {displayCreators.map((creator) => (
-                <CreatorCard
-                  key={`search-${creator.id}`}
-                  creator={creator}
-                  variant="vic-search"
-                />
+                <CreatorCard key={`search-${creator.id}`} creator={creator} variant="vic-search" />
               ))}
             </div>
           </section>
@@ -196,53 +178,72 @@ export default function MemberspassVICHome() {
           <>
             <section className="space-y-3">
               <div className="flex items-center justify-between px-1">
-                <h2 className="text-base font-semibold text-neutral-900">New in {cityName}</h2>
+                <div>
+                  <h2 className="text-base font-semibold text-neutral-900">Candidates</h2>
+                  <p className="mt-1 text-xs text-neutral-500">3 awaiting endorsement</p>
+                </div>
                 <span className="text-xs text-neutral-400">Swipe</span>
               </div>
-              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory">
+              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-proximity">
                 {showNewInTownSkeletons
                   ? Array.from({ length: 3 }).map((_, index) => (
-                      <div key={`new-in-town-skeleton-${index}`} className="w-[75%] shrink-0 snap-start">
-                        <div className="h-[290px] w-full rounded-3xl border border-neutral-200 bg-neutral-100 shadow-[0_10px_30px_rgba(0,0,0,0.08)]" />
+                      <div key={`new-in-town-skeleton-${index}`} className="w-[220px] shrink-0 snap-start">
+                        <div className="h-[300px] w-full rounded-[22px] border border-neutral-200 bg-neutral-100 shadow-[0_10px_30px_rgba(0,0,0,0.08)]" />
                       </div>
                     ))
-                  : displayCreators.map((creator) => (
-                      <div key={creator.id} className="w-[75%] shrink-0 snap-start">
-                        <CreatorCard creator={creator} variant="vic" />
+                  : candidateCreators.map((creator) => (
+                      <div key={creator.id} className="w-[220px] shrink-0 snap-start">
+                        <CreatorCard creator={creator} variant="vic" size="candidate" />
                       </div>
                     ))}
               </div>
             </section>
 
-            <section className="space-y-3">
+            <section className="space-y-3 pt-1">
               <div className="flex items-center justify-between px-1">
-                <h2 className="text-base font-semibold text-neutral-900">Featured profiles</h2>
+                <h2 className="text-base font-semibold text-neutral-900">Members in {cityName}</h2>
                 <span className="text-xs text-neutral-400">Swipe</span>
               </div>
-              <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory">
-                {featuredContent.map((item) => (
+              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-proximity">
+                {membersCreators.map((creator, index) => (
                   <div
-                    key={item.title}
-                    className="w-72 shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 bg-white shadow-[0_10px_30px_rgba(0,0,0,0.08)]"
+                    key={`members-${creator.id}-${index}`}
+                    className={`${membersLargeIndexes.has(index) ? "w-[210px]" : "w-[180px]"} shrink-0 snap-start`}
                   >
-                    <div className="relative h-48 w-full">
-                      <img src={item.imageUrl} alt={item.title} className="h-full w-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
-                      <div className="absolute bottom-4 left-4">
-                        <p className="text-sm font-semibold text-white">{item.title}</p>
-                        <p className="text-xs text-white/80">{item.creatorName}</p>
-                      </div>
-                      <span className="absolute right-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/85 px-2 py-1 text-[10px] font-semibold text-neutral-800">
-                        <Sparkles className="h-3 w-3" />
-                        Experience
-                      </span>
-                    </div>
+                    <CreatorCard
+                      creator={creator}
+                      variant="vic"
+                      size={membersLargeIndexes.has(index) ? "large" : "normal"}
+                      badge={index < memberBadges.length ? memberBadges[index] : undefined}
+                    />
                   </div>
                 ))}
               </div>
             </section>
 
-            <section className="space-y-3">
+            <section className="space-y-3 pt-1">
+              <div className="flex items-center justify-between px-1">
+                <h2 className="text-base font-semibold text-neutral-900">Suggested for you</h2>
+                <span className="text-xs text-neutral-400">Swipe</span>
+              </div>
+              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-proximity">
+                {suggestedCreators.map((creator, index) => (
+                  <div
+                    key={`suggested-${creator.id}-${index}`}
+                    className={`${suggestedLargeIndexes.has(index) ? "w-[210px]" : "w-[180px]"} shrink-0 snap-start`}
+                  >
+                    <CreatorCard
+                      creator={creator}
+                      variant="vic"
+                      size={suggestedLargeIndexes.has(index) ? "large" : "normal"}
+                      badge={index < suggestedBadges.length ? suggestedBadges[index] : undefined}
+                    />
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            <section className="space-y-3 pt-1">
               <div className="flex items-center justify-between px-1">
                 <div>
                   <h2 className="text-base font-semibold text-neutral-900">Private list</h2>
@@ -259,10 +260,10 @@ export default function MemberspassVICHome() {
                   Unlock
                 </button>
               </div>
-              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-mandatory">
+              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-proximity">
                 {premiumCreators.map((creator) => (
-                  <div key={creator.id} className="w-[75%] shrink-0 snap-start">
-                    <CreatorCard creator={creator} locked variant="vic" />
+                  <div key={creator.id} className="w-[180px] shrink-0 snap-start">
+                    <CreatorCard creator={creator} locked variant="vic" size="normal" />
                   </div>
                 ))}
               </div>
