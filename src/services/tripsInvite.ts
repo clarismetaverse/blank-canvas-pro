@@ -49,10 +49,15 @@ export function getValidInvitedUsers(input: unknown): ValidInvitedUser[] {
     .filter((item): item is ValidInvitedUser => item !== null);
 }
 
-export async function putTripsInvite(trip_id: number, invited_users: number[]): Promise<TripsInviteResponse> {
+export type PutTripsInviteInput = {
+  activityId: number;
+  invitedUsers: number[];
+};
+
+export async function putTripsInvite({ activityId, invitedUsers }: PutTripsInviteInput): Promise<TripsInviteResponse> {
   const normalizedInvitedUsers = Array.from(
     new Set(
-      invited_users
+      invitedUsers
         .map((id) => Number(id))
         .filter((id) => Number.isFinite(id) && id > 0)
     )
@@ -61,7 +66,8 @@ export async function putTripsInvite(trip_id: number, invited_users: number[]): 
   const response = await request<Partial<TripsInviteResponse>>("/trips/invite", {
     method: "PUT",
     body: JSON.stringify({
-      trip_id,
+      trip_id: Number(activityId),
+      activity_id: Number(activityId),
       invited_users: normalizedInvitedUsers,
     }),
   });
