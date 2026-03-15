@@ -210,7 +210,7 @@ export default function MemberspassVICHome() {
                 <h2 className="text-base font-semibold text-neutral-900">Members in {cityName}</h2>
                 <button
                   type="button"
-                  onClick={() => {/* TODO */}}
+                  onClick={() => navigate("/members/all", { state: { title: `Members in ${cityName}`, creators: membersCreators } })}
                   className="text-xs font-medium text-neutral-500 hover:text-neutral-900 transition-colors"
                 >
                   See all
