@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lock, Star } from "lucide-react";
+import { Lock } from "lucide-react";
 import type { CreatorLite } from "@/services/creatorSearch";
 import CreatorProfileSheet from "@/components/memberspass/CreatorProfileSheet";
 
@@ -166,20 +166,6 @@ export default function CreatorCard({
         )}
       </button>
 
-      {isVicSurface && mode !== "select" && (
-        <button
-          type="button"
-          onClick={(event) => {
-            event.stopPropagation();
-            setIsFavorite((prev) => !prev);
-          }}
-          aria-pressed={isFavorite}
-          aria-label={isFavorite ? "Remove favourite" : "Add favourite"}
-          className="absolute right-3 top-3 z-10 rounded-full bg-white/90 p-2 text-neutral-800 shadow-md transition hover:scale-105 active:scale-95"
-        >
-          <Star className={isFavorite ? "h-4 w-4 fill-neutral-900" : "h-4 w-4"} />
-        </button>
-      )}
 
       <CreatorProfileSheet
         creator={creator}

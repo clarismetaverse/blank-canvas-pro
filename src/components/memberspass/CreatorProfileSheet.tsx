@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Bookmark, Gift, Instagram, Lock, Music2, Share2, Star, Ticket, X } from "lucide-react";
+import { Bookmark, Gift, Instagram, Lock, Music2, Share2, Ticket, X } from "lucide-react";
 import { useState } from "react";
 import type { CreatorLite } from "@/services/creatorSearch";
 import InviteExperienceSheet from "@/components/vic/InviteExperienceSheet";
@@ -171,15 +171,6 @@ export default function CreatorProfileSheet({
                     )}
                     <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent" />
                     <div className="absolute right-4 top-4 flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={handleToggleFavorite}
-                        aria-pressed={isFavorite}
-                        aria-label={isFavorite ? "Remove favourite" : "Add favourite"}
-                        className="rounded-full bg-white/90 p-2 text-neutral-900 shadow-md transition hover:scale-105 active:scale-95"
-                      >
-                        <Star className={isFavorite ? "h-4 w-4 fill-neutral-900" : "h-4 w-4"} />
-                      </button>
                       <button
                         type="button"
                         className="rounded-full bg-white/90 p-2 text-neutral-900 shadow-md transition hover:scale-105 active:scale-95"
