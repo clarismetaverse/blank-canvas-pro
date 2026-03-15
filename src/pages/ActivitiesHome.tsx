@@ -140,7 +140,6 @@ export default function ActivitiesHome() {
   const [myActivitiesLoading, setMyActivitiesLoading] = useState(true);
   const [inviteSheetOpen, setInviteSheetOpen] = useState(false);
   const [inviteFilterType, setInviteFilterType] = useState<"local" | "trip" | "bali">("local");
-  const [inviteActivityId, setInviteActivityId] = useState<number | null>(null);
   const [eventTemps, setEventTemps] = useState<EventTemp[]>([]);
   const [eventTempsLoading, setEventTempsLoading] = useState(true);
 
@@ -243,7 +242,6 @@ export default function ActivitiesHome() {
                 type="button"
                 onClick={() => {
                   setInviteFilterType(item.type);
-                  setInviteActivityId(null);
                   setInviteSheetOpen(true);
                 }}
                 className="flex w-full items-center gap-3 rounded-2xl border border-neutral-200 bg-white px-4 py-3.5 text-left text-sm font-semibold text-neutral-800 shadow-[0_4px_12px_rgba(0,0,0,0.04)] transition active:scale-[0.98] hover:bg-neutral-50"
@@ -280,25 +278,21 @@ export default function ActivitiesHome() {
                 const statusAccepted = raw?.status === "confirmed";
 
                 return (
-                    <div
+                  <button
                     key={activity.id}
+                    type="button"
+                    onClick={() =>
+                      navigate(
+                        location.pathname.startsWith("/memberspass/vic/activities")
+                          ? `/memberspass/vic/activities/${activity.id}`
+                          : `/activities/${activity.id}`
+                      )
+                    }
                     className="relative h-52 w-[78%] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 text-left shadow-[0_18px_38px_rgba(10,10,20,0.16)]"
                   >
-                    <button
-                      type="button"
-                      onClick={() =>
-                        navigate(
-                          location.pathname.startsWith("/memberspass/vic/activities")
-                            ? `/memberspass/vic/activities/${activity.id}`
-                            : `/activities/${activity.id}`
-                        )
-                      }
-                      className="absolute inset-0 z-0"
-                      aria-label={`View ${activity.title}`}
-                    />
-                    <img src={activity.coverUrl} alt={activity.title} className="h-full w-full object-cover pointer-events-none" />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/55 pointer-events-none" />
-                    <div className="absolute left-4 top-4 flex items-center gap-2">
+                    <img src={activity.coverUrl} alt={activity.title} className="h-full w-full object-cover" />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/55" />
+                    <div className="absolute left-4 top-4">
                       <span
                         className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wide ${
                           statusAccepted
@@ -309,20 +303,7 @@ export default function ActivitiesHome() {
                         {statusLabel}
                       </span>
                     </div>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setInviteActivityId(Number(activity.id) || null);
-                        setInviteFilterType("local");
-                        setInviteSheetOpen(true);
-                      }}
-                      className="absolute right-4 top-4 z-10 inline-flex items-center gap-1.5 rounded-full border border-white/30 bg-white/90 px-3 py-1.5 text-[11px] font-semibold text-neutral-800 shadow-sm backdrop-blur active:scale-[0.97]"
-                    >
-                      <Mail className="h-3 w-3" />
-                      Invite
-                    </button>
-                    <div className="absolute bottom-4 left-4 right-4 space-y-2.5 pointer-events-none">
+                    <div className="absolute bottom-4 left-4 right-4 space-y-2.5">
                       <div>
                         <p className="text-base font-semibold text-white">{activity.title}</p>
                         <p className="text-xs text-white/80">{activity.subtitle}</p>
@@ -354,7 +335,7 @@ export default function ActivitiesHome() {
                         )}
                       </div>
                     </div>
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -556,7 +537,6 @@ export default function ActivitiesHome() {
         onClose={() => setInviteSheetOpen(false)}
         creator={null}
         filterType={inviteFilterType}
-        activityId={inviteActivityId}
         onInviteSuccess={loadActivities}
       />
     </div>
