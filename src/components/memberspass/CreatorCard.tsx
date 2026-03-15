@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lock, Star } from "lucide-react";
+import { Lock } from "lucide-react";
 import type { CreatorLite } from "@/services/creatorSearch";
 import CreatorProfileSheet from "@/components/memberspass/CreatorProfileSheet";
 
