@@ -2,10 +2,8 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Bookmark, Gift, Instagram, Lock, Music2, Share2, Star, Ticket, X } from "lucide-react";
 import { useState } from "react";
 import type { CreatorLite } from "@/services/creatorSearch";
-import ActivityPickerModal from "@/features/activities/ActivityPickerModal";
 import InviteExperienceSheet from "@/components/vic/InviteExperienceSheet";
 import GiftDrawer from "@/components/memberspass/GiftDrawer";
-import type { Activity } from "@/services/activityApi";
 import type { GiftItem } from "@/components/memberspass/GiftEditorialCard";
 
 const backdrop = {
@@ -63,8 +61,6 @@ export default function CreatorProfileSheet({
   onToggleFavorite,
   onClose,
 }: CreatorProfileSheetProps) {
-  const [activityPickerOpen, setActivityPickerOpen] = useState(false);
-  const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
   const [inviteOpen, setInviteOpen] = useState(false);
   const [isGiftDrawerOpen, setIsGiftDrawerOpen] = useState(false);
   const instagramUrl = buildSocialLink("instagram", creator?.IG_account);
@@ -337,7 +333,7 @@ export default function CreatorProfileSheet({
                         return;
                       }
 
-                      setActivityPickerOpen(true);
+                      setInviteOpen(true);
                     }}
                   >
                     {isInvited && isSelectMode ? "Deselect" : isInvited ? "Invited ✓" : (
@@ -461,27 +457,11 @@ export default function CreatorProfileSheet({
             )}
           </motion.div>
           {!isSelectMode && (
-            <>
-              <ActivityPickerModal
-                open={activityPickerOpen}
-                onClose={() => setActivityPickerOpen(false)}
-                creatorName={creator?.name}
-                onSelect={(activity) => {
-                  setSelectedActivity(activity);
-                  setActivityPickerOpen(false);
-                  setInviteOpen(true);
-                }}
-              />
-              <InviteExperienceSheet
-                open={inviteOpen}
-                onClose={() => {
-                  setInviteOpen(false);
-                  setSelectedActivity(null);
-                }}
-                creator={creator}
-                activityId={selectedActivity?.id ?? null}
-              />
-            </>
+            <InviteExperienceSheet
+              open={inviteOpen}
+              onClose={() => setInviteOpen(false)}
+              creator={creator}
+            />
           )}
           <GiftDrawer
             open={isGiftDrawerOpen}

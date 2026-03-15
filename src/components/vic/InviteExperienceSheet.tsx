@@ -18,8 +18,6 @@ type InviteExperienceSheetProps = {
   onClose: () => void;
   creator: CreatorLite | null;
   filterType?: "local" | "trip" | "bali";
-  activityId?: number | null;
-  onInviteSuccess?: () => Promise<void> | void;
 };
 
 type ExperienceItem = {
@@ -136,7 +134,7 @@ const activityIcons = {
   "night-out": MoonStar,
 } as const;
 
-export default function InviteExperienceSheet({ open, onClose, creator, filterType, activityId, onInviteSuccess }: InviteExperienceSheetProps) {
+export default function InviteExperienceSheet({ open, onClose, creator, filterType }: InviteExperienceSheetProps) {
   const navigate = useNavigate();
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [activeTripId, setActiveTripId] = useState<string | null>(null);
@@ -1016,7 +1014,6 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                 maxInvites={invitesBudget}
                 initialSelected={invitedForSelected}
                 selectedTopicIds={selectedTopicIds}
-                activityId={activityId ?? selectedLocalBooking?.activityId ?? undefined}
                 onConfirm={(selected) => {
                   setPendingInvites(selected);
                   setInviteModelsOpen(false);
@@ -1064,8 +1061,8 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                         )
                       );
 
-                      let selectedActivityId = activityId ?? bookingState.activityId ?? null;
-                      if (!selectedActivityId) {
+                      let activityId = bookingState.activityId ?? null;
+                      if (!activityId) {
                         const created = await createActivity({
                           Name: selectedLocalItem.title || "",
                           Destination: cityName || "",
@@ -1081,14 +1078,14 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                           status: "draft",
                           ModelLimit: 0,
                         });
-                        selectedActivityId = Number(created.id) || null;
+                        activityId = Number(created.id) || null;
                       }
 
-                      if (!selectedActivityId) {
+                      if (!activityId) {
                         throw new Error("Missing activity id");
                       }
 
-                      const response = await putTripsInvite({ activityId: selectedActivityId, invitedUsers: invitedIds });
+                      const response = await putTripsInvite(activityId, invitedIds);
                       const trip = response.result1 && typeof response.result1 === "object" ? response.result1 : {};
                       const validInvitedUsers = getValidInvitedUsers(trip.InvitedUsers);
                       const delta = Number(response.invite) || 0;
@@ -1104,8 +1101,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                         hostAvatarUrl,
                       });
 
-                      updateLocalBooking(selectedLocalItem.id, (prev) => ({ ...prev, activityId: selectedActivityId }));
-                      await onInviteSuccess?.();
+                      updateLocalBooking(selectedLocalItem.id, (prev) => ({ ...prev, activityId }));
                       setInvitedModels((prev) => ({ ...prev, [selectedLocalItem.id]: pendingInvites }));
                       setConfirmInvitesOpen(false);
                       setBookingToastVisible(true);

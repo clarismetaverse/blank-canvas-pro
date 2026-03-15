@@ -143,22 +143,22 @@ export default function ActivitiesHome() {
   const [eventTemps, setEventTemps] = useState<EventTemp[]>([]);
   const [eventTempsLoading, setEventTempsLoading] = useState(true);
 
-  const loadActivities = async () => {
-    setMyActivitiesLoading(true);
-    try {
-      const activities = await fetchMyActivities();
-      setMyActivitiesRaw(activities);
-      setMyActivities(activities.map(mapActivityToTrip));
-    } catch (error) {
-      console.error("Failed to load activities/me", error);
-      setMyActivitiesRaw([]);
-      setMyActivities([]);
-    } finally {
-      setMyActivitiesLoading(false);
-    }
-  };
-
   useEffect(() => {
+    const loadActivities = async () => {
+      setMyActivitiesLoading(true);
+      try {
+        const activities = await fetchMyActivities();
+        setMyActivitiesRaw(activities);
+        setMyActivities(activities.map(mapActivityToTrip));
+      } catch (error) {
+        console.error("Failed to load activities/me", error);
+        setMyActivitiesRaw([]);
+        setMyActivities([]);
+      } finally {
+        setMyActivitiesLoading(false);
+      }
+    };
+
     const loadEventTemps = async () => {
       setEventTempsLoading(true);
       try {
@@ -537,7 +537,6 @@ export default function ActivitiesHome() {
         onClose={() => setInviteSheetOpen(false)}
         creator={null}
         filterType={inviteFilterType}
-        onInviteSuccess={loadActivities}
       />
     </div>
   );

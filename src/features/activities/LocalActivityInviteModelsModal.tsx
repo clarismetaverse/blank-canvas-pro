@@ -26,7 +26,6 @@ type Props = {
   maxInvites?: number;
   initialSelected?: CreatorLite[];
   selectedTopicIds?: number[];
-  activityId?: number | string;
   onConfirm: (selected: CreatorLite[]) => void;
   initialTab?: TabKey;
   peopleByTab?: Partial<Record<Exclude<TabKey, "discover">, PersonLite[]>>;
@@ -61,13 +60,10 @@ export default function LocalActivityInviteModelsModal({
   maxInvites = 8,
   initialSelected = [],
   selectedTopicIds = [],
-  activityId,
   onConfirm,
   initialTab,
   peopleByTab,
 }: Props) {
-  void activityId;
-
   const [q, setQ] = useState("");
   const [tab, setTab] = useState<TabKey>("discover");
   const dq = useDebounced(q, 260);

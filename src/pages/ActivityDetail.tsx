@@ -12,7 +12,6 @@ import CreatorProfileSheet from "@/components/memberspass/CreatorProfileSheet";
 import type { CreatorLite } from "@/services/creatorSearch";
 import { fetchActivityById, type ActivityDetailResponse, type InviteLite, type InviteStatus, type TripActivity } from "@/services/activities";
 import { getValidInvitedUsers, putTripsInvite } from "@/services/tripsInvite";
-import { fetchMyActivities } from "@/services/activitiesMe";
 import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityInviteModelsModal";
 import InvitesSentPopup from "@/components/vic/InvitesSentPopup";
 import { useAuth } from "@/hooks/useAuth";
@@ -948,14 +947,12 @@ export default function ActivityDetail() {
         venueLabel={activity?.subtitle || activity?.title}
         cityName={activity?.locationLabel || "your city"}
         selectedTopicIds={[]}
-        activityId={activityId ? Number(activityId) : undefined}
         peopleByTab={peopleByTab}
         onConfirm={async (selected) => {
           if (!activityId || selected.length === 0) return;
           try {
             const creatorIds = selected.map((c) => Number(c.id));
-            const numericActivityId = Number(activityId);
-            const response = await putTripsInvite({ activityId: numericActivityId, invitedUsers: creatorIds });
+            const response = await putTripsInvite(Number(activityId), creatorIds);
             const trip = response.result1 && typeof response.result1 === "object" ? response.result1 : {};
             const validInvitedUsers = getValidInvitedUsers(trip.InvitedUsers);
             const delta = Number(response.invite) || 0;
@@ -970,43 +967,26 @@ export default function ActivityDetail() {
               hostAvatarUrl: user?.Picture?.url || null,
             });
 
-            const activities = await fetchMyActivities();
-            const refreshed = activities.find((item) => Number(item.id) === numericActivityId);
-
-            if (refreshed) {
-              const newInvites: InviteLite[] = (refreshed.InvitedUsersExpanded ?? refreshed.ModelsList ?? []).map((user, i) => ({
-                id: String(user.id ?? `${refreshed.id}-${i}`),
-                status: "invited",
-                creator: {
-                  name: user.name || "Invited creator",
-                  avatarUrl: user.Profile_pic?.url || "https://i.pravatar.cc/100?img=65",
-                  ig: "",
-                },
-              }));
-
-              setActivity((prev) => (prev ? { ...prev, invites: newInvites } : prev));
-            } else {
-              const data = await fetchActivityById(activityId);
-              const newInvites: InviteLite[] = (data.InvitedUsers ?? []).map((user, i) => ({
-                id: String(user.id ?? `${data.id}-${i}`),
-                status: "invited",
-                creator: {
-                  name: user.NickName || user.name || "Invited creator",
-                  avatarUrl: user.Profile_pic?.url || "https://i.pravatar.cc/100?img=65",
-                  ig: (() => {
-                    const account = user.IG_account?.trim();
-                    if (account) {
-                      const match = account.match(/instagram\.com\/([A-Za-z0-9._]+)/i);
-                      if (match?.[1]) return match[1];
-                      if (account.startsWith("@")) return account.slice(1);
-                      return account;
-                    }
-                    return user.NickName || "";
-                  })(),
-                },
-              }));
-              setActivity((prev) => (prev ? { ...prev, invites: newInvites } : prev));
-            }
+            const data = await fetchActivityById(activityId);
+            const newInvites: InviteLite[] = (data.InvitedUsers ?? []).map((user, i) => ({
+              id: String(user.id ?? `${data.id}-${i}`),
+              status: "invited",
+              creator: {
+                name: user.NickName || user.name || "Invited creator",
+                avatarUrl: user.Profile_pic?.url || "https://i.pravatar.cc/100?img=65",
+                ig: (() => {
+                  const account = user.IG_account?.trim();
+                  if (account) {
+                    const match = account.match(/instagram\.com\/([A-Za-z0-9._]+)/i);
+                    if (match?.[1]) return match[1];
+                    if (account.startsWith("@")) return account.slice(1);
+                    return account;
+                  }
+                  return user.NickName || "";
+                })(),
+              },
+            }));
+            setActivity((prev) => (prev ? { ...prev, invites: newInvites } : prev));
           } catch (err) {
             console.error("[ActivityDetail] Failed to send invites", err);
           }
