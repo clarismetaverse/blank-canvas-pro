@@ -193,7 +193,13 @@ export default function MemberspassVICHome() {
                     ))
                   : candidateCreators.map((creator) => (
                       <div key={creator.id} className="w-[220px] shrink-0 snap-start">
-                        <CreatorCard creator={creator} variant="vic" size="candidate" />
+                        <CreatorCard
+                          creator={creator}
+                          variant="vic"
+                          size="candidate"
+                          profileType="candidate"
+                          profileSource="vic"
+                        />
                       </div>
                     ))}
               </div>

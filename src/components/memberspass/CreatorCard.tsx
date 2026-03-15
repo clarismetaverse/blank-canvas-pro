@@ -13,6 +13,8 @@ type CreatorCardProps = {
   mode?: "default" | "select";
   isInvited?: boolean;
   onInvite?: (creator: CreatorLite) => void;
+  profileType?: "creator" | "candidate";
+  profileSource?: "default" | "vic" | "claris";
 };
 
 export default function CreatorCard({
@@ -25,6 +27,8 @@ export default function CreatorCard({
   mode = "default",
   isInvited = false,
   onInvite,
+  profileType = "creator",
+  profileSource = "default",
 }: CreatorCardProps) {
   const [open, setOpen] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
@@ -181,6 +185,8 @@ export default function CreatorCard({
         }}
         isFavorite={isFavorite}
         onToggleFavorite={() => setIsFavorite((prev) => !prev)}
+        profileType={profileType}
+        profileSource={profileSource}
       />
     </div>
   );
