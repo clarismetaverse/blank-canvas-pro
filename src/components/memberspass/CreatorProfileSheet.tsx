@@ -251,14 +251,14 @@ export default function CreatorProfileSheet({
 
 
                     <div className="mt-6 space-y-3">
-                      <button
+                      {/* <button
                         type="button"
                         className="flex w-full items-center justify-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold text-neutral-700 shadow-sm"
                         onClick={() => window.alert("Coming soon")}
                       >
                         <Bookmark className="h-4 w-4" />
                         Save to list
-                      </button>
+                      </button> */}
                       <button
                         type="button"
                         className="flex w-full items-center justify-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold text-neutral-700 shadow-sm"
