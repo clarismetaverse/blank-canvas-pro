@@ -117,7 +117,7 @@ export default function CreatorCard({
                   className={`relative ${
                     isVicSearch
                       ? "text-[29px] font-semibold leading-[0.94] tracking-[-0.035em] text-[#FFF8F0] drop-shadow-[0_2px_14px_rgba(0,0,0,0.38)]"
-                      : "mb-1 text-lg font-semibold text-white"
+                      : "mb-1 text-[22px] font-semibold leading-tight text-white"
                   }`}
                 >
                   {isVicSurface ? displayName : creator.name || "Unnamed creator"}
@@ -125,9 +125,16 @@ export default function CreatorCard({
               </div>
 
               {isVic && (
-                <p className="text-xs text-white/75">
-                  {creator.nationality?.trim() || creator.tagline?.trim() || "Available locally"}
-                </p>
+                <div className="flex items-end justify-between">
+                  <p className="text-xs text-white/75">
+                    {creator.nationality?.trim() || creator.tagline?.trim() || "Available locally"}
+                  </p>
+                  {creator.Agency?.trim() && (
+                    <p className="text-[11px] font-medium tracking-wide text-white/55">
+                      {creator.Agency.trim()}
+                    </p>
+                  )}
+                </div>
               )}
 
               {!isVicSurface && (
