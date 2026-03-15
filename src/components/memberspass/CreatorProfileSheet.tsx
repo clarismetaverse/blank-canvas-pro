@@ -479,6 +479,7 @@ export default function CreatorProfileSheet({
                   setSelectedActivity(null);
                 }}
                 creator={creator}
+                activityId={selectedActivity?.id ?? null}
               />
             </>
           )}
