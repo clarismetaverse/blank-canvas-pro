@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Bookmark, Gift, Instagram, Lock, Music2, Share2, Ticket, X } from "lucide-react";
+import { Bookmark, Gift, Heart, Instagram, Lock, Music2, Share2, Ticket, X } from "lucide-react";
 import { useState } from "react";
 import type { CreatorLite } from "@/services/creatorSearch";
 import InviteExperienceSheet from "@/components/vic/InviteExperienceSheet";
@@ -40,13 +40,9 @@ type CreatorProfileSheetProps = {
   onInvite?: (creator: CreatorLite) => void;
   isFavorite?: boolean;
   onToggleFavorite?: () => void;
+  profileType?: "creator" | "candidate";
+  profileSource?: "default" | "vic" | "claris";
   onClose: () => void;
-};
-
-const roleBadges = (creator: CreatorLite | null) => {
-  if (creator?.Tiktok_account) return ["Influencer"];
-  if (creator?.IG_account) return ["Creator"];
-  return ["Pro Model"];
 };
 
 export default function CreatorProfileSheet({
@@ -59,6 +55,8 @@ export default function CreatorProfileSheet({
   onInvite,
   isFavorite = false,
   onToggleFavorite,
+  profileType = "creator",
+  profileSource = "default",
   onClose,
 }: CreatorProfileSheetProps) {
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -67,22 +65,27 @@ export default function CreatorProfileSheet({
   const tiktokUrl = buildSocialLink("tiktok", creator?.Tiktok_account);
   const hasTikTok = Boolean(creator?.Tiktok_account);
   const platformLabel = hasTikTok ? "TikTok creator" : "Instagram creator";
-  const roles = roleBadges(creator);
   const isVic = variant === "vic";
   const isSelectMode = mode === "select";
+  const shouldShowCandidateActions = isVic && profileType === "candidate";
+  const footerPrimaryClassName =
+    isInvited && isSelectMode
+      ? "flex-1 rounded-full border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-500 active:scale-[0.98] transition-transform"
+      : isInvited
+        ? "flex-1 rounded-full bg-emerald-500 px-4 py-3 text-sm font-semibold text-white opacity-95"
+        : locked
+          ? "flex-1 rounded-full border border-neutral-200 px-4 py-3 text-sm font-semibold text-neutral-400"
+          : "flex-1 rounded-full bg-neutral-900 px-4 py-3 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.15)] active:scale-[0.98] transition-transform";
+
   const handleToggleFavorite = onToggleFavorite ?? (() => {});
   const heroImage = creator?.Profile_pic?.url;
-  const displayRole = roles[0] ?? "Creator";
+  const displayRole = profileType === "candidate" ? "Candidate" : "Creator";
   const bioText =
     creator?.bio ||
     "A premium profile curated for cinematic storytelling, exclusive experiences, and refined collaborations.";
   const interests = ["Travel", "Fine dining", "Art", "Wellness", "Music", "Fashion"];
   const galleryImages = Array.from({ length: 6 }, (_, index) => ({
     id: `gallery-${index}`,
-    src: heroImage,
-  }));
-  const closeFriendsImages = Array.from({ length: 3 }, (_, index) => ({
-    id: `close-friend-${index}`,
     src: heroImage,
   }));
   const gifts: GiftItem[] = [
@@ -292,48 +295,64 @@ export default function CreatorProfileSheet({
                 </div>
 
                 <div className="flex gap-3 border-t border-neutral-200 bg-white px-5 py-4">
-                  {!isSelectMode && (
-                    <button
-                      type="button"
-                      className="flex-1 rounded-full bg-neutral-900 px-4 py-3 text-sm font-semibold text-white"
-                      onClick={() => setIsGiftDrawerOpen(true)}
-                    >
-                      <span className="inline-flex items-center justify-center gap-2">
-                        <Gift className="h-4 w-4" />
-                        Gift
-                      </span>
-                    </button>
+                  {shouldShowCandidateActions ? (
+                    <>
+                      <button
+                        type="button"
+                        className="flex-1 rounded-full bg-neutral-900 px-4 py-3 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.15)] active:scale-[0.98] transition-transform"
+                        onClick={() => window.alert(`Endorsement flow for ${profileSource} candidates coming soon`)}
+                      >
+                        Endorse
+                      </button>
+                      <button
+                        type="button"
+                        className="flex-1 rounded-full border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold text-neutral-700 shadow-sm active:scale-[0.98] transition-transform"
+                        onClick={handleToggleFavorite}
+                      >
+                        <span className="inline-flex items-center justify-center gap-2">
+                          <Heart className={`h-4 w-4 ${isFavorite ? "fill-current" : ""}`} />
+                          Save
+                        </span>
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      {!isSelectMode && (
+                        <button
+                          type="button"
+                          className="flex-1 rounded-full bg-neutral-900 px-4 py-3 text-sm font-semibold text-white"
+                          onClick={() => setIsGiftDrawerOpen(true)}
+                        >
+                          <span className="inline-flex items-center justify-center gap-2">
+                            <Gift className="h-4 w-4" />
+                            Gift
+                          </span>
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        disabled={Boolean(locked) || (Boolean(isInvited) && !isSelectMode)}
+                        className={footerPrimaryClassName}
+                        onClick={() => {
+                          if (locked) return;
+
+                          if (isSelectMode) {
+                            if (creator) onInvite?.(creator);
+                            return;
+                          }
+
+                          setInviteOpen(true);
+                        }}
+                      >
+                        {isInvited && isSelectMode ? "Deselect" : isInvited ? "Invited ✓" : (
+                          <span className="inline-flex items-center justify-center gap-2">
+                            <Ticket className="h-4 w-4" />
+                            Invite
+                          </span>
+                        )}
+                      </button>
+                    </>
                   )}
-                  <button
-                    type="button"
-                    disabled={Boolean(locked) || (Boolean(isInvited) && !isSelectMode)}
-                    className={
-                      isInvited && isSelectMode
-                        ? "flex-1 rounded-full border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-500 active:scale-[0.98] transition-transform"
-                        : isInvited
-                          ? "flex-1 rounded-full bg-emerald-500 px-4 py-3 text-sm font-semibold text-white opacity-95"
-                          : locked
-                            ? "flex-1 rounded-full border border-neutral-200 px-4 py-3 text-sm font-semibold text-neutral-400"
-                            : "flex-1 rounded-full bg-neutral-900 px-4 py-3 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.15)] active:scale-[0.98] transition-transform"
-                    }
-                    onClick={() => {
-                      if (locked) return;
-
-                      if (isSelectMode) {
-                        if (creator) onInvite?.(creator);
-                        return;
-                      }
-
-                      setInviteOpen(true);
-                    }}
-                  >
-                    {isInvited && isSelectMode ? "Deselect" : isInvited ? "Invited ✓" : (
-                      <span className="inline-flex items-center justify-center gap-2">
-                        <Ticket className="h-4 w-4" />
-                        Invite
-                      </span>
-                    )}
-                  </button>
                 </div>
               </>
             ) : (
