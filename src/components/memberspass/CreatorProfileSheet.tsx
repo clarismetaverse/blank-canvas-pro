@@ -231,7 +231,7 @@ export default function CreatorProfileSheet({
                       </div>
                     </div>
 
-                    <div className="mt-6">
+                    {/* <div className="mt-6">
                       <h3 className="text-sm font-semibold text-neutral-900">Gallery</h3>
                       <div className="mt-3 grid grid-cols-3 gap-2">
                         {galleryImages.map((image) => (
@@ -247,7 +247,7 @@ export default function CreatorProfileSheet({
                           </div>
                         ))}
                       </div>
-                    </div>
+                    </div> */}
 
 
                     <div className="mt-6 space-y-3">
