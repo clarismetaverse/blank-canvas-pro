@@ -72,7 +72,9 @@ export default function CreatorCard({
             className={`absolute inset-0 ${
               isVicSearch
                 ? "bg-gradient-to-t from-black/82 via-black/28 via-[58%] to-transparent"
-                : "bg-gradient-to-t from-black/90 via-black/40 to-transparent"
+                : isVic
+                  ? "bg-gradient-to-t from-black/55 via-black/20 to-transparent"
+                  : "bg-gradient-to-t from-black/90 via-black/40 to-transparent"
             }`}
           />
 
