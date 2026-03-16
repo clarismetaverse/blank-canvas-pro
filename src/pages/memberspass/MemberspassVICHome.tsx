@@ -176,7 +176,7 @@ export default function MemberspassVICHome() {
           </section>
         ) : (
           <>
-            <section className="space-y-3">
+            <section className="space-y-4">
               <div className="flex items-center justify-between px-1">
                 <div>
                   <h2 className="text-base font-semibold text-neutral-900">Candidates</h2>
@@ -184,11 +184,11 @@ export default function MemberspassVICHome() {
                 </div>
                 <span className="text-xs text-neutral-400">Swipe</span>
               </div>
-              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-proximity">
+              <div className="flex gap-[12px] overflow-x-auto pb-3 snap-x snap-proximity">
                 {showNewInTownSkeletons
                   ? Array.from({ length: 3 }).map((_, index) => (
                       <div key={`new-in-town-skeleton-${index}`} className="w-[220px] shrink-0 snap-start">
-                        <div className="h-[300px] w-full rounded-[22px] border border-neutral-200 bg-neutral-100 shadow-[0_10px_30px_rgba(0,0,0,0.08)]" />
+                        <div className="h-[300px] w-full rounded-[22px] border border-neutral-200 bg-neutral-100 shadow-[0_10px_28px_rgba(0,0,0,0.10)]" />
                       </div>
                     ))
                   : candidateCreators.map((creator) => (
