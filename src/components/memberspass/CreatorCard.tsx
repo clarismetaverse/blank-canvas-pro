@@ -41,11 +41,11 @@ export default function CreatorCard({
   const isVicSurface = isVic || isVicSearch;
   const cardSizeClasses =
     isVic && size === "candidate"
-      ? "h-[300px] rounded-[22px]"
+      ? "h-[300px] rounded-[22px] shadow-[0_10px_28px_rgba(0,0,0,0.10)]"
       : isVic && size === "large"
-        ? "h-[330px] rounded-[20px]"
+        ? "h-[330px] rounded-[20px] shadow-[0_6px_18px_rgba(0,0,0,0.07)]"
         : isVic
-          ? "h-[230px] rounded-[20px]"
+          ? "h-[230px] rounded-[20px] shadow-[0_6px_18px_rgba(0,0,0,0.07)]"
           : isVicSearch
             ? "h-[308px] rounded-3xl"
             : "h-[348px] rounded-3xl";
