@@ -145,7 +145,7 @@ export default function CreatorCard({
                   className={`relative ${
                     isVicSearch
                       ? "text-[29px] font-semibold leading-[0.94] tracking-[-0.035em] text-[#FFF8F0] drop-shadow-[0_2px_14px_rgba(0,0,0,0.38)]"
-                      : "mb-1 text-[22px] font-semibold leading-tight text-white"
+                      : "mb-1 text-[26px] font-semibold leading-tight text-white"
                   }`}
                 >
                   {isVicSurface ? displayName : creator.name || "Unnamed creator"}
