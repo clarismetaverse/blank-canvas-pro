@@ -1,6 +1,12 @@
 import type { CreatorLite } from "@/services/creatorSearch";
 import { request } from "@/services/xano";
 
+type EndorsementRaw = {
+  id?: number;
+  name?: string;
+  Profile_pic?: { url?: string } | null;
+};
+
 type UserTurbo = {
   id?: number;
   name?: string;
@@ -13,12 +19,14 @@ type UserTurbo = {
   City?: string;
   Agency?: string;
   NickName?: string;
+  endorsments?: EndorsementRaw[];
 };
 
 type NewInTownResponse = {
   users?: {
     items?: Array<{
       id?: number;
+      endorsments?: EndorsementRaw[];
       _user_turbo?: UserTurbo;
     }>;
   };
@@ -41,6 +49,7 @@ export async function fetchNewInTown(): Promise<CreatorLite[]> {
           tagline: u?.tagline,
           description: u?.description,
           Agency: u?.Agency,
+          endorsments: u?.endorsments ?? item.endorsments ?? [],
           IG_account: u?.IG_account,
           Tiktok_account: u?.Tiktok_account,
           Profile_pic: u?.Profile_pic,

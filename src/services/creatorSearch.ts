@@ -1,5 +1,11 @@
 const API = "https://xbut-eryu-hhsg.f2.xano.io/api:vGd6XDW3";
 
+export type Endorsement = {
+  id?: number;
+  name?: string;
+  Profile_pic?: { url?: string } | null;
+};
+
 export type CreatorLite = {
   id: number;
   name?: string;
@@ -8,6 +14,7 @@ export type CreatorLite = {
   description?: string;
   nationality?: string;
   Agency?: string;
+  endorsments?: Endorsement[];
   user_interest_topics_turbo_id?: Array<number | { id?: number; interest_topics?: string }>;
   IG_account?: string;
   Tiktok_account?: string;

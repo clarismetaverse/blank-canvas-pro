@@ -137,6 +137,24 @@ export default function CreatorCard({
                 </div>
               )}
 
+              {isVic && size === "candidate" && creator.endorsments && creator.endorsments.length > 0 && (
+                <div className="mt-2 flex items-center gap-1.5">
+                  <div className="flex -space-x-1.5">
+                    {creator.endorsments.slice(0, 3).map((e, i) => (
+                      <img
+                        key={e.id ?? i}
+                        src={e.Profile_pic?.url || CREATOR_PLACEHOLDER_IMAGE}
+                        alt={e.name || "VIC"}
+                        className="h-5 w-5 rounded-full border border-white/60 object-cover"
+                      />
+                    ))}
+                  </div>
+                  <span className="text-[10px] font-medium text-white/70">
+                    endorsed by {creator.endorsments[0]?.name || "VIC"}
+                  </span>
+                </div>
+              )}
+
               {!isVicSurface && (
                 <div className="mt-2 flex flex-wrap items-center gap-2">
                   {isUgcReady && (
