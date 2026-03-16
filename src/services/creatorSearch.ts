@@ -2,8 +2,8 @@ const API = "https://xbut-eryu-hhsg.f2.xano.io/api:vGd6XDW3";
 
 export type Endorsement = {
   id?: number;
-  name?: string;
-  Profile_pic?: { url?: string } | null;
+  Name?: string;
+  Picture?: { url?: string } | null;
 };
 
 export type CreatorLite = {

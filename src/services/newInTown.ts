@@ -49,7 +49,11 @@ export async function fetchNewInTown(): Promise<CreatorLite[]> {
           tagline: u?.tagline,
           description: u?.description,
           Agency: u?.Agency,
-          endorsments: u?.endorsments ?? item.endorsments ?? [],
+          endorsments: (item.endorsments ?? []).map((e: any) => ({
+            id: e.id,
+            Name: e.Name,
+            Picture: e.Picture,
+          })),
           IG_account: u?.IG_account,
           Tiktok_account: u?.Tiktok_account,
           Profile_pic: u?.Profile_pic,
