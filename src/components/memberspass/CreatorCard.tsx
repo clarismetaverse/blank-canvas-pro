@@ -59,7 +59,7 @@ export default function CreatorCard({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={`group relative w-full overflow-hidden text-left shadow-[0_12px_40px_rgba(0,0,0,0.16)] transition-transform duration-200 ease-out hover:scale-[1.01] active:scale-[0.98] ${cardSizeClasses}`}
+        className={`group relative w-full overflow-hidden text-left shadow-[0_6px_18px_rgba(0,0,0,0.07)] transition-transform duration-200 ease-out hover:scale-[1.01] active:scale-[0.98] ${cardSizeClasses}`}
       >
         <div className="relative h-full w-full">
           <img
