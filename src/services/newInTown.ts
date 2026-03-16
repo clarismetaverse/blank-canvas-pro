@@ -1,6 +1,12 @@
 import type { CreatorLite } from "@/services/creatorSearch";
 import { request } from "@/services/xano";
 
+type EndorsementRaw = {
+  id?: number;
+  name?: string;
+  Profile_pic?: { url?: string } | null;
+};
+
 type UserTurbo = {
   id?: number;
   name?: string;
@@ -13,6 +19,7 @@ type UserTurbo = {
   City?: string;
   Agency?: string;
   NickName?: string;
+  endorsments?: EndorsementRaw[];
 };
 
 type NewInTownResponse = {
