@@ -41,11 +41,11 @@ export default function CreatorCard({
   const isVicSurface = isVic || isVicSearch;
   const cardSizeClasses =
     isVic && size === "candidate"
-      ? "h-[300px] rounded-[22px]"
+      ? "h-[300px] rounded-[22px] shadow-[0_10px_28px_rgba(0,0,0,0.10)]"
       : isVic && size === "large"
-        ? "h-[330px] rounded-[20px]"
+        ? "h-[330px] rounded-[20px] shadow-[0_6px_18px_rgba(0,0,0,0.07)]"
         : isVic
-          ? "h-[230px] rounded-[20px]"
+          ? "h-[230px] rounded-[20px] shadow-[0_6px_18px_rgba(0,0,0,0.07)]"
           : isVicSearch
             ? "h-[308px] rounded-3xl"
             : "h-[348px] rounded-3xl";
@@ -59,7 +59,7 @@ export default function CreatorCard({
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={`group relative w-full overflow-hidden text-left shadow-[0_12px_40px_rgba(0,0,0,0.16)] transition-transform duration-200 ease-out hover:scale-[1.01] active:scale-[0.98] ${cardSizeClasses}`}
+        className={`group relative w-full overflow-hidden text-left shadow-[0_6px_18px_rgba(0,0,0,0.07)] transition-transform duration-200 ease-out hover:scale-[1.01] active:scale-[0.98] ${cardSizeClasses}`}
       >
         <div className="relative h-full w-full">
           <img
@@ -72,7 +72,9 @@ export default function CreatorCard({
             className={`absolute inset-0 ${
               isVicSearch
                 ? "bg-gradient-to-t from-black/82 via-black/28 via-[58%] to-transparent"
-                : "bg-gradient-to-t from-black/90 via-black/40 to-transparent"
+                : isVic
+                  ? "bg-gradient-to-t from-black/55 via-black/20 to-transparent"
+                  : "bg-gradient-to-t from-black/90 via-black/40 to-transparent"
             }`}
           />
 

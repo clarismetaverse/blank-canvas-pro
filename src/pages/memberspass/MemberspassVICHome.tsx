@@ -100,7 +100,7 @@ export default function MemberspassVICHome() {
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-[#0B0B0F]">
       <div className="sticky top-0 z-20 border-b border-neutral-200 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-md items-center justify-between px-4 py-4">
+        <div className="mx-auto flex w-full max-w-md items-center justify-between px-5 py-4">
           <button
             type="button"
             onClick={() => navigate(-1)}
@@ -114,7 +114,7 @@ export default function MemberspassVICHome() {
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-md space-y-10 px-4 pb-16 pt-6">
+      <div className="mx-auto w-full max-w-md space-y-10 px-5 pb-16 pt-6">
         <section className="space-y-4 rounded-3xl border border-neutral-200 bg-white p-5 shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
           <div className="flex items-start justify-between gap-4">
             <div>
@@ -176,7 +176,7 @@ export default function MemberspassVICHome() {
           </section>
         ) : (
           <>
-            <section className="space-y-3">
+            <section className="space-y-4">
               <div className="flex items-center justify-between px-1">
                 <div>
                   <h2 className="text-base font-semibold text-neutral-900">Candidates</h2>
@@ -184,11 +184,11 @@ export default function MemberspassVICHome() {
                 </div>
                 <span className="text-xs text-neutral-400">Swipe</span>
               </div>
-              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-proximity">
+              <div className="flex gap-[12px] overflow-x-auto pb-3 snap-x snap-proximity">
                 {showNewInTownSkeletons
                   ? Array.from({ length: 3 }).map((_, index) => (
                       <div key={`new-in-town-skeleton-${index}`} className="w-[220px] shrink-0 snap-start">
-                        <div className="h-[300px] w-full rounded-[22px] border border-neutral-200 bg-neutral-100 shadow-[0_10px_30px_rgba(0,0,0,0.08)]" />
+                        <div className="h-[300px] w-full rounded-[22px] border border-neutral-200 bg-neutral-100 shadow-[0_10px_28px_rgba(0,0,0,0.10)]" />
                       </div>
                     ))
                   : candidateCreators.map((creator) => (
@@ -205,7 +205,7 @@ export default function MemberspassVICHome() {
               </div>
             </section>
 
-            <section className="space-y-3 pt-1">
+            <section className="space-y-4 pt-2">
               <div className="flex items-center justify-between px-1">
                 <h2 className="text-base font-semibold text-neutral-900">Members in {cityName}</h2>
                 <button
@@ -216,7 +216,7 @@ export default function MemberspassVICHome() {
                   See all
                 </button>
               </div>
-              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-proximity">
+              <div className="flex gap-[12px] overflow-x-auto pb-3 snap-x snap-proximity">
                 {membersCreators.map((creator, index) => (
                   <div
                     key={`members-${creator.id}-${index}`}
@@ -233,12 +233,12 @@ export default function MemberspassVICHome() {
               </div>
             </section>
 
-            <section className="space-y-3 pt-1">
+            <section className="space-y-4 pt-2">
               <div className="flex items-center justify-between px-1">
                 <h2 className="text-base font-semibold text-neutral-900">Suggested for you</h2>
                 <span className="text-xs text-neutral-400">Swipe</span>
               </div>
-              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-proximity">
+              <div className="flex gap-[12px] overflow-x-auto pb-3 snap-x snap-proximity">
                 {suggestedCreators.map((creator, index) => (
                   <div
                     key={`suggested-${creator.id}-${index}`}
