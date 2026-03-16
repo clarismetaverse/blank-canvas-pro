@@ -19,6 +19,7 @@ type NewInTownResponse = {
   users?: {
     items?: Array<{
       id?: number;
+      endorsments?: EndorsementRaw[];
       _user_turbo?: UserTurbo;
     }>;
   };
