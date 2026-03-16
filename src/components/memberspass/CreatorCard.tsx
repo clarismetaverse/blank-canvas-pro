@@ -107,14 +107,14 @@ export default function CreatorCard({
                     {creator.endorsments.slice(0, 3).map((e, i) => (
                       <img
                         key={e.id ?? i}
-                        src={e.Profile_pic?.url || CREATOR_PLACEHOLDER_IMAGE}
-                        alt={e.name || "VIC"}
+                        src={e.Picture?.url || CREATOR_PLACEHOLDER_IMAGE}
+                        alt={e.Name || "VIC"}
                         className="h-4 w-4 rounded-full border border-white/60 object-cover"
                       />
                     ))}
                   </div>
                   <span className="text-[10px] font-medium text-white/90">
-                    endorsed by {creator.endorsments[0]?.name || "VIC"}
+                    endorsed by {creator.endorsments[0]?.Name || "VIC"}
                   </span>
                 </>
               ) : (
