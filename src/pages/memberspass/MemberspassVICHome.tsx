@@ -114,7 +114,7 @@ export default function MemberspassVICHome() {
         </div>
       </div>
 
-      <div className="mx-auto w-full max-w-md space-y-10 px-4 pb-16 pt-6">
+      <div className="mx-auto w-full max-w-md space-y-10 px-5 pb-16 pt-6">
         <section className="space-y-4 rounded-3xl border border-neutral-200 bg-white p-5 shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
           <div className="flex items-start justify-between gap-4">
             <div>
