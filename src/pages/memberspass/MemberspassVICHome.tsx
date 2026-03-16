@@ -255,31 +255,7 @@ export default function MemberspassVICHome() {
               </div>
             </section>
 
-            <section className="space-y-3 pt-1">
-              <div className="flex items-center justify-between px-1">
-                <div>
-                  <h2 className="text-base font-semibold text-neutral-900">Private list</h2>
-                  <p className="mt-1 flex items-center gap-2 text-xs text-neutral-500">
-                    <Lock className="h-3 w-3" />
-                    Locked — Pro Models & Key Influencers
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => window.alert("Unlock flow coming soon.")}
-                  className="rounded-full border border-neutral-200 bg-white px-3 py-1 text-xs font-semibold text-neutral-700"
-                >
-                  Unlock
-                </button>
-              </div>
-              <div className="flex gap-3 overflow-x-auto pb-2 snap-x snap-proximity">
-                {premiumCreators.map((creator) => (
-                  <div key={creator.id} className="w-[180px] shrink-0 snap-start">
-                    <CreatorCard creator={creator} locked variant="vic" size="normal" />
-                  </div>
-                ))}
-              </div>
-            </section>
+            {/* Private list section hidden */}
           </>
         )}
       </div>
