@@ -124,21 +124,8 @@ export default function CreatorCard({
                 </p>
               </div>
 
-              {isVic && (
-                <div className="flex items-end justify-between">
-                  <p className="text-xs text-white/75">
-                    {creator.nationality?.trim() || creator.tagline?.trim() || "Available locally"}
-                  </p>
-                  {creator.Agency?.trim() && (
-                    <p className="text-[11px] font-medium tracking-wide text-white/55">
-                      {creator.Agency.trim()}
-                    </p>
-                  )}
-                </div>
-              )}
-
               {isVic && size === "candidate" && (
-                <div className="mt-2 flex items-center gap-1.5">
+                <div className="mt-1.5 flex items-center gap-1.5">
                   {creator.endorsments && creator.endorsments.length > 0 ? (
                     <>
                       <div className="flex -space-x-1.5">
@@ -159,6 +146,19 @@ export default function CreatorCard({
                     <span className="text-[10px] font-medium italic text-white/50">
                       awaiting endorsement
                     </span>
+                  )}
+                </div>
+              )}
+
+              {isVic && (
+                <div className="flex items-end justify-between">
+                  <p className="text-xs text-white/75">
+                    {creator.nationality?.trim() || creator.tagline?.trim() || "Available locally"}
+                  </p>
+                  {creator.Agency?.trim() && (
+                    <p className="text-[11px] font-medium tracking-wide text-white/55">
+                      {creator.Agency.trim()}
+                    </p>
                   )}
                 </div>
               )}
