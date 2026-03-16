@@ -99,6 +99,32 @@ export default function CreatorCard({
             </span>
           )}
 
+          {isVic && size === "candidate" && (
+            <div className="absolute left-3 top-3 z-10 flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1 backdrop-blur-sm">
+              {creator.endorsments && creator.endorsments.length > 0 ? (
+                <>
+                  <div className="flex -space-x-1">
+                    {creator.endorsments.slice(0, 3).map((e, i) => (
+                      <img
+                        key={e.id ?? i}
+                        src={e.Profile_pic?.url || CREATOR_PLACEHOLDER_IMAGE}
+                        alt={e.name || "VIC"}
+                        className="h-4 w-4 rounded-full border border-white/60 object-cover"
+                      />
+                    ))}
+                  </div>
+                  <span className="text-[10px] font-medium text-white/90">
+                    endorsed by {creator.endorsments[0]?.name || "VIC"}
+                  </span>
+                </>
+              ) : (
+                <span className="text-[10px] font-medium italic text-white/70">
+                  awaiting endorsement
+                </span>
+              )}
+            </div>
+          )}
+
           <div
             className={`absolute left-0 right-0 ${
               isVicSearch ? "bottom-0 p-4 pb-3" : "bottom-0 p-4 pb-[14px]"
