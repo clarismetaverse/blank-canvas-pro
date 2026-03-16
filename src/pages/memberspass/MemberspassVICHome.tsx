@@ -100,7 +100,7 @@ export default function MemberspassVICHome() {
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-[#0B0B0F]">
       <div className="sticky top-0 z-20 border-b border-neutral-200 bg-white/90 backdrop-blur">
-        <div className="mx-auto flex w-full max-w-md items-center justify-between px-4 py-4">
+        <div className="mx-auto flex w-full max-w-md items-center justify-between px-5 py-4">
           <button
             type="button"
             onClick={() => navigate(-1)}
