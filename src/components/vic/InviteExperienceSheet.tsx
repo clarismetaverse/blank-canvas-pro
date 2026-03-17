@@ -12,6 +12,11 @@ import { requestVicBooking, type BookingStatus } from "@/services/vicBookings";
 import { fetchVicProfile } from "@/services/vic";
 import { getAuthToken } from "@/services";
 import InvitesSentPopup from "@/components/vic/InvitesSentPopup";
+import AddNewLocationSheet from "@/components/vic/AddNewLocationSheet";
+import LocalVenueSearchBar from "@/components/vic/LocalVenueSearchBar";
+import LocalVenueSuggestionsList from "@/components/vic/LocalVenueSuggestionsList";
+import SelectedVenuePreviewCard from "@/components/vic/SelectedVenuePreviewCard";
+import type { CreateLocationInput, VenueSuggestion } from "@/components/vic/LocalVenueTypes";
 
 type InviteExperienceSheetProps = {
   open: boolean;
@@ -42,6 +47,9 @@ type LocalActivityItem = {
   coverObject: Record<string, unknown> | null;
   tag: string;
   supportCount: number;
+  address?: string;
+  city?: string;
+  isNew?: boolean;
 };
 
 type LocalBookingState = {
@@ -153,6 +161,10 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
   const [eventsLoading, setEventsLoading] = useState(false);
   const [expandedLocalBookingId, setExpandedLocalBookingId] = useState<string | null>(null);
   const [localBookings, setLocalBookings] = useState<Record<string, LocalBookingState>>({});
+  const [venueSearchQuery, setVenueSearchQuery] = useState("");
+  const [addLocationOpen, setAddLocationOpen] = useState(false);
+  const [customVenueSuggestions, setCustomVenueSuggestions] = useState<VenueSuggestion[]>([]);
+  const [selectedVenuePreview, setSelectedVenuePreview] = useState<VenueSuggestion | null>(null);
   const [bookingToastVisible, setBookingToastVisible] = useState(false);
   const [inviteModelsOpen, setInviteModelsOpen] = useState(false);
   const [confirmInvitesOpen, setConfirmInvitesOpen] = useState(false);
@@ -296,24 +308,65 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
     return normalizedName.includes("top") || account.includes("verified") || creatorWithTier.id % 7 === 0;
   }, [creator]);
 
+  const cityName = useMemo(() => {
+    if (typeof window === "undefined") return "your city";
+    return localStorage.getItem("owner_city") || "your city";
+  }, []);
+
   const bookingTimeOptions = useMemo(
     () => ["18:30", "19:00", "19:30", "20:00", "20:30", "21:00", "21:30", "22:00"],
     []
   );
 
-  const localActivityItems = useMemo<LocalActivityItem[]>(
+  const localActivityItems = useMemo<LocalActivityItem[]>(() => {
+    const baseItems = filteredEvents.map((event) => ({
+      id: String(event.id),
+      title: event.Name,
+      dateLabel: event.Date_start || undefined,
+      coverUrl: event.Cover?.url || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80",
+      coverObject: event.Cover ? (event.Cover as unknown as Record<string, unknown>) : null,
+      tag: event.Type || "local",
+      supportCount: 40 + (event.id % 25),
+      city: cityName,
+    }));
+    const customItems = customVenueSuggestions.map((venue, index) => ({
+      id: venue.id,
+      title: venue.name,
+      coverUrl: venue.coverUrl || "https://images.unsplash.com/photo-1559339352-11d035aa65de?auto=format&fit=crop&w=900&q=80",
+      coverObject: null,
+      tag: "custom",
+      supportCount: 18 + (index % 6),
+      address: venue.address,
+      city: venue.city,
+      isNew: venue.isNew,
+    }));
+
+    return [...customItems, ...baseItems];
+  }, [cityName, customVenueSuggestions, filteredEvents]);
+
+  const venueSuggestions = useMemo<VenueSuggestion[]>(
     () =>
-      filteredEvents.map((event) => ({
-        id: String(event.id),
-        title: event.Name,
-        dateLabel: event.Date_start || undefined,
-        coverUrl: event.Cover?.url || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80",
-        coverObject: event.Cover ? (event.Cover as unknown as Record<string, unknown>) : null,
-        tag: event.Type || "local",
-        supportCount: 40 + (event.id % 25),
+      localActivityItems.map((item) => ({
+        id: item.id,
+        name: item.title,
+        address: item.address || item.dateLabel,
+        city: item.city || cityName,
+        coverUrl: item.coverUrl,
+        isNew: item.isNew,
       })),
-    [filteredEvents]
+    [cityName, localActivityItems]
   );
+
+  const filteredVenueSuggestions = useMemo(() => {
+    const query = venueSearchQuery.trim().toLowerCase();
+    if (!query) {
+      return venueSuggestions.slice(0, 4);
+    }
+    return venueSuggestions.filter((item) => {
+      const haystack = `${item.name} ${item.address ?? ""} ${item.city ?? ""}`.toLowerCase();
+      return haystack.includes(query);
+    });
+  }, [venueSearchQuery, venueSuggestions]);
 
   const getLocalBookingState = (activityId: string): LocalBookingState =>
     localBookings[activityId] ?? {
@@ -340,11 +393,6 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
     ? (invitedModels[selectedLocalItem.id] ?? EMPTY_CREATORS)
     : EMPTY_CREATORS;
   const invitedCount = invitedForSelected.length;
-  const cityName = useMemo(() => {
-    if (typeof window === "undefined") return "your city";
-    return localStorage.getItem("owner_city") || "your city";
-  }, []);
-
   const venueShortName = useMemo(() => {
     const raw = selectedLocalItem?.title?.trim() ?? "";
     const base = raw.split(" - ")[0].split(" | ")[0].trim();
@@ -461,6 +509,33 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
     window.setTimeout(() => {
       setHighlightActivities(false);
     }, 1500);
+  };
+
+  const handleSelectVenueSuggestion = (venue: VenueSuggestion) => {
+    setSelectedVenuePreview(venue);
+    setVenueSearchQuery(venue.name);
+  };
+
+  const handleCreateLocation = (payload: CreateLocationInput) => {
+    const nextVenue: VenueSuggestion = {
+      id: `custom-${Date.now()}`,
+      name: payload.name,
+      address: payload.address,
+      city: payload.city,
+      coverUrl: payload.coverUrl,
+      isNew: true,
+    };
+    setCustomVenueSuggestions((prev) => [nextVenue, ...prev]);
+    setSelectedVenuePreview(nextVenue);
+    setVenueSearchQuery(nextVenue.name);
+    setAddLocationOpen(false);
+  };
+
+  const continueWithVenue = () => {
+    if (!selectedVenuePreview) {
+      return;
+    }
+    setExpandedLocalBookingId(selectedVenuePreview.id);
   };
 
   const handleInvite = () => {
@@ -776,11 +851,22 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                       </button>
                     </div>
                     <div className="space-y-4">
+                      {filterType === "local" && (
+                        <div className="space-y-3">
+                          <LocalVenueSearchBar value={venueSearchQuery} onChange={setVenueSearchQuery} />
+                          <LocalVenueSuggestionsList
+                            items={filteredVenueSuggestions}
+                            onSelect={handleSelectVenueSuggestion}
+                            onAddNew={() => setAddLocationOpen(true)}
+                          />
+                          {selectedVenuePreview && <SelectedVenuePreviewCard venue={selectedVenuePreview} onContinue={continueWithVenue} />}
+                        </div>
+                      )}
                       {eventsLoading ? (
                         Array.from({ length: 3 }).map((_, i) => (
                           <div key={`ev-skel-${i}`} className="min-h-[280px] w-full animate-pulse rounded-3xl bg-neutral-200/80" />
                         ))
-                      ) : filteredEvents.length === 0 ? (
+                      ) : localActivityItems.length === 0 ? (
                         <p className="text-xs text-neutral-400">No events found.</p>
                       ) : (
                         localActivityItems.map((item) => {
@@ -804,10 +890,16 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                                     <span className="inline-flex rounded-full border border-white/35 bg-white/20 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-sm">
                                       {item.tag}
                                     </span>
+                                    {item.isNew && (
+                                      <span className="ml-2 inline-flex rounded-full border border-white/35 bg-white/20 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-[0.16em] text-white backdrop-blur-sm">
+                                        NEW
+                                      </span>
+                                    )}
                                   </div>
                                   <div className="absolute bottom-5 left-5 right-5 space-y-1">
                                     <p className="text-2xl font-semibold text-white">{item.title}</p>
                                     {item.dateLabel && <p className="text-sm text-white/80">{item.dateLabel}</p>}
+                                    {item.address && <p className="text-sm text-white/80">{[item.address, item.city].filter(Boolean).join(" • ")}</p>}
                                     <div className="mt-2 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[12px] font-medium text-white/90 backdrop-blur-md">
                                       <span className="inline-flex h-5 w-5 items-center justify-center rounded-full bg-white/15">
                                         <Users className="h-3.5 w-3.5 text-white/90" />
@@ -1005,6 +1097,11 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                 </motion.div>
               )}
             </AnimatePresence>
+            <AddNewLocationSheet
+              open={addLocationOpen}
+              onClose={() => setAddLocationOpen(false)}
+              onCreate={handleCreateLocation}
+            />
             {selectedLocalItem && inviteModelsOpen && (
               <LocalActivityInviteModelsModal
                 open={inviteModelsOpen}
