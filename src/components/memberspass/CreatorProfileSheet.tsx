@@ -46,6 +46,7 @@ type CreatorProfileSheetProps = {
   profileType?: "creator" | "candidate";
   profileSource?: "default" | "vic" | "claris";
   onClose: () => void;
+  onEndorsed?: () => void;
 };
 
 export default function CreatorProfileSheet({
