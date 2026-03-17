@@ -174,11 +174,11 @@ export default function CreatorCard({
 
               {isVic && (
                 <div className="flex items-end justify-between">
-                  <p className="text-xs text-white/75">
+                  <p className={`text-xs ${endorsed ? "text-white/50" : "text-white/75"} transition-opacity duration-300`}>
                     {creator.nationality?.trim() || creator.tagline?.trim() || "Available locally"}
                   </p>
                   {creator.Agency?.trim() && (
-                    <p className="text-[11px] font-medium tracking-wide text-white/55">
+                    <p className={`text-[11px] font-medium tracking-wide ${endorsed ? "text-white/35" : "text-white/55"} transition-opacity duration-300`}>
                       {creator.Agency.trim()}
                     </p>
                   )}
