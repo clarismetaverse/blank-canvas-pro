@@ -5,6 +5,7 @@ import type { CreatorLite } from "@/services/creatorSearch";
 import InviteExperienceSheet from "@/components/vic/InviteExperienceSheet";
 import GiftDrawer from "@/components/memberspass/GiftDrawer";
 import type { GiftItem } from "@/components/memberspass/GiftEditorialCard";
+import EndorseConfirmationModal from "@/components/memberspass/EndorseConfirmationModal";
 import { endorseCreator } from "@/services/endorse";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -66,6 +67,7 @@ export default function CreatorProfileSheet({
   const [isGiftDrawerOpen, setIsGiftDrawerOpen] = useState(false);
   const [isEndorsing, setIsEndorsing] = useState(false);
   const [endorsed, setEndorsed] = useState(false);
+  const [endorseModalOpen, setEndorseModalOpen] = useState(false);
   const instagramUrl = buildSocialLink("instagram", creator?.IG_account);
   const tiktokUrl = buildSocialLink("tiktok", creator?.Tiktok_account);
   const hasTikTok = Boolean(creator?.Tiktok_account);
@@ -297,6 +299,7 @@ export default function CreatorProfileSheet({
                           try {
                             await endorseCreator(creator.id, user.id);
                             setEndorsed(true);
+                            setTimeout(() => setEndorseModalOpen(true), 150);
                           } catch (err) {
                             console.error("Endorse failed", err);
                           } finally {
@@ -481,6 +484,15 @@ export default function CreatorProfileSheet({
             creatorName={creator?.name}
             gifts={gifts}
             onSelectGift={(gift) => window.alert(`${gift.name} details coming soon`)}
+          />
+          <EndorseConfirmationModal
+            open={endorseModalOpen}
+            creatorName={creator?.name}
+            creatorImage={creator?.Profile_pic?.url}
+            onClose={() => {
+              setEndorseModalOpen(false);
+              onClose();
+            }}
           />
         </motion.div>
       )}
