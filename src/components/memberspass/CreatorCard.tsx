@@ -32,6 +32,7 @@ export default function CreatorCard({
 }: CreatorCardProps) {
   const [open, setOpen] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [endorsed, setEndorsed] = useState(false);
 
   const img = getCreatorAvatar(creator);
   const isUgcReady = true;
