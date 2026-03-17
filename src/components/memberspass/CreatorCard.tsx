@@ -91,6 +91,7 @@ export default function CreatorCard({
             <div className="pointer-events-none absolute inset-0 bg-[rgba(245,245,245,0.40)] transition-opacity duration-300" />
           )}
 
+          {isVicSearch && (
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[120px] bg-[radial-gradient(ellipse_at_bottom,rgba(0,0,0,0.45)_0%,rgba(0,0,0,0.22)_38%,rgba(0,0,0,0)_78%)] blur-xl" />
           )}
 
