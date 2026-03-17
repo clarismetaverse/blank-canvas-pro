@@ -67,6 +67,7 @@ export default function CreatorProfileSheet({
   const [isGiftDrawerOpen, setIsGiftDrawerOpen] = useState(false);
   const [isEndorsing, setIsEndorsing] = useState(false);
   const [endorsed, setEndorsed] = useState(false);
+  const [endorseModalOpen, setEndorseModalOpen] = useState(false);
   const instagramUrl = buildSocialLink("instagram", creator?.IG_account);
   const tiktokUrl = buildSocialLink("tiktok", creator?.Tiktok_account);
   const hasTikTok = Boolean(creator?.Tiktok_account);
