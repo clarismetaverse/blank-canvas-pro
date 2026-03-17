@@ -114,9 +114,13 @@ export default function CreatorCard({
             </span>
           )}
 
-          {isVic && size === "candidate" && (
-            <div className="absolute left-3 top-3 z-10 flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1 backdrop-blur-sm">
-              {creator.endorsments && creator.endorsments.length > 0 ? (
+          {isCandidate && (
+            <div className="absolute left-3 top-3 z-10 flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1 backdrop-blur-sm transition-all duration-300">
+              {endorsed ? (
+                <span className="text-[10px] font-medium text-white/90">
+                  Endorsed ✓
+                </span>
+              ) : creator.endorsments && creator.endorsments.length > 0 ? (
                 <>
                   <div className="flex -space-x-1">
                     {creator.endorsments.slice(0, 3).map((e, i) => (
