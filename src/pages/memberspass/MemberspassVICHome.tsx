@@ -182,7 +182,13 @@ export default function MemberspassVICHome() {
                   <h2 className="text-base font-semibold text-neutral-900">Candidates</h2>
                   <p className="mt-1 text-xs text-neutral-500">3 awaiting endorsement</p>
                 </div>
-                <span className="text-xs text-neutral-400">Swipe</span>
+                <button
+                  type="button"
+                  onClick={() => navigate("/members/all", { state: { title: "Candidates", creators: candidateCreators } })}
+                  className="text-xs font-medium text-neutral-500 hover:text-neutral-900 transition-colors"
+                >
+                  See all
+                </button>
               </div>
               <div className="flex gap-[12px] overflow-x-auto pb-3 snap-x snap-proximity">
                 {showNewInTownSkeletons
