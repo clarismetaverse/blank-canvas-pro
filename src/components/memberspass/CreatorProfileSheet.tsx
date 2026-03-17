@@ -5,6 +5,8 @@ import type { CreatorLite } from "@/services/creatorSearch";
 import InviteExperienceSheet from "@/components/vic/InviteExperienceSheet";
 import GiftDrawer from "@/components/memberspass/GiftDrawer";
 import type { GiftItem } from "@/components/memberspass/GiftEditorialCard";
+import { endorseCreator } from "@/services/endorse";
+import { useAuth } from "@/hooks/useAuth";
 
 const backdrop = {
   hidden: { opacity: 0 },
@@ -59,8 +61,11 @@ export default function CreatorProfileSheet({
   profileSource = "default",
   onClose,
 }: CreatorProfileSheetProps) {
+  const { user } = useAuth();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [isGiftDrawerOpen, setIsGiftDrawerOpen] = useState(false);
+  const [isEndorsing, setIsEndorsing] = useState(false);
+  const [endorsed, setEndorsed] = useState(false);
   const instagramUrl = buildSocialLink("instagram", creator?.IG_account);
   const tiktokUrl = buildSocialLink("tiktok", creator?.Tiktok_account);
   const hasTikTok = Boolean(creator?.Tiktok_account);
@@ -278,10 +283,28 @@ export default function CreatorProfileSheet({
                     <>
                       <button
                         type="button"
-                        className="flex-1 rounded-full bg-neutral-900 px-4 py-3 text-sm font-semibold text-white shadow-[0_4px_14px_rgba(0,0,0,0.15)] active:scale-[0.98] transition-transform"
-                        onClick={() => window.alert(`Endorsement flow for ${profileSource} candidates coming soon`)}
+                        disabled={isEndorsing || endorsed}
+                        className={`flex-1 rounded-full px-4 py-3 text-sm font-semibold shadow-[0_4px_14px_rgba(0,0,0,0.15)] active:scale-[0.98] transition-transform ${
+                          endorsed
+                            ? "bg-emerald-500 text-white opacity-95"
+                            : isEndorsing
+                              ? "bg-neutral-400 text-white"
+                              : "bg-neutral-900 text-white"
+                        }`}
+                        onClick={async () => {
+                          if (!creator || !user?.id) return;
+                          setIsEndorsing(true);
+                          try {
+                            await endorseCreator(creator.id, user.id);
+                            setEndorsed(true);
+                          } catch (err) {
+                            console.error("Endorse failed", err);
+                          } finally {
+                            setIsEndorsing(false);
+                          }
+                        }}
                       >
-                        Endorse
+                        {endorsed ? "Endorsed ✓" : isEndorsing ? "Endorsing…" : "Endorse"}
                       </button>
                       <button
                         type="button"
