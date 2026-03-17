@@ -485,6 +485,15 @@ export default function CreatorProfileSheet({
             gifts={gifts}
             onSelectGift={(gift) => window.alert(`${gift.name} details coming soon`)}
           />
+          <EndorseConfirmationModal
+            open={endorseModalOpen}
+            creatorName={creator?.name}
+            creatorImage={creator?.Profile_pic?.url}
+            onClose={() => {
+              setEndorseModalOpen(false);
+              onClose();
+            }}
+          />
         </motion.div>
       )}
     </AnimatePresence>
