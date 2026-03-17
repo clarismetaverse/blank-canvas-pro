@@ -5,6 +5,7 @@ import type { CreatorLite } from "@/services/creatorSearch";
 import InviteExperienceSheet from "@/components/vic/InviteExperienceSheet";
 import GiftDrawer from "@/components/memberspass/GiftDrawer";
 import type { GiftItem } from "@/components/memberspass/GiftEditorialCard";
+import EndorseConfirmationModal from "@/components/memberspass/EndorseConfirmationModal";
 import { endorseCreator } from "@/services/endorse";
 import { useAuth } from "@/hooks/useAuth";
 
