@@ -62,6 +62,7 @@ export default function CreatorProfileSheet({
   profileType = "creator",
   profileSource = "default",
   onClose,
+  onEndorsed,
 }: CreatorProfileSheetProps) {
   const { user } = useAuth();
   const [inviteOpen, setInviteOpen] = useState(false);
