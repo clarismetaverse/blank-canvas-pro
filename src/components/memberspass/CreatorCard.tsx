@@ -55,12 +55,19 @@ export default function CreatorCard({
   const bioLine = getCreatorBio(creator);
   const interestTags = getCreatorInterestTags(creator, interests);
 
+  const isCandidate = isVic && size === "candidate";
+
   return (
     <div className="relative w-full shrink-0 snap-start">
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={`group relative w-full overflow-hidden text-left shadow-[0_6px_18px_rgba(0,0,0,0.07)] transition-transform duration-200 ease-out hover:scale-[1.01] active:scale-[0.98] ${cardSizeClasses}`}
+        className={`group relative w-full overflow-hidden text-left shadow-[0_6px_18px_rgba(0,0,0,0.07)] duration-200 ease-out hover:scale-[1.01] active:scale-[0.98] ${cardSizeClasses} ${
+          endorsed
+            ? "scale-[0.98] border border-neutral-200/60 transition-all duration-300"
+            : "transition-transform"
+        }`}
+        style={endorsed ? { filter: "grayscale(20%) brightness(0.95)" } : undefined}
       >
         <div className="relative h-full w-full">
           <img
