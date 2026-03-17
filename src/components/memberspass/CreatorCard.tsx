@@ -32,6 +32,7 @@ export default function CreatorCard({
 }: CreatorCardProps) {
   const [open, setOpen] = useState(false);
   const [isFavorite, setIsFavorite] = useState(false);
+  const [endorsed, setEndorsed] = useState(false);
 
   const img = getCreatorAvatar(creator);
   const isUgcReady = true;
@@ -54,12 +55,19 @@ export default function CreatorCard({
   const bioLine = getCreatorBio(creator);
   const interestTags = getCreatorInterestTags(creator, interests);
 
+  const isCandidate = isVic && size === "candidate";
+
   return (
     <div className="relative w-full shrink-0 snap-start">
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className={`group relative w-full overflow-hidden text-left shadow-[0_6px_18px_rgba(0,0,0,0.07)] transition-transform duration-200 ease-out hover:scale-[1.01] active:scale-[0.98] ${cardSizeClasses}`}
+        className={`group relative w-full overflow-hidden text-left shadow-[0_6px_18px_rgba(0,0,0,0.07)] duration-200 ease-out hover:scale-[1.01] active:scale-[0.98] ${cardSizeClasses} ${
+          endorsed
+            ? "scale-[0.98] border border-neutral-200/60 transition-all duration-300"
+            : "transition-transform"
+        }`}
+        style={endorsed ? { filter: "grayscale(20%) brightness(0.95)" } : undefined}
       >
         <div className="relative h-full w-full">
           <img
@@ -77,6 +85,11 @@ export default function CreatorCard({
                   : "bg-gradient-to-t from-black/90 via-black/40 to-transparent"
             }`}
           />
+
+          {/* Soft endorsed overlay */}
+          {endorsed && (
+            <div className="pointer-events-none absolute inset-0 bg-[rgba(245,245,245,0.40)] transition-opacity duration-300" />
+          )}
 
           {isVicSearch && (
             <div className="pointer-events-none absolute inset-x-0 bottom-0 h-[120px] bg-[radial-gradient(ellipse_at_bottom,rgba(0,0,0,0.45)_0%,rgba(0,0,0,0.22)_38%,rgba(0,0,0,0)_78%)] blur-xl" />
@@ -101,9 +114,13 @@ export default function CreatorCard({
             </span>
           )}
 
-          {isVic && size === "candidate" && (
-            <div className="absolute left-3 top-3 z-10 flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1 backdrop-blur-sm">
-              {creator.endorsments && creator.endorsments.length > 0 ? (
+          {isCandidate && (
+            <div className="absolute left-3 top-3 z-10 flex items-center gap-1.5 rounded-full bg-black/50 px-2.5 py-1 backdrop-blur-sm transition-all duration-300">
+              {endorsed ? (
+                <span className="text-[10px] font-medium text-white/90">
+                  Endorsed ✓
+                </span>
+              ) : creator.endorsments && creator.endorsments.length > 0 ? (
                 <>
                   <div className="flex -space-x-1">
                     {creator.endorsments.slice(0, 3).map((e, i) => (
@@ -225,6 +242,7 @@ export default function CreatorCard({
         onToggleFavorite={() => setIsFavorite((prev) => !prev)}
         profileType={profileType}
         profileSource={profileSource}
+        onEndorsed={() => setEndorsed(true)}
       />
     </div>
   );

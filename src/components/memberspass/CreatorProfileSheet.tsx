@@ -46,6 +46,7 @@ type CreatorProfileSheetProps = {
   profileType?: "creator" | "candidate";
   profileSource?: "default" | "vic" | "claris";
   onClose: () => void;
+  onEndorsed?: () => void;
 };
 
 export default function CreatorProfileSheet({
@@ -61,6 +62,7 @@ export default function CreatorProfileSheet({
   profileType = "creator",
   profileSource = "default",
   onClose,
+  onEndorsed,
 }: CreatorProfileSheetProps) {
   const { user } = useAuth();
   const [inviteOpen, setInviteOpen] = useState(false);
@@ -299,6 +301,7 @@ export default function CreatorProfileSheet({
                           try {
                             await endorseCreator(creator.id, user.id);
                             setEndorsed(true);
+                            onEndorsed?.();
                             setTimeout(() => setEndorseModalOpen(true), 150);
                           } catch (err) {
                             console.error("Endorse failed", err);
