@@ -242,6 +242,7 @@ export default function CreatorCard({
         onToggleFavorite={() => setIsFavorite((prev) => !prev)}
         profileType={profileType}
         profileSource={profileSource}
+        onEndorsed={() => setEndorsed(true)}
       />
     </div>
   );
