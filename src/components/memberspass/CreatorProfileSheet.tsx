@@ -301,6 +301,7 @@ export default function CreatorProfileSheet({
                           try {
                             await endorseCreator(creator.id, user.id);
                             setEndorsed(true);
+                            onEndorsed?.();
                             setTimeout(() => setEndorseModalOpen(true), 150);
                           } catch (err) {
                             console.error("Endorse failed", err);
