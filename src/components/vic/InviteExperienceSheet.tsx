@@ -518,11 +518,10 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
 
   const handleCreateLocation = (payload: CreateLocationInput) => {
     const nextVenue: VenueSuggestion = {
-      id: payload.id || `custom-${Date.now()}`,
+      id: `custom-${Date.now()}`,
       name: payload.name,
       address: payload.address,
       city: payload.city,
-      cityId: payload.cityId,
       coverUrl: payload.coverUrl,
       isNew: true,
     };
