@@ -239,27 +239,6 @@ export default function MemberspassVICHome() {
               </div>
             </section>
 
-            <section className="space-y-4 pt-2">
-              <div className="flex items-center justify-between px-1">
-                <h2 className="text-base font-semibold text-neutral-900">Suggested for you</h2>
-                <span className="text-xs text-neutral-400">Swipe</span>
-              </div>
-              <div className="flex gap-[12px] overflow-x-auto pb-3 snap-x snap-proximity">
-                {suggestedCreators.map((creator, index) => (
-                  <div
-                    key={`suggested-${creator.id}-${index}`}
-                    className={`${suggestedLargeIndexes.has(index) ? "w-[210px]" : "w-[180px]"} shrink-0 snap-start`}
-                  >
-                    <CreatorCard
-                      creator={creator}
-                      variant="vic"
-                      size={suggestedLargeIndexes.has(index) ? "large" : "normal"}
-                      badge={index < suggestedBadges.length ? suggestedBadges[index] : undefined}
-                    />
-                  </div>
-                ))}
-              </div>
-            </section>
 
             {/* Private list section hidden */}
           </>
