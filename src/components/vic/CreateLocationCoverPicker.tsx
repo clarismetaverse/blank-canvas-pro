@@ -10,18 +10,23 @@ export default function CreateLocationCoverPicker({ coverUrl, onChange }: Create
     <div className="space-y-2 rounded-2xl border border-neutral-200 bg-white p-3">
       <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-500">Cover (optional)</p>
       {coverUrl ? (
-        <div className="relative h-36 w-full overflow-hidden rounded-xl">
+        <div className="relative h-36 w-full cursor-pointer overflow-hidden rounded-xl" onClick={() => document.getElementById("cover-url-input")?.focus()}>
           <img src={coverUrl} alt="Location cover preview" className="h-full w-full object-cover" />
         </div>
       ) : (
-        <div className="flex h-28 items-center justify-center rounded-xl border border-dashed border-neutral-300 bg-neutral-50 text-neutral-500">
+        <button
+          type="button"
+          onClick={() => document.getElementById("cover-url-input")?.focus()}
+          className="flex h-28 w-full items-center justify-center rounded-xl border border-dashed border-neutral-300 bg-neutral-50 text-neutral-500 transition hover:border-neutral-400 hover:bg-neutral-100"
+        >
           <span className="inline-flex items-center gap-2 text-xs font-medium">
             <ImagePlus className="h-4 w-4" />
             Add a cover image URL
           </span>
-        </div>
+        </button>
       )}
       <input
+        id="cover-url-input"
         value={coverUrl}
         onChange={(event) => onChange(event.target.value)}
         placeholder="https://..."
