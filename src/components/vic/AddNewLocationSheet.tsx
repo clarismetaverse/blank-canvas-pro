@@ -114,7 +114,7 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
                 </AnimatePresence>
               </div>
 
-              <CreateLocationCoverPicker coverUrl={coverUrl} onChange={setCoverUrl} />
+              <CreateLocationCoverPicker coverUrl={coverUrl} coverFile={coverFile} onUrlChange={setCoverUrl} onFileChange={setCoverFile} />
             </div>
 
             <button
