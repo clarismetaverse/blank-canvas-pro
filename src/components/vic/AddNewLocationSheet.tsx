@@ -22,16 +22,24 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
   const [city, setCity] = useState<ClubCity | "">("");
   const [cityPickerOpen, setCityPickerOpen] = useState(false);
   const [coverUrl, setCoverUrl] = useState("");
+  const [coverFile, setCoverFile] = useState<File | null>(null);
 
   const canCreate = useMemo(() => Boolean(name.trim() && address.trim() && city), [name, address, city]);
 
   const handleCreate = () => {
     if (!canCreate) return;
-    onCreate({ name: name.trim(), address: address.trim(), city: city, coverUrl: coverUrl.trim() || undefined });
+    onCreate({
+      name: name.trim(),
+      address: address.trim(),
+      city: city,
+      coverUrl: coverUrl.trim() || undefined,
+      coverFile: coverFile ?? undefined,
+    });
     setName("");
     setAddress("");
     setCity("");
     setCoverUrl("");
+    setCoverFile(null);
   };
 
   return (
