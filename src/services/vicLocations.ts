@@ -10,15 +10,17 @@ export type VicLocationCity = {
 
 type CreateVicLocationPayload = {
   Name: string;
-  Address: string;
-  cities_id: number;
+  Adress: string;
+  City: number;
   Cover?: string | null;
 };
 
 type CreateVicLocationResponse = {
   id?: number;
   Name?: string;
+  Adress?: string;
   Address?: string;
+  City?: number | null;
   cities_id?: number | null;
   CityName?: string;
   Cover?: string | { url?: string | null } | null;
