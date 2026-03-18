@@ -1,8 +1,9 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { MapPin, X } from "lucide-react";
+import { ChevronDown, MapPin, X } from "lucide-react";
 import { useMemo, useState } from "react";
 import CreateLocationCoverPicker from "@/components/vic/CreateLocationCoverPicker";
 import type { CreateLocationInput } from "@/components/vic/LocalVenueTypes";
+import type { ClubCity } from "@/services/membersClubs";
 
 type AddNewLocationSheetProps = {
   open: boolean;
@@ -10,20 +11,23 @@ type AddNewLocationSheetProps = {
   onCreate: (payload: CreateLocationInput) => void;
 };
 
+const CITIES: ClubCity[] = ["Bali", "Dubai", "Milan"];
+
 const backdrop = { hidden: { opacity: 0 }, visible: { opacity: 1 }, exit: { opacity: 0 } };
 const card = { hidden: { y: 24, opacity: 0 }, visible: { y: 0, opacity: 1 }, exit: { y: 20, opacity: 0 } };
 
 export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewLocationSheetProps) {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
-  const [city, setCity] = useState("");
+  const [city, setCity] = useState<ClubCity | "">("");
+  const [cityPickerOpen, setCityPickerOpen] = useState(false);
   const [coverUrl, setCoverUrl] = useState("");
 
-  const canCreate = useMemo(() => Boolean(name.trim() && address.trim() && city.trim()), [name, address, city]);
+  const canCreate = useMemo(() => Boolean(name.trim() && address.trim() && city), [name, address, city]);
 
   const handleCreate = () => {
     if (!canCreate) return;
-    onCreate({ name: name.trim(), address: address.trim(), city: city.trim(), coverUrl: coverUrl.trim() || undefined });
+    onCreate({ name: name.trim(), address: address.trim(), city: city, coverUrl: coverUrl.trim() || undefined });
     setName("");
     setAddress("");
     setCity("");
@@ -55,10 +59,53 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
                 <span className="mb-2 block text-xs font-semibold text-neutral-500">Address</span>
                 <input value={address} onChange={(event) => setAddress(event.target.value)} placeholder="Street, district" className="w-full bg-transparent text-sm font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none" />
               </label>
-              <label className="block rounded-2xl border border-neutral-200 bg-white p-3">
-                <span className="mb-2 block text-xs font-semibold text-neutral-500">City</span>
-                <input value={city} onChange={(event) => setCity(event.target.value)} placeholder="City" className="w-full bg-transparent text-sm font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none" />
-              </label>
+
+              {/* City picker dropdown — no free text input */}
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setCityPickerOpen((prev) => !prev)}
+                  className="flex w-full items-center justify-between rounded-2xl border border-neutral-200 bg-white p-3 text-left"
+                >
+                  <span className="min-w-0">
+                    <span className="mb-1 block text-xs font-semibold text-neutral-500">City</span>
+                    <span className={`block text-sm font-medium ${city ? "text-neutral-900" : "text-neutral-400"}`}>
+                      {city || "Select a city"}
+                    </span>
+                  </span>
+                  <ChevronDown className={`h-4 w-4 shrink-0 text-neutral-400 transition-transform ${cityPickerOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                <AnimatePresence>
+                  {cityPickerOpen && (
+                    <motion.ul
+                      initial={{ opacity: 0, y: -4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -4 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute z-20 mt-1 w-full overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_12px_32px_rgba(0,0,0,0.12)]"
+                    >
+                      {CITIES.map((c) => (
+                        <li key={c}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setCity(c);
+                              setCityPickerOpen(false);
+                            }}
+                            className={`flex w-full items-center px-4 py-3 text-sm font-medium transition hover:bg-neutral-50 ${
+                              city === c ? "bg-neutral-50 text-neutral-900" : "text-neutral-700"
+                            }`}
+                          >
+                            {c}
+                          </button>
+                        </li>
+                      ))}
+                    </motion.ul>
+                  )}
+                </AnimatePresence>
+              </div>
+
               <CreateLocationCoverPicker coverUrl={coverUrl} onChange={setCoverUrl} />
             </div>
 
