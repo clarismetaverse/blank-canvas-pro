@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertCircle, CheckCircle2, ChevronDown, LoaderCircle, MapPin, Sparkles, X } from "lucide-react";
+import { AlertCircle, Check, CheckCircle2, ChevronDown, LoaderCircle, MapPin, Sparkles, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import CreateLocationCoverPicker from "@/components/vic/CreateLocationCoverPicker";
 import type { CreateLocationInput } from "@/components/vic/LocalVenueTypes";
@@ -28,10 +28,12 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
   const [citiesError, setCitiesError] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [cityPickerOpen, setCityPickerOpen] = useState(false);
 
   useEffect(() => {
     if (!open) {
       setSubmitError(null);
+      setCityPickerOpen(false);
       return;
     }
 
@@ -82,6 +84,12 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
   const resetForm = () => {
     setForm(initialState);
     setSubmitError(null);
+    setCityPickerOpen(false);
+  };
+
+  const handleSelectCity = (nextCityId: number) => {
+    updateField("cityId", String(nextCityId));
+    setCityPickerOpen(false);
   };
 
   const handleCreate = async () => {
@@ -93,8 +101,8 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
     try {
       const response = await createVicLocation({
         Name: name.trim(),
-        Address: address.trim(),
-        cities_id: selectedCity.id,
+        Adress: address.trim(),
+        City: selectedCity.id,
         Cover: coverUrl.trim() || null,
       });
 
@@ -102,9 +110,9 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
         id: response.id ? `custom-${response.id}` : `custom-${Date.now()}`,
         backendId: response.id,
         name: response.Name?.trim() || name.trim(),
-        address: response.Address?.trim() || address.trim(),
+        address: response.Adress?.trim() || response.Address?.trim() || address.trim(),
         city: selectedCity.CityName,
-        cityId: selectedCity.id,
+        cityId: response.City ?? selectedCity.id,
         coverUrl:
           typeof response.Cover === "string"
             ? response.Cover
@@ -182,34 +190,101 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
                   />
                 </label>
 
-                <label className="block rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm transition focus-within:border-neutral-300 focus-within:shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
-                  <span className="mb-2 block text-xs font-semibold text-neutral-500">City</span>
-                  <div className="relative">
-                    <select
-                      value={cityId}
-                      onChange={(event) => updateField("cityId", event.target.value)}
-                      disabled={citiesLoading || !cities.length || isSubmitting}
-                      className="w-full appearance-none bg-transparent pr-8 text-sm font-medium text-neutral-900 focus:outline-none disabled:cursor-not-allowed disabled:text-neutral-400"
-                    >
-                      {!cities.length ? <option value="">No cities available</option> : null}
-                      {cities.map((cityOption) => (
-                        <option key={cityOption.id} value={cityOption.id}>
-                          {cityOption.CityName}
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="pointer-events-none absolute right-0 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400" />
+                <div className="rounded-2xl border border-[#EED9E4] bg-[linear-gradient(180deg,#fffafb_0%,#fffefe_100%)] p-3 shadow-[0_10px_30px_rgba(122,30,84,0.06)]">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <span className="block text-xs font-semibold uppercase tracking-[0.12em] text-[#7A1E54]">City picker</span>
+                      <p className="mt-1 text-xs text-neutral-500">Choose from the synced destination list used by the backend.</p>
+                    </div>
+                    {selectedCity ? (
+                      <span className="rounded-full bg-white px-2.5 py-1 text-[11px] font-semibold text-neutral-700 shadow-sm">
+                        ID {selectedCity.id}
+                      </span>
+                    ) : null}
                   </div>
-                  <p className={`mt-2 text-xs ${helperTone}`}>
+
+                  <div className="relative mt-3">
+                    <button
+                      type="button"
+                      onClick={() => setCityPickerOpen((prev) => !prev)}
+                      disabled={citiesLoading || !cities.length || isSubmitting}
+                      className="flex w-full items-center justify-between gap-3 rounded-2xl border border-white/80 bg-white/95 px-4 py-3 text-left shadow-[0_12px_28px_rgba(15,23,42,0.06)] transition hover:border-[#E8CBD8] disabled:cursor-not-allowed disabled:opacity-70"
+                      aria-expanded={cityPickerOpen}
+                      aria-label="Select city"
+                    >
+                      <div className="min-w-0">
+                        <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-neutral-400">Selected destination</p>
+                        <p className="mt-1 truncate text-sm font-semibold text-neutral-900">
+                          {citiesLoading
+                            ? "Loading city list…"
+                            : selectedCity?.CityName || (cities.length ? "Choose a city" : "No cities available")}
+                        </p>
+                      </div>
+                      <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#FFF3F7] text-[#7A1E54]">
+                        <ChevronDown className={`h-4 w-4 transition ${cityPickerOpen ? "rotate-180" : ""}`} />
+                      </span>
+                    </button>
+
+                    <AnimatePresence>
+                      {cityPickerOpen && cities.length ? (
+                        <motion.div
+                          initial={{ opacity: 0, y: 8 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          exit={{ opacity: 0, y: 8 }}
+                          transition={{ duration: 0.18, ease: "easeOut" }}
+                          className="absolute left-0 right-0 top-[calc(100%+12px)] z-20 overflow-hidden rounded-3xl border border-[#EED9E4] bg-white/95 shadow-[0_24px_60px_rgba(122,30,84,0.16)] backdrop-blur"
+                        >
+                          <div className="border-b border-[#F5E6EC] px-4 py-3">
+                            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-neutral-400">Available cities</p>
+                            <p className="mt-1 text-sm text-neutral-500">Tap a destination to lock the backend City ID and continue the local activity flow.</p>
+                          </div>
+                          <div className="max-h-64 space-y-2 overflow-y-auto p-3">
+                            {cities.map((cityOption) => {
+                              const active = cityOption.id === selectedCity?.id;
+
+                              return (
+                                <button
+                                  key={cityOption.id}
+                                  type="button"
+                                  onClick={() => handleSelectCity(cityOption.id)}
+                                  className={`flex w-full items-center justify-between gap-3 rounded-2xl border px-4 py-3 text-left transition ${
+                                    active
+                                      ? "border-[#E8BCD0] bg-[#FFF4F8] shadow-[0_10px_24px_rgba(122,30,84,0.08)]"
+                                      : "border-neutral-200 bg-white hover:border-[#E8CBD8] hover:bg-[#FFF9FB]"
+                                  }`}
+                                >
+                                  <div className="min-w-0">
+                                    <p className="truncate text-sm font-semibold text-neutral-900">{cityOption.CityName}</p>
+                                    <p className="mt-1 text-xs text-neutral-500">Backend City value: {cityOption.id}</p>
+                                  </div>
+                                  <span
+                                    className={`inline-flex h-8 w-8 items-center justify-center rounded-full border ${
+                                      active
+                                        ? "border-[#E3A6C0] bg-[#7A1E54] text-white"
+                                        : "border-neutral-200 bg-white text-transparent"
+                                    }`}
+                                  >
+                                    <Check className="h-4 w-4" />
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </motion.div>
+                      ) : null}
+                    </AnimatePresence>
+                  </div>
+
+                  <p className={`mt-3 text-xs ${helperTone}`}>
                     {citiesLoading
                       ? "Loading destination list…"
                       : citiesError
                         ? "Couldn’t load cities. Try reopening the sheet."
                         : selectedCity
-                          ? `The backend will receive city ID ${selectedCity.id} for ${selectedCity.CityName}.`
+                          ? `The backend payload will submit City: ${selectedCity.id} for ${selectedCity.CityName}.`
                           : "Select a city from the synced destination list."}
                   </p>
-                </label>
+                </div>
 
                 <CreateLocationCoverPicker coverUrl={coverUrl} onChange={(value) => updateField("coverUrl", value)} />
               </div>
