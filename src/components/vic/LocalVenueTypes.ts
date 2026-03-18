@@ -12,4 +12,5 @@ export type CreateLocationInput = {
   address: string;
   city: string;
   coverUrl?: string;
+  coverFile?: File;
 };
