@@ -1,9 +1,9 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, MapPin, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { ChevronDown, LoaderCircle, MapPin, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import CreateLocationCoverPicker from "@/components/vic/CreateLocationCoverPicker";
 import type { CreateLocationInput } from "@/components/vic/LocalVenueTypes";
-import type { ClubCity } from "@/services/membersClubs";
+import { fetchVenueCities, type VenueCity } from "@/services/vicLocations";
 
 type AddNewLocationSheetProps = {
   open: boolean;
@@ -11,33 +11,73 @@ type AddNewLocationSheetProps = {
   onCreate: (payload: CreateLocationInput) => void;
 };
 
-const CITIES: ClubCity[] = ["Bali", "Dubai", "Milan"];
-
 const backdrop = { hidden: { opacity: 0 }, visible: { opacity: 1 }, exit: { opacity: 0 } };
 const card = { hidden: { y: 24, opacity: 0 }, visible: { y: 0, opacity: 1 }, exit: { y: 20, opacity: 0 } };
 
 export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewLocationSheetProps) {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
-  const [city, setCity] = useState<ClubCity | "">("");
+  const [selectedCity, setSelectedCity] = useState<VenueCity | null>(null);
+  const [cities, setCities] = useState<VenueCity[]>([]);
+  const [citiesLoading, setCitiesLoading] = useState(false);
+  const [citiesError, setCitiesError] = useState<string | null>(null);
   const [cityPickerOpen, setCityPickerOpen] = useState(false);
   const [coverUrl, setCoverUrl] = useState("");
   const [coverFile, setCoverFile] = useState<File | null>(null);
 
-  const canCreate = useMemo(() => Boolean(name.trim() && address.trim() && city), [name, address, city]);
+  useEffect(() => {
+    if (!open) {
+      setCityPickerOpen(false);
+      return;
+    }
+
+    let active = true;
+
+    const loadCities = async () => {
+      setCitiesLoading(true);
+      setCitiesError(null);
+      try {
+        const nextCities = await fetchVenueCities();
+        if (!active) {
+          return;
+        }
+        setCities(nextCities);
+      } catch {
+        if (!active) {
+          return;
+        }
+        setCities([]);
+        setCitiesError("Unable to load cities right now.");
+      } finally {
+        if (active) {
+          setCitiesLoading(false);
+        }
+      }
+    };
+
+    void loadCities();
+
+    return () => {
+      active = false;
+    };
+  }, [open]);
+
+  const canCreate = useMemo(() => Boolean(name.trim() && address.trim() && selectedCity), [name, address, selectedCity]);
 
   const handleCreate = () => {
-    if (!canCreate) return;
+    if (!canCreate || !selectedCity) return;
     onCreate({
-      name: name.trim(),
-      address: address.trim(),
-      city: city,
+      Name: name.trim(),
+      Adress: address.trim(),
+      City: selectedCity.id,
+      cityName: selectedCity.name,
       coverUrl: coverUrl.trim() || undefined,
       coverFile: coverFile ?? undefined,
     });
     setName("");
     setAddress("");
-    setCity("");
+    setSelectedCity(null);
+    setCityPickerOpen(false);
     setCoverUrl("");
     setCoverFile(null);
   };
@@ -68,49 +108,50 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
                 <input value={address} onChange={(event) => setAddress(event.target.value)} placeholder="Street, district" className="w-full bg-transparent text-sm font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none" />
               </label>
 
-              {/* City picker dropdown — no free text input */}
               <div className="relative">
                 <button
                   type="button"
-                  onClick={() => setCityPickerOpen((prev) => !prev)}
-                  className="flex w-full items-center justify-between rounded-2xl border border-neutral-200 bg-white p-3 text-left"
+                  onClick={() => !citiesLoading && cities.length > 0 && setCityPickerOpen((prev) => !prev)}
+                  className="flex w-full items-center justify-between rounded-2xl border border-neutral-200 bg-white p-3 text-left disabled:cursor-not-allowed disabled:opacity-70"
+                  disabled={citiesLoading || cities.length === 0}
                 >
                   <span className="min-w-0">
                     <span className="mb-1 block text-xs font-semibold text-neutral-500">City</span>
-                    <span className={`block text-sm font-medium ${city ? "text-neutral-900" : "text-neutral-400"}`}>
-                      {city || "Select a city"}
+                    <span className={`block text-sm font-medium ${selectedCity ? "text-neutral-900" : "text-neutral-400"}`}>
+                      {citiesLoading ? "Loading cities..." : selectedCity?.name || (citiesError ? "Unable to load cities" : "Select a city")}
                     </span>
                   </span>
-                  <ChevronDown className={`h-4 w-4 shrink-0 text-neutral-400 transition-transform ${cityPickerOpen ? "rotate-180" : ""}`} />
+                  {citiesLoading ? <LoaderCircle className="h-4 w-4 shrink-0 animate-spin text-neutral-400" /> : <ChevronDown className={`h-4 w-4 shrink-0 text-neutral-400 transition-transform ${cityPickerOpen ? "rotate-180" : ""}`} />}
                 </button>
+                {citiesError ? <p className="mt-2 text-xs font-medium text-rose-500">{citiesError}</p> : null}
 
                 <AnimatePresence>
-                  {cityPickerOpen && (
+                  {cityPickerOpen && cities.length > 0 ? (
                     <motion.ul
                       initial={{ opacity: 0, y: -4 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, y: -4 }}
                       transition={{ duration: 0.15 }}
-                      className="absolute z-20 mt-1 w-full overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_12px_32px_rgba(0,0,0,0.12)]"
+                      className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-2xl border border-neutral-200 bg-white shadow-[0_12px_32px_rgba(0,0,0,0.12)]"
                     >
-                      {CITIES.map((c) => (
-                        <li key={c}>
+                      {cities.map((city) => (
+                        <li key={city.id}>
                           <button
                             type="button"
                             onClick={() => {
-                              setCity(c);
+                              setSelectedCity(city);
                               setCityPickerOpen(false);
                             }}
                             className={`flex w-full items-center px-4 py-3 text-sm font-medium transition hover:bg-neutral-50 ${
-                              city === c ? "bg-neutral-50 text-neutral-900" : "text-neutral-700"
+                              selectedCity?.id === city.id ? "bg-neutral-50 text-neutral-900" : "text-neutral-700"
                             }`}
                           >
-                            {c}
+                            {city.name}
                           </button>
                         </li>
                       ))}
                     </motion.ul>
-                  )}
+                  ) : null}
                 </AnimatePresence>
               </div>
 
