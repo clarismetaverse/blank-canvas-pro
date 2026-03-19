@@ -8,9 +8,10 @@ export type VenueSuggestion = {
 };
 
 export type CreateLocationInput = {
-  name: string;
-  address: string;
-  city: string;
+  Name: string;
+  Adress: string;
+  City: number;
+  cityName: string;
   coverUrl?: string;
   coverFile?: File;
 };
