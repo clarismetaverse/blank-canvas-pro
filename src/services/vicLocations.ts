@@ -25,6 +25,6 @@ export async function createRestaurantVIC(payload: {
       Name: payload.name,
       Adress: payload.address,
       City: cityId,
-    }),
+    }) as unknown as undefined,
   });
 }
