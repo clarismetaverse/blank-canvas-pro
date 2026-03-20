@@ -16,27 +16,32 @@ export async function createRestaurantVIC(payload: {
   name: string;
   address: string;
   city: string;
+  coverFile?: File;
 }): Promise<{ id: number }> {
   const cityId = CITY_ID_MAP[payload.city] ?? "0";
   const API = "https://xbut-eryu-hhsg.f2.xano.io/api:vGd6XDW3";
 
   const token = getAuthToken();
   const headers: Record<string, string> = {
-    "Content-Type": "application/json",
     Accept: "application/json",
   };
   if (token) {
     headers.Authorization = `Bearer ${token}`;
   }
 
+  const formData = new FormData();
+  formData.append("Name", payload.name);
+  formData.append("Adress", payload.address);
+  formData.append("City", cityId);
+
+  if (payload.coverFile) {
+    formData.append("Cover", payload.coverFile);
+  }
+
   const res = await fetch(`${API}/RestaurantVIC`, {
     method: "POST",
     headers,
-    body: JSON.stringify({
-      Name: payload.name,
-      Adress: payload.address,
-      City: cityId,
-    }),
+    body: formData,
   });
 
   if (!res.ok) {
