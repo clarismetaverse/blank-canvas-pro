@@ -523,6 +523,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
         name: payload.name,
         address: payload.address,
         city: payload.city,
+        coverFile: payload.coverFile,
       });
       const nextVenue: VenueSuggestion = {
         id: result?.id ? String(result.id) : `custom-${Date.now()}`,
