@@ -516,19 +516,30 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
     setVenueSearchQuery(venue.name);
   };
 
-  const handleCreateLocation = (payload: CreateLocationInput) => {
-    const nextVenue: VenueSuggestion = {
-      id: `custom-${Date.now()}`,
-      name: payload.Name,
-      address: payload.Adress,
-      city: payload.cityName,
-      coverUrl: payload.coverUrl,
-      isNew: true,
-    };
-    setCustomVenueSuggestions((prev) => [nextVenue, ...prev]);
-    setSelectedVenuePreview(nextVenue);
-    setVenueSearchQuery(nextVenue.name);
-    setAddLocationOpen(false);
+  const handleCreateLocation = async (payload: CreateLocationInput) => {
+    const { createRestaurantVIC } = await import("@/services/vicLocations");
+    try {
+      const result = await createRestaurantVIC({
+        name: payload.name,
+        address: payload.address,
+        city: payload.city,
+      });
+      const nextVenue: VenueSuggestion = {
+        id: result?.id ? String(result.id) : `custom-${Date.now()}`,
+        name: payload.name,
+        address: payload.address,
+        city: payload.city,
+        coverUrl: payload.coverUrl,
+        isNew: true,
+      };
+      setCustomVenueSuggestions((prev) => [nextVenue, ...prev]);
+      setSelectedVenuePreview(nextVenue);
+      setVenueSearchQuery(nextVenue.name);
+    } catch (err) {
+      console.error("[handleCreateLocation] Failed to create restaurant:", err);
+    } finally {
+      setAddLocationOpen(false);
+    }
   };
 
   const continueWithVenue = () => {
