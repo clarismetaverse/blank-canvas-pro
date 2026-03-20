@@ -1,6 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronDown, LoaderCircle, MapPin, X } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import CreateLocationCoverPicker from "@/components/vic/CreateLocationCoverPicker";
 import type { CreateLocationInput } from "@/components/vic/LocalVenueTypes";
 import { fetchVenueCities, type VenueCity } from "@/services/vicLocations";
@@ -11,10 +11,26 @@ type AddNewLocationSheetProps = {
   onCreate: (payload: CreateLocationInput) => void;
 };
 
-const backdrop = { hidden: { opacity: 0 }, visible: { opacity: 1 }, exit: { opacity: 0 } };
-const card = { hidden: { y: 24, opacity: 0 }, visible: { y: 0, opacity: 1 }, exit: { y: 20, opacity: 0 } };
+const backdrop = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1 },
+  exit: { opacity: 0 },
+};
 
-export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewLocationSheetProps) {
+const card = {
+  hidden: { y: 24, opacity: 0 },
+  visible: { y: 0, opacity: 1 },
+  exit: { y: 20, opacity: 0 },
+};
+
+const fieldBaseClass =
+  "block rounded-2xl border border-neutral-200 bg-white p-3 shadow-[0_1px_2px_rgba(0,0,0,0.03)] transition focus-within:border-neutral-300 focus-within:shadow-[0_8px_24px_rgba(0,0,0,0.06)]";
+
+export default function AddNewLocationSheet({
+  open,
+  onClose,
+  onCreate,
+}: AddNewLocationSheetProps) {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [selectedCity, setSelectedCity] = useState<VenueCity | null>(null);
@@ -24,6 +40,23 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
   const [cityPickerOpen, setCityPickerOpen] = useState(false);
   const [coverUrl, setCoverUrl] = useState("");
   const [coverFile, setCoverFile] = useState<File | null>(null);
+
+  const cityPickerRef = useRef<HTMLDivElement | null>(null);
+
+  const resetForm = () => {
+    setName("");
+    setAddress("");
+    setSelectedCity(null);
+    setCoverUrl("");
+    setCoverFile(null);
+    setCityPickerOpen(false);
+    setCitiesError(null);
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
 
   useEffect(() => {
     if (!open) {
@@ -36,16 +69,13 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
     const loadCities = async () => {
       setCitiesLoading(true);
       setCitiesError(null);
+
       try {
         const nextCities = await fetchVenueCities();
-        if (!active) {
-          return;
-        }
+        if (!active) return;
         setCities(nextCities);
       } catch {
-        if (!active) {
-          return;
-        }
+        if (!active) return;
         setCities([]);
         setCitiesError("Unable to load cities right now.");
       } finally {
@@ -62,10 +92,38 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
     };
   }, [open]);
 
-  const canCreate = useMemo(() => Boolean(name.trim() && address.trim() && selectedCity), [name, address, selectedCity]);
+  useEffect(() => {
+    if (!cityPickerOpen) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (!cityPickerRef.current) return;
+      if (!cityPickerRef.current.contains(event.target as Node)) {
+        setCityPickerOpen(false);
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setCityPickerOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [cityPickerOpen]);
+
+  const canCreate = useMemo(() => {
+    return Boolean(name.trim() && address.trim() && selectedCity);
+  }, [name, address, selectedCity]);
 
   const handleCreate = () => {
     if (!canCreate || !selectedCity) return;
+
     onCreate({
       Name: name.trim(),
       Adress: address.trim(),
@@ -74,102 +132,19 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
       coverUrl: coverUrl.trim() || undefined,
       coverFile: coverFile ?? undefined,
     });
-    setName("");
-    setAddress("");
-    setSelectedCity(null);
-    setCityPickerOpen(false);
-    setCoverUrl("");
-    setCoverFile(null);
+
+    resetForm();
   };
 
   return (
     <AnimatePresence>
       {open ? (
-        <motion.div className="fixed inset-0 z-[90] flex items-end justify-center p-4" initial="hidden" animate="visible" exit="exit">
-          <motion.button type="button" className="absolute inset-0 bg-black/50 backdrop-blur-sm" variants={backdrop} onClick={onClose} />
-          <motion.div variants={card} transition={{ duration: 0.26, ease: "easeOut" }} className="relative z-10 w-full max-w-lg space-y-4 rounded-[28px] border border-white/30 bg-[#FFFEFC] p-4 shadow-[0_30px_80px_rgba(0,0,0,0.25)]">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-lg font-semibold text-neutral-900">Add new location</p>
-                <p className="mt-1 text-sm text-neutral-500">Create a private venue entry for this plan.</p>
-              </div>
-              <button type="button" onClick={onClose} className="rounded-full bg-neutral-100 p-2 text-neutral-700" aria-label="Close add location">
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              <label className="block rounded-2xl border border-neutral-200 bg-white p-3">
-                <span className="mb-2 block text-xs font-semibold text-neutral-500">Venue name</span>
-                <input value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Private Rooftop by the Marina" className="w-full bg-transparent text-sm font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none" />
-              </label>
-              <label className="block rounded-2xl border border-neutral-200 bg-white p-3">
-                <span className="mb-2 block text-xs font-semibold text-neutral-500">Address</span>
-                <input value={address} onChange={(event) => setAddress(event.target.value)} placeholder="Street, district" className="w-full bg-transparent text-sm font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none" />
-              </label>
-
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => !citiesLoading && cities.length > 0 && setCityPickerOpen((prev) => !prev)}
-                  className="flex w-full items-center justify-between rounded-2xl border border-neutral-200 bg-white p-3 text-left disabled:cursor-not-allowed disabled:opacity-70"
-                  disabled={citiesLoading || cities.length === 0}
-                >
-                  <span className="min-w-0">
-                    <span className="mb-1 block text-xs font-semibold text-neutral-500">City</span>
-                    <span className={`block text-sm font-medium ${selectedCity ? "text-neutral-900" : "text-neutral-400"}`}>
-                      {citiesLoading ? "Loading cities..." : selectedCity?.name || (citiesError ? "Unable to load cities" : "Select a city")}
-                    </span>
-                  </span>
-                  {citiesLoading ? <LoaderCircle className="h-4 w-4 shrink-0 animate-spin text-neutral-400" /> : <ChevronDown className={`h-4 w-4 shrink-0 text-neutral-400 transition-transform ${cityPickerOpen ? "rotate-180" : ""}`} />}
-                </button>
-                {citiesError ? <p className="mt-2 text-xs font-medium text-rose-500">{citiesError}</p> : null}
-
-                <AnimatePresence>
-                  {cityPickerOpen && cities.length > 0 ? (
-                    <motion.ul
-                      initial={{ opacity: 0, y: -4 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -4 }}
-                      transition={{ duration: 0.15 }}
-                      className="absolute z-20 mt-1 max-h-64 w-full overflow-auto rounded-2xl border border-neutral-200 bg-white shadow-[0_12px_32px_rgba(0,0,0,0.12)]"
-                    >
-                      {cities.map((city) => (
-                        <li key={city.id}>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setSelectedCity(city);
-                              setCityPickerOpen(false);
-                            }}
-                            className={`flex w-full items-center px-4 py-3 text-sm font-medium transition hover:bg-neutral-50 ${
-                              selectedCity?.id === city.id ? "bg-neutral-50 text-neutral-900" : "text-neutral-700"
-                            }`}
-                          >
-                            {city.name}
-                          </button>
-                        </li>
-                      ))}
-                    </motion.ul>
-                  ) : null}
-                </AnimatePresence>
-              </div>
-
-              <CreateLocationCoverPicker coverUrl={coverUrl} coverFile={coverFile} onUrlChange={setCoverUrl} onFileChange={setCoverFile} />
-            </div>
-
-            <button
-              type="button"
-              disabled={!canCreate}
-              onClick={handleCreate}
-              className={`inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-semibold transition ${canCreate ? "bg-neutral-900 text-white" : "bg-neutral-200 text-neutral-500"}`}
-            >
-              <MapPin className="h-4 w-4" />
-              Create location
-            </button>
-          </motion.div>
-        </motion.div>
-      ) : null}
-    </AnimatePresence>
-  );
-}
+        <motion.div
+          className="fixed inset-0 z-[90] flex items-end justify-center p-4"
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+        >
+          <motion.button
+            type="button"
+            className="absol
