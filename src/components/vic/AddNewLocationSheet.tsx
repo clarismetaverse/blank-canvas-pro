@@ -27,8 +27,8 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
   const [coverFile, setCoverFile] = useState<File | null>(null);
 
   const canCreate = useMemo(
-    () => Boolean(name.trim() && address.trim() && city && eventDateTime),
-    [name, address, city, eventDateTime]
+    () => Boolean(name.trim() && address.trim() && city),
+    [name, address, city]
   );
 
   const handleCreate = () => {
@@ -155,7 +155,7 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
               className={`inline-flex w-full items-center justify-center gap-2 rounded-full px-4 py-3 text-sm font-semibold transition ${canCreate ? "bg-neutral-900 text-white" : "bg-neutral-200 text-neutral-500"}`}
             >
               <MapPin className="h-4 w-4" />
-              Create location
+              Create activity
             </button>
           </motion.div>
         </motion.div>
