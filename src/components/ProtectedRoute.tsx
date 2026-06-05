@@ -3,7 +3,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { getAuthToken } from "@/services";
 
 export function ProtectedRoute() {
-  const { user, isLoading } = useAuth();
+  const { isLoading } = useAuth();
   const token = getAuthToken();
 
   if (isLoading) {
