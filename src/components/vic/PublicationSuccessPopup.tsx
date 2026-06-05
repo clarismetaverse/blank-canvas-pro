@@ -1,5 +1,6 @@
 import { AnimatePresence, motion } from "framer-motion";
 import { Check } from "lucide-react";
+import { createPortal } from "react-dom";
 
 type PublicationSuccessPopupProps = {
   open: boolean;
@@ -12,7 +13,8 @@ export default function PublicationSuccessPopup({
   title = "Untitled experience",
   onClose,
 }: PublicationSuccessPopupProps) {
-  return (
+  if (typeof document === "undefined") return null;
+  return createPortal(
     <AnimatePresence>
       {open && (
         <motion.div
@@ -61,6 +63,7 @@ export default function PublicationSuccessPopup({
           </motion.div>
         </motion.div>
       )}
-    </AnimatePresence>
+    </AnimatePresence>,
+    document.body
   );
 }
