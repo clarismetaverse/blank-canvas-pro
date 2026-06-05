@@ -81,7 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     setAuthToken(data.auth_token);
-    const success = await hydrateUser(data.auth_token, false);
+    const success = await hydrateUser(data.auth_token);
     if (!success) {
       throw new Error("Failed to load profile after login");
     }
