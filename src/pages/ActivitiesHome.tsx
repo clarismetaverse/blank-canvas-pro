@@ -227,15 +227,27 @@ export default function ActivitiesHome() {
           initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ ...easeOut, delay: 0.05 }}
-          className="rounded-3xl border border-neutral-200 bg-white p-6 shadow-[0_12px_32px_rgba(0,0,0,0.06)]"
+          className="relative overflow-hidden rounded-[28px] border border-neutral-800/90 bg-gradient-to-b from-neutral-950 to-neutral-900 p-7 shadow-[0_30px_60px_-20px_rgba(0,0,0,0.55)]"
         >
-          <h2 className="text-2xl font-semibold tracking-tight text-neutral-900">Create a moment</h2>
-          <p className="mt-2 text-sm text-neutral-500">Pick a type to get started.</p>
-          <div className="mt-4 flex flex-col gap-2">
+          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#c9a86a]/60 to-transparent" />
+          <div className="pointer-events-none absolute -right-16 -top-16 h-40 w-40 rounded-full bg-[#c9a86a]/10 blur-3xl" />
+
+          <div className="flex items-center gap-2">
+            <span className="h-px w-6 bg-[#c9a86a]/70" />
+            <span className="text-[10px] font-medium uppercase tracking-[0.28em] text-[#c9a86a]">By invitation</span>
+          </div>
+          <h2 className="mt-3 font-serif text-[28px] leading-[1.05] tracking-tight text-neutral-50">
+            Curate a moment
+          </h2>
+          <p className="mt-2 text-[13px] leading-relaxed text-neutral-400">
+            Choose the form your gathering will take.
+          </p>
+
+          <div className="mt-6 divide-y divide-white/[0.06] border-y border-white/[0.06]">
             {([
-              { label: "Create a local activity", icon: MapPin, type: "local" as const },
-              { label: "Create a Trip", icon: Plane, type: "trip" as const },
-              { label: "Bali Activity", icon: Palmtree, type: "bali" as const },
+              { label: "Local activity", hint: "An intimate evening, close to home", icon: MapPin, type: "local" as const },
+              { label: "A trip", hint: "Days away, with chosen company", icon: Plane, type: "trip" as const },
+              { label: "Bali", hint: "On the island, by invitation", icon: Palmtree, type: "bali" as const },
             ]).map((item) => (
               <button
                 key={item.label}
@@ -244,13 +256,16 @@ export default function ActivitiesHome() {
                   setInviteFilterType(item.type);
                   setInviteSheetOpen(true);
                 }}
-                className="flex w-full items-center gap-3 rounded-2xl border border-neutral-200 bg-white px-4 py-3.5 text-left text-sm font-semibold text-neutral-800 shadow-[0_4px_12px_rgba(0,0,0,0.04)] transition active:scale-[0.98] hover:bg-neutral-50"
+                className="group flex w-full items-center gap-4 py-4 text-left transition active:scale-[0.99]"
               >
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-neutral-100 text-neutral-600">
-                  <item.icon className="h-4.5 w-4.5" />
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#c9a86a]/30 bg-white/[0.03] text-[#c9a86a] transition group-hover:bg-[#c9a86a]/10">
+                  <item.icon className="h-4 w-4" strokeWidth={1.5} />
                 </span>
-                <span className="flex-1">{item.label}</span>
-                <ChevronRight className="h-4 w-4 text-neutral-400" />
+                <span className="flex-1 min-w-0">
+                  <span className="block text-[15px] font-medium tracking-tight text-neutral-50">{item.label}</span>
+                  <span className="mt-0.5 block truncate text-[11.5px] text-neutral-500">{item.hint}</span>
+                </span>
+                <ChevronRight className="h-4 w-4 text-neutral-600 transition group-hover:translate-x-0.5 group-hover:text-[#c9a86a]" />
               </button>
             ))}
           </div>
