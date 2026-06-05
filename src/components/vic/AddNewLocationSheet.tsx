@@ -71,7 +71,7 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
 
             <div className="space-y-3">
               <label className="block rounded-2xl border border-neutral-200 bg-white p-3">
-                <span className="mb-2 block text-xs font-semibold text-neutral-500">Venue name</span>
+                <span className="mb-2 block text-xs font-semibold text-neutral-500">Title</span>
                 <input value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Private Rooftop by the Marina" className="w-full bg-transparent text-sm font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none" />
               </label>
               <label className="block rounded-2xl border border-neutral-200 bg-white p-3">
