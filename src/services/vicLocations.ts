@@ -37,9 +37,9 @@ export async function createRestaurantVIC(payload: {
   formData.append("City", cityId);
   formData.append("cities2_id", cityId);
 
-  // Hardcoded + extra fields
-  formData.append("actions_turbo_id", JSON.stringify([1]));
-  formData.append("category_venues_turbo", JSON.stringify([55]));
+  // Hardcoded + extra fields — try multiple shapes since Xano multipart parsing varies
+  formData.append("actions_turbo_id[]", "1");
+  formData.append("category_venues_turbo[]", "55");
   formData.append("is_event", "true");
 
   formData.append("About", payload.about ?? "");
@@ -47,7 +47,9 @@ export async function createRestaurantVIC(payload: {
   if (payload.eventDateTime) {
     const ts = new Date(payload.eventDateTime).getTime();
     if (!Number.isNaN(ts)) {
-      formData.append("event_date_time", JSON.stringify([ts]));
+      // send both as plain number and as array element
+      formData.append("event_date_time", String(ts));
+      formData.append("event_date_time[]", String(ts));
     }
   }
 
