@@ -48,7 +48,7 @@ export async function createRestaurantVIC(payload: {
   if (payload.eventDateTime) {
     const ts = new Date(payload.eventDateTime).getTime();
     if (!Number.isNaN(ts)) {
-      formData.append("event_date_time", JSON.stringify([ts]));
+      formData.append("event_date_time", String(ts));
     }
   }
 
