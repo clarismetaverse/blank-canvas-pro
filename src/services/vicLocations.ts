@@ -35,6 +35,7 @@ export async function createRestaurantVIC(payload: {
   formData.append("Name", payload.name);
   formData.append("Adress", payload.address);
   formData.append("City", cityId);
+  formData.append("cities2_id", cityId);
 
   // Hardcoded + extra fields
   formData.append("actions_turbo_id", JSON.stringify([1]));
