@@ -27,8 +27,8 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
   const [coverFile, setCoverFile] = useState<File | null>(null);
 
   const canCreate = useMemo(
-    () => Boolean(name.trim() && address.trim() && city && eventDateTime),
-    [name, address, city, eventDateTime]
+    () => Boolean(name.trim() && address.trim() && city),
+    [name, address, city]
   );
 
   const handleCreate = () => {
