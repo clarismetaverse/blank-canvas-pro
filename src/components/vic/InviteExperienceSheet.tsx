@@ -12,6 +12,7 @@ import { requestVicBooking, type BookingStatus } from "@/services/vicBookings";
 import { fetchVicProfile } from "@/services/vic";
 import { getAuthToken } from "@/services";
 import InvitesSentPopup from "@/components/vic/InvitesSentPopup";
+import PublicationSuccessPopup from "@/components/vic/PublicationSuccessPopup";
 import AddNewLocationSheet from "@/components/vic/AddNewLocationSheet";
 import LocalVenueSearchBar from "@/components/vic/LocalVenueSearchBar";
 import LocalVenueSuggestionsList from "@/components/vic/LocalVenueSuggestionsList";
@@ -173,6 +174,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
   const [invitedModels, setInvitedModels] = useState<Record<string, CreatorLite[]>>({});
   const [hostId, setHostId] = useState<number>(0);
   const [hostAvatarUrl, setHostAvatarUrl] = useState<string | null>(null);
+  const [publicationSuccess, setPublicationSuccess] = useState<{ open: boolean; title: string }>({ open: false, title: "" });
   const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; cityName?: string; total: number; delta: number; avatars: ValidInvitedUser[]; hostAvatarUrl?: string | null }>({
     open: false,
     tripName: "",
@@ -538,6 +540,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
       setCustomVenueSuggestions((prev) => [nextVenue, ...prev]);
       setSelectedVenuePreview(nextVenue);
       setVenueSearchQuery(nextVenue.name);
+      setPublicationSuccess({ open: true, title: payload.name });
     } catch (err) {
       console.error("[handleCreateLocation] Failed to create restaurant:", err);
     } finally {
@@ -1246,6 +1249,11 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
               delta={invitesSentPopup.delta}
               hostAvatarUrl={invitesSentPopup.hostAvatarUrl}
               avatars={invitesSentPopup.avatars.slice(0, 3).map((item) => ({ id: item.id, name: item.name, url: item.avatarUrl }))}
+            />
+            <PublicationSuccessPopup
+              open={publicationSuccess.open}
+              title={publicationSuccess.title}
+              onClose={() => setPublicationSuccess({ open: false, title: "" })}
             />
           </motion.div>
 
