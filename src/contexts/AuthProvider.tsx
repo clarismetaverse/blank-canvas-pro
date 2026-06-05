@@ -15,7 +15,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const hydrateUser = useCallback(async (token: string | null, isBootstrap = false) => {
+  const hydrateUser = useCallback(async (token: string | null) => {
     if (!token) {
       setUser(null);
       return false;
@@ -23,17 +23,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const profile = await fetchVicProfile(token);
     if (!profile) {
-      setAuthToken(null);
-      setUser(null);
-      if (isBootstrap) {
-        navigate("/login", { replace: true });
-      }
       return false;
     }
 
     setUser(profile as User);
     return true;
-  }, [navigate]);
+  }, []);
+
 
   const logout = useCallback(() => {
     setAuthToken(null);
@@ -50,14 +46,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        await hydrateUser(token, true);
-      } catch {
-        setAuthToken(null);
-        setUser(null);
-        navigate("/login", { replace: true });
+        await hydrateUser(token);
+      } catch (err) {
+        console.warn("[AuthProvider] bootstrap profile fetch failed; keeping cached token", err);
       } finally {
         setIsLoading(false);
       }
+
     };
 
     void bootstrap();
@@ -86,7 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     setAuthToken(data.auth_token);
-    const success = await hydrateUser(data.auth_token, false);
+    const success = await hydrateUser(data.auth_token);
     if (!success) {
       throw new Error("Failed to load profile after login");
     }
