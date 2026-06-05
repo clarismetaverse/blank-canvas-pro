@@ -14,9 +14,10 @@ export function ProtectedRoute() {
     );
   }
 
-  if (!token || !user) {
+  if (!token) {
     return <Navigate to="/login" replace />;
   }
+
 
   return <Outlet />;
 }
