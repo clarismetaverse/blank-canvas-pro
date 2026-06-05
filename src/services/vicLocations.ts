@@ -38,11 +38,10 @@ export async function createRestaurantVIC(payload: {
 
   // Hardcoded + extra fields
   formData.append("actions_turbo_id", JSON.stringify([1]));
+  formData.append("category_venues_turbo", JSON.stringify([55]));
   formData.append("is_event", "true");
 
-  if (payload.about) {
-    formData.append("About", payload.about);
-  }
+  formData.append("About", payload.about ?? "");
 
   if (payload.eventDateTime) {
     const ts = new Date(payload.eventDateTime).getTime();
