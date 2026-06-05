@@ -227,23 +227,20 @@ export default function ActivitiesHome() {
           initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
           animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
           transition={{ ...easeOut, delay: 0.05 }}
-          className="relative overflow-hidden rounded-2xl border border-neutral-800/90 bg-gradient-to-b from-neutral-950 to-neutral-900 p-5 shadow-[0_20px_40px_-16px_rgba(0,0,0,0.45)]"
+          className="relative"
         >
-          <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-[#c9a86a]/60 to-transparent" />
-          <div className="pointer-events-none absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[#c9a86a]/10 blur-3xl" />
-
-          <div className="flex items-center gap-2">
-            <span className="h-px w-5 bg-[#c9a86a]/70" />
+          <div className="flex items-center gap-2 px-1">
+            <span className="h-px w-5 bg-[#c9a86a]/80" />
             <span className="text-[10px] font-medium uppercase tracking-[0.28em] text-[#c9a86a]">By invitation</span>
           </div>
-          <h2 className="mt-2 font-serif text-[22px] leading-[1.1] tracking-tight text-neutral-50">
+          <h2 className="mt-2 px-1 font-serif text-[22px] leading-[1.1] tracking-tight text-neutral-900">
             Curate a moment
           </h2>
-          <p className="mt-1 text-[12px] leading-relaxed text-neutral-400">
+          <p className="mt-1 px-1 text-[12px] leading-relaxed text-neutral-500">
             Choose the form your gathering will take.
           </p>
 
-          <div className="mt-4 divide-y divide-white/[0.06] border-y border-white/[0.06]">
+          <div className="mt-4 divide-y divide-neutral-200/70 border-y border-neutral-200/70">
             {([
               { label: "Local activity", hint: "An intimate evening, close to home", icon: MapPin, type: "local" as const },
               { label: "A trip", hint: "Days away, with chosen company", icon: Plane, type: "trip" as const },
@@ -256,16 +253,16 @@ export default function ActivitiesHome() {
                   setInviteFilterType(item.type);
                   setInviteSheetOpen(true);
                 }}
-                className="group flex w-full items-center gap-3 py-3 text-left transition active:scale-[0.99]"
+                className="group flex w-full items-center gap-3 px-1 py-3 text-left transition active:scale-[0.99]"
               >
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#c9a86a]/30 bg-white/[0.03] text-[#c9a86a] transition group-hover:bg-[#c9a86a]/10">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-neutral-200 text-neutral-700 transition group-hover:border-[#c9a86a]/50 group-hover:text-[#c9a86a]">
                   <item.icon className="h-3.5 w-3.5" strokeWidth={1.5} />
                 </span>
                 <span className="flex-1 min-w-0">
-                  <span className="block text-[14px] font-medium tracking-tight text-neutral-50">{item.label}</span>
+                  <span className="block text-[14px] font-medium tracking-tight text-neutral-900">{item.label}</span>
                   <span className="block truncate text-[11px] text-neutral-500">{item.hint}</span>
                 </span>
-                <ChevronRight className="h-4 w-4 text-neutral-600 transition group-hover:translate-x-0.5 group-hover:text-[#c9a86a]" />
+                <ChevronRight className="h-4 w-4 text-neutral-400 transition group-hover:translate-x-0.5 group-hover:text-[#c9a86a]" />
               </button>
             ))}
           </div>
