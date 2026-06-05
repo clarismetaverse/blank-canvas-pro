@@ -46,14 +46,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       try {
-        await hydrateUser(token, true);
-      } catch {
-        setAuthToken(null);
-        setUser(null);
-        navigate("/login", { replace: true });
+        await hydrateUser(token);
+      } catch (err) {
+        console.warn("[AuthProvider] bootstrap profile fetch failed; keeping cached token", err);
       } finally {
         setIsLoading(false);
       }
+
     };
 
     void bootstrap();
