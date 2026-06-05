@@ -21,10 +21,15 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
   const [address, setAddress] = useState("");
   const [city, setCity] = useState<ClubCity | "">("");
   const [cityPickerOpen, setCityPickerOpen] = useState(false);
+  const [about, setAbout] = useState("");
+  const [eventDateTime, setEventDateTime] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
   const [coverFile, setCoverFile] = useState<File | null>(null);
 
-  const canCreate = useMemo(() => Boolean(name.trim() && address.trim() && city), [name, address, city]);
+  const canCreate = useMemo(
+    () => Boolean(name.trim() && address.trim() && city && eventDateTime),
+    [name, address, city, eventDateTime]
+  );
 
   const handleCreate = () => {
     if (!canCreate) return;
@@ -32,12 +37,16 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
       name: name.trim(),
       address: address.trim(),
       city: city,
+      about: about.trim() || undefined,
+      eventDateTime: eventDateTime || undefined,
       coverUrl: coverUrl.trim() || undefined,
       coverFile: coverFile ?? undefined,
     });
     setName("");
     setAddress("");
     setCity("");
+    setAbout("");
+    setEventDateTime("");
     setCoverUrl("");
     setCoverFile(null);
   };
