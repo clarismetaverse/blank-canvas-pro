@@ -1,51 +1,36 @@
+## Problem
 
+When you click **Activities**, the preview reloads (Vite HMR / full reload). On reload, `AuthProvider` bootstraps and calls `fetchVicProfile` with the cached token. The Xano token has expired (`"This token is expired."` in the console), `fetchVicProfile` returns `null`, and the provider clears the token and redirects to `/login`. The Activities page itself is fine — it's the bootstrap path that kicks you out.
 
-## Fix Login-to-Homepage Flow
+## Fix
 
-### Problem
-After successful login via `POST /auth_vic_login`, the profile fetch `GET /vic` fails with "token belongs to a different object type", causing a redirect loop back to `/login`.
-
-### Root Cause
-The `fetchWithAuth` helper in `src/services/vic.ts` has a retry mechanism that strips the `Bearer` prefix on 401/403. This inconsistent auth header format may be confusing the Xano endpoint. Additionally, the `apiFetch` utility in `src/services/index.ts` has its own unauthorized handling that clears the token and dispatches an event, potentially conflicting with the profile fetch flow.
+Stop forcing logout when the bootstrap profile fetch fails. Keep the user on the current route, surface a soft "session may be stale" state, and only redirect to `/login` on explicit user-driven login failures or a real 401 returned by a user-triggered call.
 
 ### Changes
 
-**1. Simplify `src/services/vic.ts` — use `apiFetch` instead of raw fetch**
+1. **`src/contexts/AuthProvider.tsx` — bootstrap path**
+   - In the `bootstrap` effect, if `hydrateUser(token, true)` returns false (profile fetch failed), do **not** call `setAuthToken(null)` and do **not** `navigate("/login")`.
+   - Keep the cached token in `localStorage`, leave `user` as `null` (or optionally a minimal placeholder), and just stop loading.
+   - Remove the `navigate("/login", { replace: true })` from the bootstrap `catch` for the same reason.
 
-Replace the custom `fetchWithAuth` + `fetchVicProfile` with a single call using the existing `apiFetch` utility. This ensures consistent authorization header format (`Bearer {token}`) and eliminates the confusing retry logic.
+2. **`src/contexts/AuthProvider.tsx` — `hydrateUser`**
+   - Remove the side-effects that clear the token and navigate when `profile` is `null` during bootstrap. Those side-effects belong only to the explicit login flow.
+   - Leave the login (`login()`) flow untouched: if `hydrateUser` fails right after `auth_vic_login`, it still throws so the Login screen shows an error.
 
-- Remove `fetchWithAuth` function
-- Update `fetchVicProfile` to accept a token, temporarily set it, then call `apiFetch<VicUser>("/vic")`
-- Or simply pass the token as a header override to `apiFetch`
+3. **`src/components/ProtectedRoute.tsx`**
+   - Currently it redirects to `/login` whenever `!token || !user`. After the bootstrap change, an expired token will leave `user === null` but `token` still present. Update the guard so it only redirects when there is no token at all. If there is a token but no user yet, render the protected content (the individual API calls inside each page will fail gracefully via `xanoFetch` errors, which the pages already handle with empty states / error logs).
 
-**2. Update `src/contexts/AuthProvider.tsx` — prevent redirect on profile failure during login**
+4. **`src/services/index.ts` — unchanged behavior, just confirm**
+   - `apiFetch` already dispatches `UNAUTHORIZED_EVENT` on a real 401. That stays as-is so a true 401 from a user-driven action still logs the user out cleanly. `xanoFetch` does not auto-logout, which is what we want for the Activities endpoints.
 
-Currently, `hydrateUser` navigates to `/login` if the profile fetch fails. During the login flow itself, this creates a loop. Instead:
+### Out of scope
 
-- Only navigate to `/login` on failure during the bootstrap (page reload) path
-- During the login callback, let the error propagate so the Login page can show an error message
-- Split `hydrateUser` behavior: bootstrap silently clears session; login throws on failure
+- No token refresh logic (Xano doesn't expose one in the current setup).
+- No changes to the Activities page, Xano endpoints, or the login UI.
+- No changes to `vicLocations.ts` / cover upload flow.
 
-**3. Add console logging for debugging (temporary)**
+### Result
 
-Add a `console.error` in `fetchVicProfile` when the response is not OK, logging the status and response body. This will help diagnose if the issue recurs.
-
-### Technical Details
-
-The key change in `vic.ts`:
-```typescript
-export async function fetchVicProfile(token: string): Promise<VicUser | null> {
-  if (!token) return null;
-  try {
-    const profile = await apiFetch<Record<string, unknown>>("/vic", {
-      headers: { Authorization: `Bearer ${token}` },
-    });
-    // map fields to VicUser...
-    return { id, Name, email, Diamonds, Invites, bio, Picture };
-  } catch {
-    return null;
-  }
-}
-```
-
-This removes the dual-format auth retry and uses the same fetch infrastructure as all other API calls.
+- Clicking Activities (and any HMR-triggered reload) no longer bounces you to `/login` just because the cached token is old.
+- A real 401 from `apiFetch` still logs you out.
+- The Login screen still works exactly as before for fresh logins.

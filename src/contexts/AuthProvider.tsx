@@ -15,7 +15,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const hydrateUser = useCallback(async (token: string | null, isBootstrap = false) => {
+  const hydrateUser = useCallback(async (token: string | null) => {
     if (!token) {
       setUser(null);
       return false;
@@ -23,17 +23,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const profile = await fetchVicProfile(token);
     if (!profile) {
-      setAuthToken(null);
-      setUser(null);
-      if (isBootstrap) {
-        navigate("/login", { replace: true });
-      }
       return false;
     }
 
     setUser(profile as User);
     return true;
-  }, [navigate]);
+  }, []);
+
 
   const logout = useCallback(() => {
     setAuthToken(null);
