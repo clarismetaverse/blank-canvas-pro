@@ -33,16 +33,11 @@ export async function createRestaurantVIC(payload: {
 
   const formData = new FormData();
 
-  // Documented base fields
+  // Match documented Xano /RestaurantVIC input schema
   formData.append("Name", payload.name);
   formData.append("Adress", payload.address);
   formData.append("City", cityId);
-
-  // Extra fields per real Xano schema
   formData.append("cities2_id", cityId);
-  formData.append("actions_turbo_id", JSON.stringify([1]));
-  formData.append("category_venuesNEW", JSON.stringify([55]));
-  formData.append("is_event", "true");
   formData.append("About", payload.about ?? "");
 
   if (payload.eventDateTime) {
@@ -50,6 +45,8 @@ export async function createRestaurantVIC(payload: {
     if (!Number.isNaN(ts)) {
       formData.append("event_date_time", String(ts));
     }
+  } else {
+    formData.append("event_date_time", "");
   }
 
   if (payload.coverFile) {
