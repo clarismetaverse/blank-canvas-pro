@@ -349,7 +349,7 @@ export default function ActivitiesHome() {
           className="space-y-3"
         >
           <div className="px-1">
-            <h2 className="text-sm font-semibold text-neutral-900">Highlights and International events</h2>
+            <h2 className="text-sm font-semibold text-neutral-900">✨ Highlights and International events 🌍</h2>
           </div>
           <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2">
             {eventTempsLoading ? (
