@@ -1250,6 +1250,11 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
               hostAvatarUrl={invitesSentPopup.hostAvatarUrl}
               avatars={invitesSentPopup.avatars.slice(0, 3).map((item) => ({ id: item.id, name: item.name, url: item.avatarUrl }))}
             />
+            <PublicationSuccessPopup
+              open={publicationSuccess.open}
+              title={publicationSuccess.title}
+              onClose={() => setPublicationSuccess({ open: false, title: "" })}
+            />
           </motion.div>
 
           <AnimatePresence>
