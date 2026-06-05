@@ -240,11 +240,10 @@ export default function ActivitiesHome() {
             Choose the form your gathering will take.
           </p>
 
-          <div className="mt-4 divide-y divide-neutral-200/70 border-y border-neutral-200/70">
+          <div className="mt-4 grid grid-cols-2 gap-2.5">
             {([
               { label: "Local activity", hint: "An intimate evening, close to home", icon: MapPin, type: "local" as const },
               { label: "A trip", hint: "Days away, with chosen company", icon: Plane, type: "trip" as const },
-              { label: "Bali", hint: "On the island, by invitation", icon: Palmtree, type: "bali" as const },
             ]).map((item) => (
               <button
                 key={item.label}
@@ -253,19 +252,40 @@ export default function ActivitiesHome() {
                   setInviteFilterType(item.type);
                   setInviteSheetOpen(true);
                 }}
-                className="group flex w-full items-center gap-3 px-1 py-3 text-left transition active:scale-[0.99]"
+                className="group relative flex aspect-square flex-col justify-between rounded-2xl border border-neutral-200/80 bg-white p-3.5 text-left transition hover:border-[#c9a86a]/40 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.12)] active:scale-[0.99]"
               >
-                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-neutral-200 text-neutral-700 transition group-hover:border-[#c9a86a]/50 group-hover:text-[#c9a86a]">
-                  <item.icon className="h-3.5 w-3.5" strokeWidth={1.5} />
+                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 text-neutral-700 transition group-hover:border-[#c9a86a]/50 group-hover:text-[#c9a86a]">
+                  <item.icon className="h-4 w-4" strokeWidth={1.5} />
                 </span>
-                <span className="flex-1 min-w-0">
+                <span className="block">
                   <span className="block text-[14px] font-medium tracking-tight text-neutral-900">{item.label}</span>
-                  <span className="block truncate text-[11px] text-neutral-500">{item.hint}</span>
+                  <span className="mt-0.5 block text-[11px] leading-snug text-neutral-500">{item.hint}</span>
                 </span>
-                <ChevronRight className="h-4 w-4 text-neutral-400 transition group-hover:translate-x-0.5 group-hover:text-[#c9a86a]" />
               </button>
             ))}
           </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              setInviteFilterType("bali");
+              setInviteSheetOpen(true);
+            }}
+            className="group mt-2.5 flex w-full items-center gap-3 rounded-2xl border border-neutral-200/80 bg-white px-4 py-3.5 text-left transition hover:border-[#c9a86a]/40 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.12)] active:scale-[0.99]"
+          >
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-neutral-200 text-neutral-700 transition group-hover:border-[#c9a86a]/50 group-hover:text-[#c9a86a]">
+              <Palmtree className="h-4 w-4" strokeWidth={1.5} />
+            </span>
+            <span className="flex-1 min-w-0">
+              <span className="flex items-center gap-2">
+                <span className="text-[14px] font-medium tracking-tight text-neutral-900">Bali</span>
+                <span className="h-px w-4 bg-[#c9a86a]/60" />
+                <span className="text-[9.5px] font-medium uppercase tracking-[0.24em] text-[#c9a86a]">Featured</span>
+              </span>
+              <span className="mt-0.5 block truncate text-[11px] text-neutral-500">On the island, by invitation</span>
+            </span>
+            <ChevronRight className="h-4 w-4 text-neutral-400 transition group-hover:translate-x-0.5 group-hover:text-[#c9a86a]" />
+          </button>
         </motion.section>
 
         <motion.section initial={{ opacity: 0, y: 8, filter: "blur(6px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={easeOut}>
