@@ -21,10 +21,15 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
   const [address, setAddress] = useState("");
   const [city, setCity] = useState<ClubCity | "">("");
   const [cityPickerOpen, setCityPickerOpen] = useState(false);
+  const [about, setAbout] = useState("");
+  const [eventDateTime, setEventDateTime] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
   const [coverFile, setCoverFile] = useState<File | null>(null);
 
-  const canCreate = useMemo(() => Boolean(name.trim() && address.trim() && city), [name, address, city]);
+  const canCreate = useMemo(
+    () => Boolean(name.trim() && address.trim() && city && eventDateTime),
+    [name, address, city, eventDateTime]
+  );
 
   const handleCreate = () => {
     if (!canCreate) return;
@@ -32,12 +37,16 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
       name: name.trim(),
       address: address.trim(),
       city: city,
+      about: about.trim() || undefined,
+      eventDateTime: eventDateTime || undefined,
       coverUrl: coverUrl.trim() || undefined,
       coverFile: coverFile ?? undefined,
     });
     setName("");
     setAddress("");
     setCity("");
+    setAbout("");
+    setEventDateTime("");
     setCoverUrl("");
     setCoverFile(null);
   };
@@ -114,7 +123,29 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
                 </AnimatePresence>
               </div>
 
+              <label className="block rounded-2xl border border-neutral-200 bg-white p-3">
+                <span className="mb-2 block text-xs font-semibold text-neutral-500">Date & time</span>
+                <input
+                  type="datetime-local"
+                  value={eventDateTime}
+                  onChange={(event) => setEventDateTime(event.target.value)}
+                  className="w-full bg-transparent text-sm font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
+                />
+              </label>
+
+              <label className="block rounded-2xl border border-neutral-200 bg-white p-3">
+                <span className="mb-2 block text-xs font-semibold text-neutral-500">About</span>
+                <textarea
+                  value={about}
+                  onChange={(event) => setAbout(event.target.value)}
+                  rows={3}
+                  placeholder="A short description of the experience"
+                  className="w-full resize-none bg-transparent text-sm font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
+                />
+              </label>
+
               <CreateLocationCoverPicker coverUrl={coverUrl} coverFile={coverFile} onUrlChange={setCoverUrl} onFileChange={setCoverFile} />
+
             </div>
 
             <button

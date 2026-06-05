@@ -16,6 +16,8 @@ export async function createRestaurantVIC(payload: {
   name: string;
   address: string;
   city: string;
+  about?: string;
+  eventDateTime?: string;
   coverFile?: File;
 }): Promise<{ id: number }> {
   const cityId = CITY_ID_MAP[payload.city] ?? "0";
@@ -33,6 +35,21 @@ export async function createRestaurantVIC(payload: {
   formData.append("Name", payload.name);
   formData.append("Adress", payload.address);
   formData.append("City", cityId);
+
+  // Hardcoded + extra fields
+  formData.append("actions_turbo_id", JSON.stringify([1]));
+  formData.append("is_event", "true");
+
+  if (payload.about) {
+    formData.append("About", payload.about);
+  }
+
+  if (payload.eventDateTime) {
+    const ts = new Date(payload.eventDateTime).getTime();
+    if (!Number.isNaN(ts)) {
+      formData.append("event_date_time", JSON.stringify([ts]));
+    }
+  }
 
   if (payload.coverFile) {
     formData.append("Cover", payload.coverFile);
