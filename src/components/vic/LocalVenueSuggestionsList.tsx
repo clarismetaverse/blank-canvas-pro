@@ -29,7 +29,7 @@ export default function LocalVenueSuggestionsList({ items, onSelect, onAddNew }:
             <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[#FDEAF2]">
               <Plus className="h-3.5 w-3.5" />
             </span>
-            + Add a new location
+            Add a new activity
           </button>
         </li>
       </ul>
