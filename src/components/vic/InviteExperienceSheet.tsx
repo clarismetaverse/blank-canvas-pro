@@ -523,6 +523,8 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
         name: payload.name,
         address: payload.address,
         city: payload.city,
+        about: payload.about,
+        eventDateTime: payload.eventDateTime,
         coverFile: payload.coverFile,
       });
       const nextVenue: VenueSuggestion = {
