@@ -1038,6 +1038,39 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
               onClose={() => setAddLocationOpen(false)}
               onCreate={handleCreateLocation}
             />
+            <AddNewLocationSheet
+              open={Boolean(planActivityVenue)}
+              presetVenue={planActivityVenue}
+              onClose={() => setPlanActivityVenue(null)}
+              onCreate={async (payload) => {
+                try {
+                  const numericId = planActivityVenue?.id?.startsWith("vic-")
+                    ? Number(planActivityVenue.id.replace("vic-", ""))
+                    : Number(planActivityVenue?.id) || 0;
+                  await createActivity({
+                    Name: payload.name,
+                    Destination: payload.city || cityName || "",
+                    Starting_Day: payload.eventDateTime || null,
+                    Return: null,
+                    VICS: [],
+                    Tripcover: null,
+                    ParticipantsMinimumNumber: 2,
+                    ActivitiesList: payload.about || "",
+                    InvitedUsers: [],
+                    event_temp_id: numericId,
+                    host: hostId,
+                    status: "draft",
+                    ModelLimit: 0,
+                  });
+                  setPublicationSuccess({ open: true, title: payload.name });
+                } catch (err) {
+                  console.error("[planActivity] failed:", err);
+                } finally {
+                  setPlanActivityVenue(null);
+                }
+              }}
+            />
+
             {selectedLocalItem && inviteModelsOpen && (
               <LocalActivityInviteModelsModal
                 open={inviteModelsOpen}
