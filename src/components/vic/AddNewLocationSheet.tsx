@@ -1,14 +1,18 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronDown, MapPin, X } from "lucide-react";
-import { useMemo, useState } from "react";
+import { Calendar, ChevronDown, MapPin, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
 import CreateLocationCoverPicker from "@/components/vic/CreateLocationCoverPicker";
-import type { CreateLocationInput } from "@/components/vic/LocalVenueTypes";
+import type { CreateLocationInput, VenueSuggestion } from "@/components/vic/LocalVenueTypes";
 import type { ClubCity } from "@/services/membersClubs";
 
 type AddNewLocationSheetProps = {
   open: boolean;
   onClose: () => void;
   onCreate: (payload: CreateLocationInput) => void;
+  presetVenue?: VenueSuggestion | null;
+  title?: string;
+  subtitle?: string;
+  ctaLabel?: string;
 };
 
 const CITIES: ClubCity[] = ["Bali", "Dubai", "Milan"];
@@ -16,7 +20,15 @@ const CITIES: ClubCity[] = ["Bali", "Dubai", "Milan"];
 const backdrop = { hidden: { opacity: 0 }, visible: { opacity: 1 }, exit: { opacity: 0 } };
 const card = { hidden: { y: 24, opacity: 0 }, visible: { y: 0, opacity: 1 }, exit: { y: 20, opacity: 0 } };
 
-export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewLocationSheetProps) {
+export default function AddNewLocationSheet({
+  open,
+  onClose,
+  onCreate,
+  presetVenue = null,
+  title,
+  subtitle,
+  ctaLabel,
+}: AddNewLocationSheetProps) {
   const [name, setName] = useState("");
   const [address, setAddress] = useState("");
   const [city, setCity] = useState<ClubCity | "">("");
@@ -26,12 +38,24 @@ export default function AddNewLocationSheet({ open, onClose, onCreate }: AddNewL
   const [coverUrl, setCoverUrl] = useState("");
   const [coverFile, setCoverFile] = useState<File | null>(null);
 
+  const isPreset = Boolean(presetVenue);
+
+  useEffect(() => {
+    if (presetVenue) {
+      setName(presetVenue.name || "");
+      setAddress(presetVenue.address || "");
+      setCity((presetVenue.city as ClubCity) || "");
+      setCoverUrl(presetVenue.coverUrl || "");
+    }
+  }, [presetVenue]);
+
   const resolvedName = useMemo(() => name.trim() || about.trim() || address.trim(), [name, about, address]);
 
   const canCreate = useMemo(
-    () => Boolean(resolvedName && address.trim() && city),
-    [resolvedName, address, city]
+    () => Boolean(resolvedName && address.trim() && city && (isPreset ? eventDateTime : true)),
+    [resolvedName, address, city, isPreset, eventDateTime]
   );
+
 
   const handleCreate = () => {
     if (!canCreate) return;
