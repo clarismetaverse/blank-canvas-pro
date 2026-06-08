@@ -1051,7 +1051,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                     ? Number(planActivityVenue.id.replace("vic-", ""))
                     : Number(planActivityVenue?.id) || 0;
                   await createActivity({
-                    Name: payload.name,
+                    Name: payload.activityName || payload.name,
                     Destination: payload.city || cityName || "",
                     Starting_Day: payload.eventDateTime || null,
                     Return: null,
@@ -1063,7 +1063,10 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                     event_temp_id: numericId,
                     host: hostId,
                     status: "draft",
-                    ModelLimit: 0,
+                    ModelLimit: payload.maxGirls ?? 0,
+                    Activity_Name: payload.activityName,
+                    Max_Girls: payload.maxGirls,
+                    Transport: payload.transport,
                   });
                   setPublicationSuccess({ open: true, title: payload.name });
                 } catch (err) {
