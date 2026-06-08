@@ -160,6 +160,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const activitiesSectionRef = useRef<HTMLElement | null>(null);
   const [filteredEvents, setFilteredEvents] = useState<EventTemp[]>([]);
+  const [vicLocations, setVicLocations] = useState<VicLocation[]>([]);
   const [eventsLoading, setEventsLoading] = useState(false);
   const [expandedLocalBookingId, setExpandedLocalBookingId] = useState<string | null>(null);
   const [localBookings, setLocalBookings] = useState<Record<string, LocalBookingState>>({});
