@@ -56,7 +56,6 @@ export default function AddNewLocationSheet({
     [resolvedName, address, city, isPreset, eventDateTime]
   );
 
-
   const handleCreate = () => {
     if (!canCreate) return;
     onCreate({
@@ -68,14 +67,21 @@ export default function AddNewLocationSheet({
       coverUrl: coverUrl.trim() || undefined,
       coverFile: coverFile ?? undefined,
     });
-    setName("");
-    setAddress("");
-    setCity("");
+    if (!isPreset) {
+      setName("");
+      setAddress("");
+      setCity("");
+      setCoverUrl("");
+      setCoverFile(null);
+    }
     setAbout("");
     setEventDateTime("");
-    setCoverUrl("");
-    setCoverFile(null);
   };
+
+  const headerTitle = title ?? (isPreset ? "Plan activity" : "Add new location");
+  const headerSubtitle =
+    subtitle ?? (isPreset ? "Fill in the activity details for the selected venue." : "Create a private venue entry for this plan.");
+  const buttonLabel = ctaLabel ?? "Create activity";
 
   return (
     <AnimatePresence>
@@ -86,8 +92,8 @@ export default function AddNewLocationSheet({
             {/* Header */}
             <div className="flex items-center justify-between gap-3 border-b border-neutral-100 px-5 py-4">
               <div>
-                <p className="text-lg font-semibold text-neutral-900">Add new location</p>
-                <p className="mt-0.5 text-sm text-neutral-500">Create a private venue entry for this plan.</p>
+                <p className="text-lg font-semibold text-neutral-900">{headerTitle}</p>
+                <p className="mt-0.5 text-sm text-neutral-500">{headerSubtitle}</p>
               </div>
               <button type="button" onClick={onClose} className="rounded-full bg-neutral-100 p-2.5 text-neutral-700" aria-label="Close add location">
                 <X className="h-5 w-5" />
@@ -97,63 +103,88 @@ export default function AddNewLocationSheet({
             {/* Scrollable form */}
             <div className="flex-1 overflow-y-auto px-5 py-5">
               <div className="mx-auto max-w-lg space-y-4">
-                <label className="block rounded-2xl border border-neutral-200 bg-white p-3.5">
-                  <span className="mb-2 block text-xs font-semibold text-neutral-500">Title</span>
-                  <input value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Private Rooftop by the Marina" className="w-full bg-transparent text-sm font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none" />
-                </label>
-                <label className="block rounded-2xl border border-neutral-200 bg-white p-3.5">
-                  <span className="mb-2 block text-xs font-semibold text-neutral-500">Address</span>
-                  <input value={address} onChange={(event) => setAddress(event.target.value)} placeholder="Street, district" className="w-full bg-transparent text-sm font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none" />
-                </label>
-
-                {/* City picker dropdown — no free text input */}
-                <div className="relative">
-                  <button
-                    type="button"
-                    onClick={() => setCityPickerOpen((prev) => !prev)}
-                    className="flex w-full items-center justify-between rounded-2xl border border-neutral-200 bg-white p-3.5 text-left"
-                  >
-                    <span className="min-w-0">
-                      <span className="mb-1 block text-xs font-semibold text-neutral-500">City</span>
-                      <span className={`block text-sm font-medium ${city ? "text-neutral-900" : "text-neutral-400"}`}>
-                        {city || "Select a city"}
+                {isPreset && presetVenue ? (
+                  <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_8px_22px_rgba(15,23,42,0.08)]">
+                    <div className="relative h-32 w-full bg-neutral-900">
+                      {presetVenue.coverUrl ? (
+                        <img src={presetVenue.coverUrl} alt={presetVenue.name} className="h-full w-full object-cover" />
+                      ) : null}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                      <span className="absolute left-3 top-3 rounded-full border border-white/30 bg-white/20 px-2.5 py-1 text-[10px] font-semibold tracking-[0.14em] text-white backdrop-blur-sm">
+                        VENUE
                       </span>
-                    </span>
-                    <ChevronDown className={`h-4 w-4 shrink-0 text-neutral-400 transition-transform ${cityPickerOpen ? "rotate-180" : ""}`} />
-                  </button>
+                    </div>
+                    <div className="px-4 py-3">
+                      <p className="text-sm font-semibold text-neutral-900">{presetVenue.name}</p>
+                      <p className="mt-0.5 inline-flex items-center gap-1.5 text-xs text-neutral-500">
+                        <MapPin className="h-3.5 w-3.5" />
+                        {[presetVenue.address, presetVenue.city].filter(Boolean).join(" • ") || "Address pending"}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <label className="block rounded-2xl border border-neutral-200 bg-white p-3.5">
+                      <span className="mb-2 block text-xs font-semibold text-neutral-500">Title</span>
+                      <input value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Private Rooftop by the Marina" className="w-full bg-transparent text-sm font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none" />
+                    </label>
+                    <label className="block rounded-2xl border border-neutral-200 bg-white p-3.5">
+                      <span className="mb-2 block text-xs font-semibold text-neutral-500">Address</span>
+                      <input value={address} onChange={(event) => setAddress(event.target.value)} placeholder="Street, district" className="w-full bg-transparent text-sm font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none" />
+                    </label>
 
-                  <AnimatePresence>
-                    {cityPickerOpen && (
-                      <motion.ul
-                        initial={{ opacity: 0, y: -4 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: -4 }}
-                        transition={{ duration: 0.15 }}
-                        className="absolute z-20 mt-1 w-full overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_12px_32px_rgba(0,0,0,0.12)]"
+                    {/* City picker dropdown — no free text input */}
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setCityPickerOpen((prev) => !prev)}
+                        className="flex w-full items-center justify-between rounded-2xl border border-neutral-200 bg-white p-3.5 text-left"
                       >
-                        {CITIES.map((c) => (
-                          <li key={c}>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setCity(c);
-                                setCityPickerOpen(false);
-                              }}
-                              className={`flex w-full items-center px-4 py-3 text-sm font-medium transition hover:bg-neutral-50 ${
-                                city === c ? "bg-neutral-50 text-neutral-900" : "text-neutral-700"
-                              }`}
-                            >
-                              {c}
-                            </button>
-                          </li>
-                        ))}
-                      </motion.ul>
-                    )}
-                  </AnimatePresence>
-                </div>
+                        <span className="min-w-0">
+                          <span className="mb-1 block text-xs font-semibold text-neutral-500">City</span>
+                          <span className={`block text-sm font-medium ${city ? "text-neutral-900" : "text-neutral-400"}`}>
+                            {city || "Select a city"}
+                          </span>
+                        </span>
+                        <ChevronDown className={`h-4 w-4 shrink-0 text-neutral-400 transition-transform ${cityPickerOpen ? "rotate-180" : ""}`} />
+                      </button>
+
+                      <AnimatePresence>
+                        {cityPickerOpen && (
+                          <motion.ul
+                            initial={{ opacity: 0, y: -4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -4 }}
+                            transition={{ duration: 0.15 }}
+                            className="absolute z-20 mt-1 w-full overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_12px_32px_rgba(0,0,0,0.12)]"
+                          >
+                            {CITIES.map((c) => (
+                              <li key={c}>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setCity(c);
+                                    setCityPickerOpen(false);
+                                  }}
+                                  className={`flex w-full items-center px-4 py-3 text-sm font-medium transition hover:bg-neutral-50 ${
+                                    city === c ? "bg-neutral-50 text-neutral-900" : "text-neutral-700"
+                                  }`}
+                                >
+                                  {c}
+                                </button>
+                              </li>
+                            ))}
+                          </motion.ul>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </>
+                )}
 
                 <label className="block rounded-2xl border border-neutral-200 bg-white p-3.5">
-                  <span className="mb-2 block text-xs font-semibold text-neutral-500">Date & time</span>
+                  <span className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-neutral-500">
+                    <Calendar className="h-3.5 w-3.5" /> Date &amp; time
+                  </span>
                   <input
                     type="datetime-local"
                     value={eventDateTime}
@@ -163,17 +194,19 @@ export default function AddNewLocationSheet({
                 </label>
 
                 <label className="block rounded-2xl border border-neutral-200 bg-white p-3.5">
-                  <span className="mb-2 block text-xs font-semibold text-neutral-500">About</span>
+                  <span className="mb-2 block text-xs font-semibold text-neutral-500">{isPreset ? "Activity details" : "About"}</span>
                   <textarea
                     value={about}
                     onChange={(event) => setAbout(event.target.value)}
                     rows={4}
-                    placeholder="A short description of the experience"
+                    placeholder={isPreset ? "What's the plan? Dress code, vibe, who's invited..." : "A short description of the experience"}
                     className="w-full resize-none bg-transparent text-sm font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
                   />
                 </label>
 
-                <CreateLocationCoverPicker coverUrl={coverUrl} coverFile={coverFile} onUrlChange={setCoverUrl} onFileChange={setCoverFile} />
+                {isPreset ? null : (
+                  <CreateLocationCoverPicker coverUrl={coverUrl} coverFile={coverFile} onUrlChange={setCoverUrl} onFileChange={setCoverFile} />
+                )}
               </div>
             </div>
 
@@ -186,7 +219,7 @@ export default function AddNewLocationSheet({
                 className={`mx-auto flex w-full max-w-lg items-center justify-center gap-2 rounded-full px-4 py-3.5 text-sm font-semibold transition ${canCreate ? "bg-neutral-900 text-white" : "bg-neutral-200 text-neutral-500"}`}
               >
                 <MapPin className="h-4 w-4" />
-                Create activity
+                {buttonLabel}
               </button>
             </div>
           </motion.div>
