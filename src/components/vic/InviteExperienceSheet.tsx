@@ -905,11 +905,13 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                       {filterType === "local" && (
                         <div className="space-y-3">
                           <LocalVenueSearchBar value={venueSearchQuery} onChange={setVenueSearchQuery} />
-                          <LocalVenueSuggestionsList
-                            items={filteredVenueSuggestions}
-                            onSelect={handleSelectVenueSuggestion}
-                            onAddNew={() => setAddLocationOpen(true)}
-                          />
+                          {venueSearchQuery.trim().length > 0 && (
+                            <LocalVenueSuggestionsList
+                              items={filteredVenueSuggestions}
+                              onSelect={handleSelectVenueSuggestion}
+                              onAddNew={() => setAddLocationOpen(true)}
+                            />
+                          )}
                           {selectedVenuePreview && <SelectedVenuePreviewCard venue={selectedVenuePreview} onContinue={continueWithVenue} />}
                         </div>
                       )}
