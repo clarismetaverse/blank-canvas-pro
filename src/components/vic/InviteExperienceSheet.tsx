@@ -6,6 +6,7 @@ import type { CreatorLite } from "@/services/creatorSearch";
 import ConfirmInvitesModal from "@/features/activities/ConfirmInvitesModal";
 import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityInviteModelsModal";
 import { fetchEventTemps, type EventTemp } from "@/services/activities";
+import { fetchVicLocations, type VicLocation } from "@/services/vicLocationsList";
 import { createActivity } from "@/services/activityApi";
 import { getValidInvitedUsers, putTripsInvite, type ValidInvitedUser } from "@/services/tripsInvite";
 import { requestVicBooking, type BookingStatus } from "@/services/vicBookings";
