@@ -35,6 +35,16 @@ export type MemberActivity = MemberActivityPayload & {
   created_at?: number;
 };
 
+export async function uploadCoverImage(file: File): Promise<MemberActivityCover> {
+  const fd = new FormData();
+  fd.append("content", file);
+  const result = await xanoFetch<MemberActivityCover>("/upload/image", {
+    method: "POST",
+    body: fd,
+  });
+  return result;
+}
+
 export async function createMemberActivity(
   payload: MemberActivityPayload
 ): Promise<MemberActivity> {
