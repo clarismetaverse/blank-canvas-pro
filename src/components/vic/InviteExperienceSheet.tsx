@@ -349,6 +349,10 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
       supportCount: 40 + (loc.id % 25),
       address: loc.Adress,
       city: cityName,
+      about: loc.About || undefined,
+      gallery: Array.isArray(loc.GaIIery)
+        ? loc.GaIIery.map((g) => g?.url || "").filter((u): u is string => Boolean(u))
+        : undefined,
     }));
     const baseItems = filteredEvents.map((event) => ({
       id: String(event.id),
