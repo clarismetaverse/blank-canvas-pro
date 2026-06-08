@@ -1058,6 +1058,22 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                   const departureDate = payload.eventDateTime
                     ? new Date(payload.eventDateTime).toISOString().slice(0, 10)
                     : null;
+
+                  let cover: MemberActivityCover | null = null;
+                  if (payload.coverFile) {
+                    try {
+                      cover = await uploadCoverImage(payload.coverFile);
+                    } catch (uploadErr) {
+                      console.error("[planActivity] cover upload failed:", uploadErr);
+                    }
+                  }
+                  if (!cover && planActivityVenue?.id) {
+                    const fallback = localActivityItems.find((it) => it.id === planActivityVenue.id)?.coverObject;
+                    if (fallback && typeof fallback === "object") {
+                      cover = fallback as unknown as MemberActivityCover;
+                    }
+                  }
+
                   await createMemberActivity({
                     Activity_Name: payload.activityName || payload.name,
                     user_turbo_id: hostId ? [hostId] : [],
@@ -1071,7 +1087,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                     activity: [],
                     day: dayMs,
                     transport: payload.transport ?? null,
-                    Cover: null,
+                    Cover: cover,
                   });
                   setPublicationSuccess({ open: true, title: payload.name });
                 } catch (err) {
