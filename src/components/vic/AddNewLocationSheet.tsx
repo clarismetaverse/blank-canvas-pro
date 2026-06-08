@@ -37,6 +37,10 @@ export default function AddNewLocationSheet({
   const [eventDateTime, setEventDateTime] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [activityName, setActivityName] = useState("");
+  const [maxGirls, setMaxGirls] = useState<string>("");
+  const [transport, setTransport] = useState<TransportOption | "">("");
+  const [transportPickerOpen, setTransportPickerOpen] = useState(false);
 
   const isPreset = Boolean(presetVenue);
 
