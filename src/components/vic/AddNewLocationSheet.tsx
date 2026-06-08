@@ -249,8 +249,9 @@ export default function AddNewLocationSheet({
                       >
                         <span className="min-w-0">
                           <span className="mb-1 block text-xs font-semibold text-neutral-500">Transport</span>
-                          <span className={`block text-sm font-medium ${transport ? "text-neutral-900" : "text-neutral-400"}`}>
-                            {transport || "Select transport"}
+                          <span className={`flex items-center gap-2 text-sm font-medium ${transport ? "text-neutral-900" : "text-neutral-400"}`}>
+                            {transport && TRANSPORT_ICONS[transport] ? (() => { const I = TRANSPORT_ICONS[transport]; return <I className="h-4 w-4 text-neutral-500" />; })() : null}
+                            <span>{transport || "Select transport"}</span>
                           </span>
                         </span>
                         <ChevronDown className={`h-4 w-4 shrink-0 text-neutral-400 transition-transform ${transportPickerOpen ? "rotate-180" : ""}`} />
