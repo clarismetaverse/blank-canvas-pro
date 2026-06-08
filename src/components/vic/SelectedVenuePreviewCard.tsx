@@ -25,6 +25,9 @@ export default function SelectedVenuePreviewCard({ venue, onContinue }: Selected
             <MapPin className="h-3.5 w-3.5" />
             {[venue.address, venue.city].filter(Boolean).join(" • ") || "Address pending"}
           </p>
+          {venue.about ? (
+            <p className="mt-2 text-sm leading-relaxed text-neutral-700">{venue.about}</p>
+          ) : null}
         </div>
         <button
           type="button"
