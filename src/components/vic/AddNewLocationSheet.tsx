@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Calendar, ChevronDown, MapPin, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import CreateLocationCoverPicker from "@/components/vic/CreateLocationCoverPicker";
-import type { CreateLocationInput, VenueSuggestion } from "@/components/vic/LocalVenueTypes";
+import { TRANSPORT_OPTIONS, type CreateLocationInput, type TransportOption, type VenueSuggestion } from "@/components/vic/LocalVenueTypes";
 import type { ClubCity } from "@/services/membersClubs";
 
 type AddNewLocationSheetProps = {
