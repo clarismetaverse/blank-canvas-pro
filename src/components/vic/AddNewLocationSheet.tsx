@@ -1,5 +1,13 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Calendar, ChevronDown, MapPin, X } from "lucide-react";
+import { Calendar, Car, ChevronDown, Check, MapPin, Plane, Ship, UserRound, X } from "lucide-react";
+
+const TRANSPORT_ICONS: Record<string, React.ComponentType<{ className?: string }>> = {
+  Yes: Check,
+  Uber: Car,
+  "Private Ferry": Ship,
+  "Private Driver": UserRound,
+  "Flight tickets": Plane,
+};
 import { useEffect, useMemo, useState } from "react";
 import CreateLocationCoverPicker from "@/components/vic/CreateLocationCoverPicker";
 import { TRANSPORT_OPTIONS, type CreateLocationInput, type TransportOption, type VenueSuggestion } from "@/components/vic/LocalVenueTypes";
