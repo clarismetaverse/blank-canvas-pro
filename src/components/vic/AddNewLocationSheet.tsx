@@ -2,7 +2,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Calendar, ChevronDown, MapPin, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import CreateLocationCoverPicker from "@/components/vic/CreateLocationCoverPicker";
-import type { CreateLocationInput, VenueSuggestion } from "@/components/vic/LocalVenueTypes";
+import { TRANSPORT_OPTIONS, type CreateLocationInput, type TransportOption, type VenueSuggestion } from "@/components/vic/LocalVenueTypes";
 import type { ClubCity } from "@/services/membersClubs";
 
 type AddNewLocationSheetProps = {
@@ -37,6 +37,10 @@ export default function AddNewLocationSheet({
   const [eventDateTime, setEventDateTime] = useState("");
   const [coverUrl, setCoverUrl] = useState("");
   const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [activityName, setActivityName] = useState("");
+  const [maxGirls, setMaxGirls] = useState<string>("");
+  const [transport, setTransport] = useState<TransportOption | "">("");
+  const [transportPickerOpen, setTransportPickerOpen] = useState(false);
 
   const isPreset = Boolean(presetVenue);
 
@@ -52,8 +56,14 @@ export default function AddNewLocationSheet({
   const resolvedName = useMemo(() => name.trim() || about.trim() || address.trim(), [name, about, address]);
 
   const canCreate = useMemo(
-    () => Boolean(resolvedName && address.trim() && city && (isPreset ? eventDateTime : true)),
-    [resolvedName, address, city, isPreset, eventDateTime]
+    () =>
+      Boolean(
+        resolvedName &&
+          address.trim() &&
+          city &&
+          (isPreset ? eventDateTime && activityName.trim() && maxGirls && transport : true)
+      ),
+    [resolvedName, address, city, isPreset, eventDateTime, activityName, maxGirls, transport]
   );
 
   const handleCreate = () => {
@@ -66,6 +76,9 @@ export default function AddNewLocationSheet({
       eventDateTime: eventDateTime || undefined,
       coverUrl: coverUrl.trim() || undefined,
       coverFile: coverFile ?? undefined,
+      activityName: activityName.trim() || undefined,
+      maxGirls: maxGirls ? Number(maxGirls) : undefined,
+      transport: (transport || undefined) as TransportOption | undefined,
     });
     if (!isPreset) {
       setName("");
@@ -76,6 +89,9 @@ export default function AddNewLocationSheet({
     }
     setAbout("");
     setEventDateTime("");
+    setActivityName("");
+    setMaxGirls("");
+    setTransport("");
   };
 
   const headerTitle = title ?? (isPreset ? "Plan activity" : "Add new location");
@@ -181,6 +197,18 @@ export default function AddNewLocationSheet({
                   </>
                 )}
 
+                {isPreset ? (
+                  <label className="block rounded-2xl border border-neutral-200 bg-white p-3.5">
+                    <span className="mb-2 block text-xs font-semibold text-neutral-500">Activity name</span>
+                    <input
+                      value={activityName}
+                      onChange={(event) => setActivityName(event.target.value)}
+                      placeholder="e.g. Sunset rooftop dinner"
+                      className="w-full bg-transparent text-sm font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
+                    />
+                  </label>
+                ) : null}
+
                 <label className="block rounded-2xl border border-neutral-200 bg-white p-3.5">
                   <span className="mb-2 flex items-center gap-1.5 text-xs font-semibold text-neutral-500">
                     <Calendar className="h-3.5 w-3.5" /> Date &amp; time
@@ -192,6 +220,67 @@ export default function AddNewLocationSheet({
                     className="w-full bg-transparent text-sm font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
                   />
                 </label>
+
+                {isPreset ? (
+                  <>
+                    <label className="block rounded-2xl border border-neutral-200 bg-white p-3.5">
+                      <span className="mb-2 block text-xs font-semibold text-neutral-500">Max girls</span>
+                      <input
+                        type="number"
+                        min={1}
+                        inputMode="numeric"
+                        value={maxGirls}
+                        onChange={(event) => setMaxGirls(event.target.value.replace(/[^0-9]/g, ""))}
+                        placeholder="e.g. 6"
+                        className="w-full bg-transparent text-sm font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none"
+                      />
+                    </label>
+
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setTransportPickerOpen((prev) => !prev)}
+                        className="flex w-full items-center justify-between rounded-2xl border border-neutral-200 bg-white p-3.5 text-left"
+                      >
+                        <span className="min-w-0">
+                          <span className="mb-1 block text-xs font-semibold text-neutral-500">Transport</span>
+                          <span className={`block text-sm font-medium ${transport ? "text-neutral-900" : "text-neutral-400"}`}>
+                            {transport || "Select transport"}
+                          </span>
+                        </span>
+                        <ChevronDown className={`h-4 w-4 shrink-0 text-neutral-400 transition-transform ${transportPickerOpen ? "rotate-180" : ""}`} />
+                      </button>
+                      <AnimatePresence>
+                        {transportPickerOpen && (
+                          <motion.ul
+                            initial={{ opacity: 0, y: -4 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -4 }}
+                            transition={{ duration: 0.15 }}
+                            className="absolute z-20 mt-1 w-full overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_12px_32px_rgba(0,0,0,0.12)]"
+                          >
+                            {TRANSPORT_OPTIONS.map((t) => (
+                              <li key={t}>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setTransport(t);
+                                    setTransportPickerOpen(false);
+                                  }}
+                                  className={`flex w-full items-center px-4 py-3 text-sm font-medium transition hover:bg-neutral-50 ${
+                                    transport === t ? "bg-neutral-50 text-neutral-900" : "text-neutral-700"
+                                  }`}
+                                >
+                                  {t}
+                                </button>
+                              </li>
+                            ))}
+                          </motion.ul>
+                        )}
+                      </AnimatePresence>
+                    </div>
+                  </>
+                ) : null}
 
                 <label className="block rounded-2xl border border-neutral-200 bg-white p-3.5">
                   <span className="mb-2 block text-xs font-semibold text-neutral-500">{isPreset ? "Activity details" : "About"}</span>

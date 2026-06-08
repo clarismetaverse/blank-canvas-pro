@@ -8,6 +8,16 @@ export type VenueSuggestion = {
   isNew?: boolean;
 };
 
+export type TransportOption = "Yes" | "Uber" | "Private Ferry" | "Private Driver" | "Flight tickets";
+
+export const TRANSPORT_OPTIONS: TransportOption[] = [
+  "Yes",
+  "Uber",
+  "Private Ferry",
+  "Private Driver",
+  "Flight tickets",
+];
+
 export type CreateLocationInput = {
   name: string;
   address: string;
@@ -16,4 +26,7 @@ export type CreateLocationInput = {
   eventDateTime?: string; // ISO datetime-local value
   coverUrl?: string;
   coverFile?: File;
+  activityName?: string;
+  maxGirls?: number;
+  transport?: TransportOption;
 };
