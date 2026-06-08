@@ -57,12 +57,9 @@ export default function AddNewLocationSheet({
 
   const canCreate = useMemo(
     () =>
-      Boolean(
-        resolvedName &&
-          address.trim() &&
-          city &&
-          (isPreset ? eventDateTime && activityName.trim() && maxGirls && transport : true)
-      ),
+      isPreset
+        ? Boolean(eventDateTime && activityName.trim() && Number(maxGirls) > 0 && transport)
+        : Boolean(resolvedName && address.trim() && city),
     [resolvedName, address, city, isPreset, eventDateTime, activityName, maxGirls, transport]
   );
 
