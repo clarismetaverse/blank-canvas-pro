@@ -6,6 +6,7 @@ import type { CreatorLite } from "@/services/creatorSearch";
 import ConfirmInvitesModal from "@/features/activities/ConfirmInvitesModal";
 import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityInviteModelsModal";
 import { fetchEventTemps, type EventTemp } from "@/services/activities";
+import { fetchVicLocations, type VicLocation } from "@/services/vicLocationsList";
 import { createActivity } from "@/services/activityApi";
 import { getValidInvitedUsers, putTripsInvite, type ValidInvitedUser } from "@/services/tripsInvite";
 import { requestVicBooking, type BookingStatus } from "@/services/vicBookings";
@@ -159,6 +160,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const activitiesSectionRef = useRef<HTMLElement | null>(null);
   const [filteredEvents, setFilteredEvents] = useState<EventTemp[]>([]);
+  const [vicLocations, setVicLocations] = useState<VicLocation[]>([]);
   const [eventsLoading, setEventsLoading] = useState(false);
   const [expandedLocalBookingId, setExpandedLocalBookingId] = useState<string | null>(null);
   const [localBookings, setLocalBookings] = useState<Record<string, LocalBookingState>>({});
@@ -219,10 +221,24 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
     const load = async () => {
       setEventsLoading(true);
       try {
-        const all = await fetchEventTemps();
-        if (isMounted) setFilteredEvents(all.filter((e) => e.Type === filterType));
+        if (filterType === "local") {
+          const locations = await fetchVicLocations();
+          if (isMounted) {
+            setVicLocations(locations);
+            setFilteredEvents([]);
+          }
+        } else {
+          const all = await fetchEventTemps();
+          if (isMounted) {
+            setFilteredEvents(all.filter((e) => e.Type === filterType));
+            setVicLocations([]);
+          }
+        }
       } catch {
-        if (isMounted) setFilteredEvents([]);
+        if (isMounted) {
+          setFilteredEvents([]);
+          setVicLocations([]);
+        }
       } finally {
         if (isMounted) setEventsLoading(false);
       }
@@ -321,6 +337,17 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
   );
 
   const localActivityItems = useMemo<LocalActivityItem[]>(() => {
+    const vicItems = vicLocations.map((loc) => ({
+      id: `vic-${loc.id}`,
+      title: loc.Title || "Untitled location",
+      dateLabel: undefined,
+      coverUrl: loc.Cover?.url || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80",
+      coverObject: loc.Cover ? (loc.Cover as unknown as Record<string, unknown>) : null,
+      tag: "local",
+      supportCount: 40 + (loc.id % 25),
+      address: loc.Adress,
+      city: cityName,
+    }));
     const baseItems = filteredEvents.map((event) => ({
       id: String(event.id),
       title: event.Name,
@@ -343,8 +370,8 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
       isNew: venue.isNew,
     }));
 
-    return [...customItems, ...baseItems];
-  }, [cityName, customVenueSuggestions, filteredEvents]);
+    return [...customItems, ...vicItems, ...baseItems];
+  }, [cityName, customVenueSuggestions, filteredEvents, vicLocations]);
 
   const venueSuggestions = useMemo<VenueSuggestion[]>(
     () =>
