@@ -221,10 +221,24 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
     const load = async () => {
       setEventsLoading(true);
       try {
-        const all = await fetchEventTemps();
-        if (isMounted) setFilteredEvents(all.filter((e) => e.Type === filterType));
+        if (filterType === "local") {
+          const locations = await fetchVicLocations();
+          if (isMounted) {
+            setVicLocations(locations);
+            setFilteredEvents([]);
+          }
+        } else {
+          const all = await fetchEventTemps();
+          if (isMounted) {
+            setFilteredEvents(all.filter((e) => e.Type === filterType));
+            setVicLocations([]);
+          }
+        }
       } catch {
-        if (isMounted) setFilteredEvents([]);
+        if (isMounted) {
+          setFilteredEvents([]);
+          setVicLocations([]);
+        }
       } finally {
         if (isMounted) setEventsLoading(false);
       }
