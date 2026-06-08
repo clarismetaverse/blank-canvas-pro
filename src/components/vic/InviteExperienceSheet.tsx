@@ -8,7 +8,7 @@ import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityI
 import { fetchEventTemps, type EventTemp } from "@/services/activities";
 import { fetchVicLocations, type VicLocation } from "@/services/vicLocationsList";
 import { createActivity } from "@/services/activityApi";
-import { createMemberActivity } from "@/services/memberActivities";
+import { createMemberActivity, uploadCoverImage, type MemberActivityCover } from "@/services/memberActivities";
 import { getValidInvitedUsers, putTripsInvite, type ValidInvitedUser } from "@/services/tripsInvite";
 import { requestVicBooking, type BookingStatus } from "@/services/vicBookings";
 import { fetchVicProfile } from "@/services/vic";
