@@ -303,9 +303,12 @@ export default function AddNewLocationSheet({
                   />
                 </label>
 
-                {isPreset ? null : (
-                  <CreateLocationCoverPicker coverUrl={coverUrl} coverFile={coverFile} onUrlChange={setCoverUrl} onFileChange={setCoverFile} />
-                )}
+                <CreateLocationCoverPicker coverUrl={coverUrl} coverFile={coverFile} onUrlChange={setCoverUrl} onFileChange={setCoverFile} />
+                {isPreset ? (
+                  <p className="-mt-2 px-1 text-[11px] text-neutral-500">
+                    Optional. If left empty, the venue's cover will be used.
+                  </p>
+                ) : null}
               </div>
             </div>
 
