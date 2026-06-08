@@ -4,6 +4,7 @@ export type VenueSuggestion = {
   address?: string;
   city?: string;
   coverUrl?: string;
+  about?: string;
   isNew?: boolean;
 };
 

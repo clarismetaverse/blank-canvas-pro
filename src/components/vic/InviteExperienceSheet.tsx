@@ -388,6 +388,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
         address: item.address || item.dateLabel,
         city: item.city || cityName,
         coverUrl: item.coverUrl,
+        about: item.about,
         isNew: item.isNew,
       })),
     [cityName, localActivityItems]
