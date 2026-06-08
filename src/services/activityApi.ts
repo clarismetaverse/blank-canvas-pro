@@ -2,6 +2,8 @@ import { xanoFetch } from "@/services/xanoClient";
 
 export type ActivityStatus = "draft" | "active" | "reserved" | "confirmed" | "cancelled";
 
+export type TransportEnum = "Yes" | "Uber" | "Private Ferry" | "Private Driver" | "Flight tickets";
+
 export type ActivityPayload = {
   Name: string;
   Destination: string;
@@ -16,6 +18,9 @@ export type ActivityPayload = {
   host: number;
   status: ActivityStatus;
   ModelLimit: number;
+  Activity_Name?: string;
+  Max_Girls?: number;
+  Transport?: TransportEnum;
 };
 
 export type Activity = ActivityPayload & {
