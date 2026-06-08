@@ -337,6 +337,17 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
   );
 
   const localActivityItems = useMemo<LocalActivityItem[]>(() => {
+    const vicItems = vicLocations.map((loc) => ({
+      id: `vic-${loc.id}`,
+      title: loc.Title || "Untitled location",
+      dateLabel: undefined,
+      coverUrl: loc.Cover?.url || "https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?auto=format&fit=crop&w=900&q=80",
+      coverObject: loc.Cover ? (loc.Cover as unknown as Record<string, unknown>) : null,
+      tag: "local",
+      supportCount: 40 + (loc.id % 25),
+      address: loc.Adress,
+      city: cityName,
+    }));
     const baseItems = filteredEvents.map((event) => ({
       id: String(event.id),
       title: event.Name,
@@ -359,8 +370,8 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
       isNew: venue.isNew,
     }));
 
-    return [...customItems, ...baseItems];
-  }, [cityName, customVenueSuggestions, filteredEvents]);
+    return [...customItems, ...vicItems, ...baseItems];
+  }, [cityName, customVenueSuggestions, filteredEvents, vicLocations]);
 
   const venueSuggestions = useMemo<VenueSuggestion[]>(
     () =>
