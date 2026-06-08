@@ -170,6 +170,7 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
   const [addLocationOpen, setAddLocationOpen] = useState(false);
   const [customVenueSuggestions, setCustomVenueSuggestions] = useState<VenueSuggestion[]>([]);
   const [selectedVenuePreview, setSelectedVenuePreview] = useState<VenueSuggestion | null>(null);
+  const [planActivityVenue, setPlanActivityVenue] = useState<VenueSuggestion | null>(null);
   const [bookingToastVisible, setBookingToastVisible] = useState(false);
   const [inviteModelsOpen, setInviteModelsOpen] = useState(false);
   const [confirmInvitesOpen, setConfirmInvitesOpen] = useState(false);
