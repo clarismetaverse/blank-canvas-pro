@@ -52,6 +52,8 @@ type LocalActivityItem = {
   address?: string;
   city?: string;
   isNew?: boolean;
+  about?: string;
+  gallery?: string[];
 };
 
 type LocalBookingState = {
