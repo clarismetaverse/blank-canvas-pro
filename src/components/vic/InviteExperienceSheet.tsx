@@ -1047,26 +1047,30 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
               onClose={() => setPlanActivityVenue(null)}
               onCreate={async (payload) => {
                 try {
-                  const numericId = planActivityVenue?.id?.startsWith("vic-")
+                  const vicLocationId = planActivityVenue?.id?.startsWith("vic-")
                     ? Number(planActivityVenue.id.replace("vic-", ""))
-                    : Number(planActivityVenue?.id) || 0;
-                  await createActivity({
-                    Name: payload.activityName || payload.name,
+                    : 0;
+                  const restaurantTurboId = planActivityVenue?.id && !planActivityVenue.id.startsWith("vic-") && !planActivityVenue.id.startsWith("custom-")
+                    ? Number(planActivityVenue.id) || 0
+                    : 0;
+                  const dayMs = payload.eventDateTime ? new Date(payload.eventDateTime).getTime() : null;
+                  const departureDate = payload.eventDateTime
+                    ? new Date(payload.eventDateTime).toISOString().slice(0, 10)
+                    : null;
+                  await createMemberActivity({
+                    Activity_Name: payload.activityName || payload.name,
+                    user_turbo_id: hostId ? [hostId] : [],
                     Destination: payload.city || cityName || "",
-                    Starting_Day: payload.eventDateTime || null,
+                    Departure: departureDate,
                     Return: null,
-                    VICS: [],
-                    Tripcover: null,
-                    ParticipantsMinimumNumber: 2,
-                    ActivitiesList: payload.about || "",
-                    InvitedUsers: [],
-                    event_temp_id: numericId,
-                    host: hostId,
-                    status: "draft",
-                    ModelLimit: payload.maxGirls ?? 0,
-                    Activity_Name: payload.activityName,
-                    Max_Girls: payload.maxGirls,
-                    Transport: payload.transport,
+                    Max_Girls: payload.maxGirls ?? 0,
+                    restaurant_turbo_id: restaurantTurboId,
+                    vic_location_id: vicLocationId,
+                    type: "local",
+                    activity: [],
+                    day: dayMs,
+                    transport: payload.transport ?? null,
+                    Cover: null,
                   });
                   setPublicationSuccess({ open: true, title: payload.name });
                 } catch (err) {
