@@ -264,22 +264,26 @@ export default function AddNewLocationSheet({
                             transition={{ duration: 0.15 }}
                             className="absolute z-20 mt-1 w-full overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-[0_12px_32px_rgba(0,0,0,0.12)]"
                           >
-                            {TRANSPORT_OPTIONS.map((t) => (
-                              <li key={t}>
-                                <button
-                                  type="button"
-                                  onClick={() => {
-                                    setTransport(t);
-                                    setTransportPickerOpen(false);
-                                  }}
-                                  className={`flex w-full items-center px-4 py-3 text-sm font-medium transition hover:bg-neutral-50 ${
-                                    transport === t ? "bg-neutral-50 text-neutral-900" : "text-neutral-700"
-                                  }`}
-                                >
-                                  {t}
-                                </button>
-                              </li>
-                            ))}
+                            {TRANSPORT_OPTIONS.map((t) => {
+                              const Icon = TRANSPORT_ICONS[t];
+                              return (
+                                <li key={t}>
+                                  <button
+                                    type="button"
+                                    onClick={() => {
+                                      setTransport(t);
+                                      setTransportPickerOpen(false);
+                                    }}
+                                    className={`flex w-full items-center gap-3 px-4 py-3 text-sm font-medium transition hover:bg-neutral-50 ${
+                                      transport === t ? "bg-neutral-50 text-neutral-900" : "text-neutral-700"
+                                    }`}
+                                  >
+                                    {Icon ? <Icon className="h-4 w-4 text-neutral-500" /> : null}
+                                    <span>{t}</span>
+                                  </button>
+                                </li>
+                              );
+                            })}
                           </motion.ul>
                         )}
                       </AnimatePresence>
