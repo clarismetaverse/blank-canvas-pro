@@ -1074,9 +1074,13 @@ export default function InviteExperienceSheet({ open, onClose, creator, filterTy
                     }
                   }
 
+                  const invitedIds = Array.isArray(payload.invitedUserIds) ? payload.invitedUserIds : [];
+                  const hostIds = hostId ? [hostId] : [];
+                  const userTurboIds = Array.from(new Set([...hostIds, ...invitedIds])).filter((n) => Number.isFinite(n) && n > 0);
+
                   await createMemberActivity({
                     Activity_Name: payload.activityName || payload.name,
-                    user_turbo_id: hostId ? [hostId] : [],
+                    user_turbo_id: userTurboIds,
                     Destination: payload.city || cityName || "",
                     Departure: departureDate,
                     Return: null,

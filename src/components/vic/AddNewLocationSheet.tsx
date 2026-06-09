@@ -12,6 +12,8 @@ import { useEffect, useMemo, useState } from "react";
 import CreateLocationCoverPicker from "@/components/vic/CreateLocationCoverPicker";
 import { TRANSPORT_OPTIONS, type CreateLocationInput, type TransportOption, type VenueSuggestion } from "@/components/vic/LocalVenueTypes";
 import type { ClubCity } from "@/services/membersClubs";
+import { fetchNewInTown } from "@/services/newInTown";
+import type { CreatorLite } from "@/services/creatorSearch";
 
 type AddNewLocationSheetProps = {
   open: boolean;
@@ -49,6 +51,9 @@ export default function AddNewLocationSheet({
   const [maxGirls, setMaxGirls] = useState<string>("");
   const [transport, setTransport] = useState<TransportOption | "">("");
   const [transportPickerOpen, setTransportPickerOpen] = useState(false);
+  const [models, setModels] = useState<CreatorLite[]>([]);
+  const [modelsLoading, setModelsLoading] = useState(false);
+  const [invitedIds, setInvitedIds] = useState<number[]>([]);
 
   const isPreset = Boolean(presetVenue);
 
@@ -60,6 +65,25 @@ export default function AddNewLocationSheet({
       setCoverUrl(presetVenue.coverUrl || "");
     }
   }, [presetVenue]);
+
+  useEffect(() => {
+    if (!open || !isPreset) return;
+    let active = true;
+    setModelsLoading(true);
+    fetchNewInTown()
+      .then((list) => {
+        if (active) setModels(list);
+      })
+      .catch(() => {
+        if (active) setModels([]);
+      })
+      .finally(() => {
+        if (active) setModelsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [open, isPreset]);
 
   const resolvedName = useMemo(() => name.trim() || about.trim() || address.trim(), [name, about, address]);
 
@@ -84,6 +108,7 @@ export default function AddNewLocationSheet({
       activityName: activityName.trim() || undefined,
       maxGirls: maxGirls ? Number(maxGirls) : undefined,
       transport: (transport || undefined) as TransportOption | undefined,
+      invitedUserIds: invitedIds.length ? invitedIds : undefined,
     });
     if (!isPreset) {
       setName("");
@@ -97,6 +122,7 @@ export default function AddNewLocationSheet({
     setActivityName("");
     setMaxGirls("");
     setTransport("");
+    setInvitedIds([]);
   };
 
   const headerTitle = title ?? (isPreset ? "Plan activity" : "Add new location");
@@ -149,6 +175,64 @@ export default function AddNewLocationSheet({
                       <span className="mb-2 block text-xs font-semibold text-neutral-500">Title</span>
                       <input value={name} onChange={(event) => setName(event.target.value)} placeholder="e.g. Private Rooftop by the Marina" className="w-full bg-transparent text-sm font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none" />
                     </label>
+                  </>
+                )}
+                {isPreset && presetVenue ? (
+                  <div className="-mx-5">
+                    <div className="mb-2 flex items-center justify-between px-5">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">Invite models</p>
+                      <p className="text-[11px] text-neutral-400">{invitedIds.length} selected</p>
+                    </div>
+                    {modelsLoading ? (
+                      <div className="flex gap-3 overflow-x-auto px-5 pb-1">
+                        {Array.from({ length: 6 }).map((_, i) => (
+                          <div key={`m-skel-${i}`} className="h-24 w-20 shrink-0 animate-pulse rounded-2xl bg-neutral-200/80" />
+                        ))}
+                      </div>
+                    ) : models.length === 0 ? (
+                      <p className="px-5 text-[12px] text-neutral-400">No models available right now.</p>
+                    ) : (
+                      <div className="flex gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+                        {models.map((m) => {
+                          const id = Number(m.id);
+                          const isSelected = invitedIds.includes(id);
+                          const avatar = m.Profile_pic?.url;
+                          return (
+                            <button
+                              key={id}
+                              type="button"
+                              onClick={() =>
+                                setInvitedIds((prev) =>
+                                  prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+                                )
+                              }
+                              className="group relative w-20 shrink-0 text-left"
+                            >
+                              <div className={`relative h-24 w-20 overflow-hidden rounded-2xl border ${isSelected ? "border-neutral-900" : "border-neutral-200"} bg-neutral-100`}>
+                                {avatar ? (
+                                  <img src={avatar} alt={m.name || "model"} className="h-full w-full object-cover" />
+                                ) : (
+                                  <div className="flex h-full w-full items-center justify-center text-xs text-neutral-400">{m.name?.[0] ?? "?"}</div>
+                                )}
+                                {isSelected ? (
+                                  <div className="absolute inset-0 bg-neutral-900/35" />
+                                ) : null}
+                                {isSelected ? (
+                                  <span className="absolute right-1.5 top-1.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-white text-neutral-900 shadow">
+                                    <Check className="h-3 w-3" />
+                                  </span>
+                                ) : null}
+                              </div>
+                              <p className="mt-1.5 truncate text-[11px] font-medium text-neutral-700">{m.name || "Model"}</p>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                ) : null}
+                {!isPreset ? (
+                  <>
                     <label className="block rounded-2xl border border-neutral-200 bg-white p-3.5">
                       <span className="mb-2 block text-xs font-semibold text-neutral-500">Address</span>
                       <input value={address} onChange={(event) => setAddress(event.target.value)} placeholder="Street, district" className="w-full bg-transparent text-sm font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none" />
@@ -200,7 +284,7 @@ export default function AddNewLocationSheet({
                       </AnimatePresence>
                     </div>
                   </>
-                )}
+                ) : null}
 
                 {isPreset ? (
                   <label className="block rounded-2xl border border-neutral-200 bg-white p-3.5">
