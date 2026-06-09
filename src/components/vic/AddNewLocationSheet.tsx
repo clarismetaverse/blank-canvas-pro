@@ -51,6 +51,9 @@ export default function AddNewLocationSheet({
   const [maxGirls, setMaxGirls] = useState<string>("");
   const [transport, setTransport] = useState<TransportOption | "">("");
   const [transportPickerOpen, setTransportPickerOpen] = useState(false);
+  const [models, setModels] = useState<CreatorLite[]>([]);
+  const [modelsLoading, setModelsLoading] = useState(false);
+  const [invitedIds, setInvitedIds] = useState<number[]>([]);
 
   const isPreset = Boolean(presetVenue);
 
@@ -62,6 +65,25 @@ export default function AddNewLocationSheet({
       setCoverUrl(presetVenue.coverUrl || "");
     }
   }, [presetVenue]);
+
+  useEffect(() => {
+    if (!open || !isPreset) return;
+    let active = true;
+    setModelsLoading(true);
+    fetchNewInTown()
+      .then((list) => {
+        if (active) setModels(list);
+      })
+      .catch(() => {
+        if (active) setModels([]);
+      })
+      .finally(() => {
+        if (active) setModelsLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [open, isPreset]);
 
   const resolvedName = useMemo(() => name.trim() || about.trim() || address.trim(), [name, about, address]);
 
