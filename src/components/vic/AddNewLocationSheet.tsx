@@ -237,7 +237,6 @@ export default function AddNewLocationSheet({
                       <span className="mb-2 block text-xs font-semibold text-neutral-500">Address</span>
                       <input value={address} onChange={(event) => setAddress(event.target.value)} placeholder="Street, district" className="w-full bg-transparent text-sm font-medium text-neutral-900 placeholder:text-neutral-400 focus:outline-none" />
                     </label>
-                    </label>
 
                     {/* City picker dropdown — no free text input */}
                     <div className="relative">
