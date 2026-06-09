@@ -54,6 +54,7 @@ export default function AddNewLocationSheet({
   const [models, setModels] = useState<CreatorLite[]>([]);
   const [modelsLoading, setModelsLoading] = useState(false);
   const [invitedIds, setInvitedIds] = useState<number[]>([]);
+  const [viewerIndex, setViewerIndex] = useState<number | null>(null);
 
   const isPreset = Boolean(presetVenue);
 
