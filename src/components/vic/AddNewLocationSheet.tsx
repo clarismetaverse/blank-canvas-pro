@@ -284,7 +284,7 @@ export default function AddNewLocationSheet({
                       </AnimatePresence>
                     </div>
                   </>
-                )}
+                ) : null}
 
                 {isPreset ? (
                   <label className="block rounded-2xl border border-neutral-200 bg-white p-3.5">
