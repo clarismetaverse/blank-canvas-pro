@@ -29,4 +29,5 @@ export type CreateLocationInput = {
   activityName?: string;
   maxGirls?: number;
   transport?: TransportOption;
+  invitedUserIds?: number[];
 };
