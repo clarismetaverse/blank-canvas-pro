@@ -12,6 +12,8 @@ import { useEffect, useMemo, useState } from "react";
 import CreateLocationCoverPicker from "@/components/vic/CreateLocationCoverPicker";
 import { TRANSPORT_OPTIONS, type CreateLocationInput, type TransportOption, type VenueSuggestion } from "@/components/vic/LocalVenueTypes";
 import type { ClubCity } from "@/services/membersClubs";
+import { fetchNewInTown } from "@/services/newInTown";
+import type { CreatorLite } from "@/services/creatorSearch";
 
 type AddNewLocationSheetProps = {
   open: boolean;
