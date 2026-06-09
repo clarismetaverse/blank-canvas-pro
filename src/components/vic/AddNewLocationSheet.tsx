@@ -108,6 +108,7 @@ export default function AddNewLocationSheet({
       activityName: activityName.trim() || undefined,
       maxGirls: maxGirls ? Number(maxGirls) : undefined,
       transport: (transport || undefined) as TransportOption | undefined,
+      invitedUserIds: invitedIds.length ? invitedIds : undefined,
     });
     if (!isPreset) {
       setName("");
@@ -121,6 +122,7 @@ export default function AddNewLocationSheet({
     setActivityName("");
     setMaxGirls("");
     setTransport("");
+    setInvitedIds([]);
   };
 
   const headerTitle = title ?? (isPreset ? "Plan activity" : "Add new location");
