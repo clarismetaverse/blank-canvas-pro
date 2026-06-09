@@ -419,6 +419,82 @@ export default function AddNewLocationSheet({
           </motion.div>
         </motion.div>
       ) : null}
+      {viewerIndex !== null && models.length > 0 ? (
+        <motion.div
+          key="models-viewer"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[120] bg-black"
+        >
+          <div className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between px-5 pt-[calc(env(safe-area-inset-top)+12px)] pb-3">
+            <button
+              type="button"
+              onClick={() => setViewerIndex(null)}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-white/15 text-white backdrop-blur"
+              aria-label="Close"
+            >
+              <X className="h-4 w-4" />
+            </button>
+            <p className="text-[12px] font-medium text-white/80">{invitedIds.length} selected</p>
+          </div>
+          <div
+            ref={(el) => {
+              if (!el || viewerIndex === null) return;
+              const child = el.children[viewerIndex] as HTMLElement | undefined;
+              if (child && Math.abs(el.scrollLeft - child.offsetLeft) > 4) {
+                el.scrollLeft = child.offsetLeft;
+              }
+            }}
+            className="flex h-full w-full snap-x snap-mandatory overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+          >
+            {models.map((m) => {
+              const id = Number(m.id);
+              const isSelected = invitedIds.includes(id);
+              const avatar = m.Profile_pic?.url;
+              return (
+                <div key={id} className="relative h-full w-screen shrink-0 snap-center">
+                  {avatar ? (
+                    <img src={avatar} alt={m.name || "model"} className="absolute inset-0 h-full w-full object-cover" />
+                  ) : (
+                    <div className="absolute inset-0 flex items-center justify-center bg-neutral-900 text-4xl text-neutral-500">
+                      {m.name?.[0] ?? "?"}
+                    </div>
+                  )}
+                  <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent pb-[calc(env(safe-area-inset-bottom)+28px)] pt-16">
+                    <div className="px-6">
+                      <p className="text-[11px] uppercase tracking-[0.18em] text-white/60">{m.Agency || "Model"}</p>
+                      <h3 className="mt-1 text-2xl font-semibold text-white">{m.name || "Model"}</h3>
+                      {m.bio || m.tagline ? (
+                        <p className="mt-2 line-clamp-3 text-sm text-white/80">{m.bio || m.tagline}</p>
+                      ) : null}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setInvitedIds((prev) =>
+                            prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
+                          )
+                        }
+                        className={`mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full px-5 py-3.5 text-sm font-semibold transition ${
+                          isSelected ? "bg-white text-neutral-900" : "bg-white/15 text-white backdrop-blur"
+                        }`}
+                      >
+                        {isSelected ? (
+                          <>
+                            <Check className="h-4 w-4" /> Invited
+                          </>
+                        ) : (
+                          "Invite"
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </motion.div>
+      ) : null}
     </AnimatePresence>
   );
 }
