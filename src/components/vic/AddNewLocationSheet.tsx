@@ -182,7 +182,18 @@ export default function AddNewLocationSheet({
                   <div className="-mx-5">
                     <div className="mb-2 flex items-center justify-between px-5">
                       <p className="text-xs font-semibold uppercase tracking-[0.14em] text-neutral-500">Invite models</p>
-                      <p className="text-[11px] text-neutral-400">{invitedIds.length} selected</p>
+                      <div className="flex items-center gap-3">
+                        <p className="text-[11px] text-neutral-400">{invitedIds.length} selected</p>
+                        {models.length > 0 ? (
+                          <button
+                            type="button"
+                            onClick={() => setViewerIndex(0)}
+                            className="text-[11px] font-medium text-neutral-500 hover:text-neutral-900"
+                          >
+                            See all
+                          </button>
+                        ) : null}
+                      </div>
                     </div>
                     {modelsLoading ? (
                       <div className="flex gap-3 overflow-x-auto px-5 pb-1">
@@ -194,7 +205,7 @@ export default function AddNewLocationSheet({
                       <p className="px-5 text-[12px] text-neutral-400">No models available right now.</p>
                     ) : (
                       <div className="flex gap-3 overflow-x-auto px-5 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-                        {models.map((m) => {
+                        {models.map((m, idx) => {
                           const id = Number(m.id);
                           const isSelected = invitedIds.includes(id);
                           const avatar = m.Profile_pic?.url;
@@ -202,11 +213,7 @@ export default function AddNewLocationSheet({
                             <button
                               key={id}
                               type="button"
-                              onClick={() =>
-                                setInvitedIds((prev) =>
-                                  prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
-                                )
-                              }
+                              onClick={() => setViewerIndex(idx)}
                               className="group relative w-20 shrink-0 text-left"
                             >
                               <div className={`relative h-24 w-20 overflow-hidden rounded-2xl border ${isSelected ? "border-neutral-900" : "border-neutral-200"} bg-neutral-100`}>
