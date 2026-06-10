@@ -6,6 +6,7 @@ import { createEvent, fetchEventTemps, type EventTemp, type InviteLite, type Tri
 import { fetchVicActivities } from "@/services/vicActivity";
 import type { Activity, ActivityStatus } from "@/services/activityApi";
 import InviteExperienceSheet from "@/components/vic/InviteExperienceSheet";
+import { fetchVicLocations, type VicLocation } from "@/services/vicLocationsList";
 type ActivitySeed = {
   title: string;
   city?: string;
@@ -54,32 +55,8 @@ const cinematicTemplates: ActivitySeed[] = [
   },
 ];
 
-const suggestedLocalActivities: ActivitySeed[] = [
-  {
-    title: "Golden Hour Marina Shoot",
-    city: "Cannes Marina",
-    timing: "Tonight",
-    tags: ["Luxury", "Editorial"],
-    imageUrl:
-      "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    title: "After-hours Gallery Walk",
-    city: "Old Town",
-    timing: "Weekend",
-    tags: ["Fashion", "Wellness"],
-    imageUrl:
-      "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    title: "Beach Club Soft Launch",
-    city: "Croisette",
-    timing: "Tonight",
-    tags: ["Nightlife", "Yachting"],
-    imageUrl:
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80",
-  },
-];
+
+
 
 const easeOut = { duration: 0.35, ease: "easeOut" as const };
 const ACTIVITY_PLACEHOLDER_COVER =
@@ -142,6 +119,8 @@ export default function ActivitiesHome() {
   const [inviteFilterType, setInviteFilterType] = useState<"local" | "trip" | "bali">("local");
   const [eventTemps, setEventTemps] = useState<EventTemp[]>([]);
   const [eventTempsLoading, setEventTempsLoading] = useState(true);
+  const [suggestedLocations, setSuggestedLocations] = useState<VicLocation[]>([]);
+  const [suggestedLocationsLoading, setSuggestedLocationsLoading] = useState(true);
 
   useEffect(() => {
     const loadActivities = async () => {
@@ -172,8 +151,22 @@ export default function ActivitiesHome() {
       }
     };
 
+    const loadSuggestedLocations = async () => {
+      setSuggestedLocationsLoading(true);
+      try {
+        const items = await fetchVicLocations();
+        setSuggestedLocations(items);
+      } catch (error) {
+        console.error("Failed to load vic_location", error);
+        setSuggestedLocations([]);
+      } finally {
+        setSuggestedLocationsLoading(false);
+      }
+    };
+
     void loadActivities();
     void loadEventTemps();
+    void loadSuggestedLocations();
   }, []);
 
   const inviteRoute = useMemo(
@@ -461,28 +454,43 @@ export default function ActivitiesHome() {
           transition={{ ...easeOut, delay: 0.15 }}
           className="space-y-3"
         >
-          <h2 className="px-1 text-sm font-semibold text-neutral-900">Suggested local activities</h2>
+          <h2 className="px-1 text-sm font-semibold text-neutral-900">Suggested locations</h2>
           <div className="space-y-3">
-            {suggestedLocalActivities.map((item) => (
-              <article
-                key={item.title}
-                className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-3 shadow-[0_8px_20px_rgba(0,0,0,0.05)]"
-              >
-                <img src={item.imageUrl} alt={item.title} className="h-12 w-12 rounded-xl object-cover" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-neutral-900">{item.title}</p>
-                  <p className="text-xs text-neutral-500">{item.timing}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => openCreateSheet(item)}
-                  className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-semibold text-neutral-700"
-                >
-                  Use
-                </button>
-              </article>
-            ))}
+            {suggestedLocationsLoading ? (
+              Array.from({ length: 3 }).map((_, idx) => (
+                <div key={idx} className="h-[68px] animate-pulse rounded-2xl border border-neutral-200 bg-neutral-100" />
+              ))
+            ) : suggestedLocations.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-neutral-200 bg-white px-4 py-6 text-center text-sm text-neutral-500">
+                No locations yet
+              </div>
+            ) : (
+              suggestedLocations.slice(0, 6).map((loc) => {
+                const cover = loc.Cover?.url || loc.GaIIery?.[0]?.url || ACTIVITY_PLACEHOLDER_COVER;
+                const title = loc.Title || "Untitled location";
+                return (
+                  <article
+                    key={loc.id}
+                    className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-3 shadow-[0_8px_20px_rgba(0,0,0,0.05)]"
+                  >
+                    <img src={cover} alt={title} className="h-12 w-12 rounded-xl object-cover" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-neutral-900">{title}</p>
+                      {loc.Adress && <p className="truncate text-xs text-neutral-500">{loc.Adress}</p>}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => openCreateSheet({ title, city: loc.Adress })}
+                      className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-semibold text-neutral-700"
+                    >
+                      Use
+                    </button>
+                  </article>
+                );
+              })
+            )}
           </div>
+
         </motion.section>
       </main>
 
