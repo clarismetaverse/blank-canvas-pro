@@ -268,6 +268,12 @@ export default function ActivitiesHome() {
                     const raw = myActivitiesRaw[index];
                     const statusLabel = raw?.status ? statusLabelMap[raw.status] : "Invited";
                     const statusAccepted = raw?.status === "confirmed";
+                    const fetchedInvited = invitedByActivity[Number(activity.id)] || [];
+                    const previewAvatars = fetchedInvited.length > 0
+                      ? fetchedInvited.slice(0, 4).map((c) => ({ id: String(c.id), creator: { name: c.name, avatarUrl: c.avatarUrl, ig: "" }, status: "invited" as const }))
+                      : activity.invites;
+                    const totalInvited = fetchedInvited.length > 0 ? fetchedInvited.length : (raw?.InvitedUsers?.length ?? 0);
+
 
                     return (
                       <button
