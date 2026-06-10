@@ -478,28 +478,43 @@ export default function ActivitiesHome() {
           transition={{ ...easeOut, delay: 0.15 }}
           className="space-y-3"
         >
-          <h2 className="px-1 text-sm font-semibold text-neutral-900">Suggested local activities</h2>
+          <h2 className="px-1 text-sm font-semibold text-neutral-900">Suggested locations</h2>
           <div className="space-y-3">
-            {suggestedLocalActivities.map((item) => (
-              <article
-                key={item.title}
-                className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-3 shadow-[0_8px_20px_rgba(0,0,0,0.05)]"
-              >
-                <img src={item.imageUrl} alt={item.title} className="h-12 w-12 rounded-xl object-cover" />
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-neutral-900">{item.title}</p>
-                  <p className="text-xs text-neutral-500">{item.timing}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => openCreateSheet(item)}
-                  className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-semibold text-neutral-700"
-                >
-                  Use
-                </button>
-              </article>
-            ))}
+            {suggestedLocationsLoading ? (
+              Array.from({ length: 3 }).map((_, idx) => (
+                <div key={idx} className="h-[68px] animate-pulse rounded-2xl border border-neutral-200 bg-neutral-100" />
+              ))
+            ) : suggestedLocations.length === 0 ? (
+              <div className="rounded-2xl border border-dashed border-neutral-200 bg-white px-4 py-6 text-center text-sm text-neutral-500">
+                No locations yet
+              </div>
+            ) : (
+              suggestedLocations.slice(0, 6).map((loc) => {
+                const cover = loc.Cover?.url || loc.GaIIery?.[0]?.url || ACTIVITY_PLACEHOLDER_COVER;
+                const title = loc.Title || "Untitled location";
+                return (
+                  <article
+                    key={loc.id}
+                    className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-3 shadow-[0_8px_20px_rgba(0,0,0,0.05)]"
+                  >
+                    <img src={cover} alt={title} className="h-12 w-12 rounded-xl object-cover" />
+                    <div className="min-w-0 flex-1">
+                      <p className="truncate text-sm font-medium text-neutral-900">{title}</p>
+                      {loc.Adress && <p className="truncate text-xs text-neutral-500">{loc.Adress}</p>}
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => openCreateSheet({ title, city: loc.Adress })}
+                      className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-semibold text-neutral-700"
+                    >
+                      Use
+                    </button>
+                  </article>
+                );
+              })
+            )}
           </div>
+
         </motion.section>
       </main>
 
