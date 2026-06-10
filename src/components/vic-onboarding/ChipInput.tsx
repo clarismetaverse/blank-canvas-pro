@@ -27,20 +27,23 @@ export function ChipInput({ label, placeholder, values, onChange }: ChipInputPro
       <div className="rounded-2xl border border-neutral-200 bg-white p-3">
         <div className="mb-2 flex flex-wrap gap-2">
           {values.map((value) => (
-            <span
-              key={value}
-              className="inline-flex items-center gap-1 rounded-full bg-neutral-100 px-3 py-1 text-xs text-neutral-700"
-            >
-              {value}
-              <button
-                type="button"
-                onClick={() => onChange(values.filter((entry) => entry !== value))}
-                className="text-neutral-500 hover:text-neutral-800"
-                aria-label={`Remove ${value}`}
-              >
-                <X size={12} />
-              </button>
+          <span
+            key={value}
+            className="relative inline-flex items-center gap-1 rounded-full bg-neutral-100 px-3 py-1 text-xs text-neutral-700"
+          >
+            <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-[#c9a86a] text-white shadow-sm">
+              <Plus size={8} strokeWidth={3} />
             </span>
+            {value}
+            <button
+              type="button"
+              onClick={() => onChange(values.filter((entry) => entry !== value))}
+              className="text-neutral-500 hover:text-neutral-800"
+              aria-label={`Remove ${value}`}
+            >
+              <X size={12} />
+            </button>
+          </span>
           ))}
         </div>
         <div className="flex gap-2">
