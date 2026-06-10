@@ -11,6 +11,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import CreatorProfileSheet from "@/components/memberspass/CreatorProfileSheet";
 import type { CreatorLite } from "@/services/creatorSearch";
 import { fetchActivityById, type ActivityDetailResponse, type InviteLite, type InviteStatus, type TripActivity } from "@/services/activities";
+import { fetchActivityInvited, type ActivityInvitedItem } from "@/services/activityInvited";
 import { getValidInvitedUsers, putTripsInvite } from "@/services/tripsInvite";
 import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityInviteModelsModal";
 import InvitesSentPopup from "@/components/vic/InvitesSentPopup";
@@ -410,13 +411,47 @@ export default function ActivityDetail() {
       };
     };
 
+    const mapInvitedToInvites = (items: ActivityInvitedItem[]): InviteLite[] => {
+      const statusMap: Record<string, InviteStatus> = {
+        approved: "accepted",
+        invited: "invited",
+        "pending request": "invited",
+        rejected: "rejected",
+        cancelled: "rejected",
+      };
+      return items
+        .filter((it) => it.type !== "organizer")
+        .map((it) => {
+          const u = it._user_turbo;
+          const name = u?.name || "Invited creator";
+          return {
+            id: String(it.id),
+            status: statusMap[it.status] ?? "invited",
+            creator: {
+              name,
+              avatarUrl: u?.Profile_pic?.url || FALLBACK_AVATAR,
+              ig: extractIgHandle(u?.IG_account, name),
+            },
+          };
+        });
+    };
+
     const load = async () => {
       if (!activityId) return;
 
       try {
         setLoading(true);
-        const data = await fetchActivityById(activityId);
+        const [data, invitedList] = await Promise.all([
+          fetchActivityById(activityId),
+          fetchActivityInvited(activityId).catch((err) => {
+            console.warn("activity_invited fetch failed", err);
+            return [] as ActivityInvitedItem[];
+          }),
+        ]);
         const mapped = mapToTrip(data);
+        if (invitedList.length > 0) {
+          mapped.invites = mapInvitedToInvites(invitedList);
+        }
         setActivityRaw(data);
         setActivity(mapped);
         setEditForm({
