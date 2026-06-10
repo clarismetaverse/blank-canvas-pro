@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, Mail, MapPin, Plane, Palmtree, ChevronRight, UserRound } from "lucide-react";
+import { ChevronLeft, Mail, MapPin, Plane, Palmtree, ChevronRight, UserRound, Plus } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { createEvent, fetchEventTemps, type EventTemp, type InviteLite, type TripActivity } from "@/services/activities";
 import { fetchVicActivities } from "@/services/vicActivity";
@@ -356,8 +356,8 @@ export default function ActivitiesHome() {
                       hasActivities ? "p-3" : "aspect-square p-3.5"
                     }`}
                   >
-                    <span className={`flex items-center justify-center rounded-full border border-neutral-200 text-neutral-700 transition group-hover:border-[#c9a86a]/50 group-hover:text-[#c9a86a] ${hasActivities ? "h-7 w-7" : "h-9 w-9"}`}>
-                      <item.icon className={hasActivities ? "h-3.5 w-3.5" : "h-4 w-4"} strokeWidth={1.5} />
+                    <span className={`flex items-center justify-center rounded-full bg-gradient-to-br from-[#d4b47a] to-[#b8985a] text-white shadow-sm ${hasActivities ? "h-7 w-7" : "h-9 w-9"}`}>
+                      <Plus className={hasActivities ? "h-3.5 w-3.5" : "h-4 w-4"} strokeWidth={2.5} />
                     </span>
                     <span className={`block ${hasActivities ? "mt-2" : ""}`}>
                       <span className={`block font-medium tracking-tight text-neutral-900 ${hasActivities ? "text-[13px]" : "text-[14px]"}`}>{item.label}</span>
@@ -379,8 +379,8 @@ export default function ActivitiesHome() {
                   hasActivities ? "px-3.5 py-2.5" : "px-4 py-3.5"
                 }`}
               >
-                <span className={`flex shrink-0 items-center justify-center rounded-full border border-neutral-200 text-neutral-700 transition group-hover:border-[#c9a86a]/50 group-hover:text-[#c9a86a] ${hasActivities ? "h-7 w-7" : "h-9 w-9"}`}>
-                  <Palmtree className={hasActivities ? "h-3.5 w-3.5" : "h-4 w-4"} strokeWidth={1.5} />
+                <span className={`flex shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#d4b47a] to-[#b8985a] text-white shadow-sm ${hasActivities ? "h-7 w-7" : "h-9 w-9"}`}>
+                  <Plus className={hasActivities ? "h-3.5 w-3.5" : "h-4 w-4"} strokeWidth={2.5} />
                 </span>
                 <span className="flex-1 min-w-0">
                   <span className="flex items-center gap-2">
