@@ -498,6 +498,12 @@ export default function ActivitiesHome() {
               suggestedLocations.slice(0, 6).map((loc) => {
                 const cover = loc.Cover?.url || loc.GaIIery?.[0]?.url || ACTIVITY_PLACEHOLDER_COVER;
                 const title = loc.Title || "Untitled location";
+                const likedCount = 6 + ((loc.id * 13) % 38);
+                const avatarSeeds = [
+                  ((loc.id * 7) % 70) + 1,
+                  ((loc.id * 11) % 70) + 1,
+                  ((loc.id * 17) % 70) + 1,
+                ];
                 return (
                   <article
                     key={loc.id}
@@ -507,6 +513,21 @@ export default function ActivitiesHome() {
                     <div className="min-w-0 flex-1">
                       <p className="truncate text-sm font-medium text-neutral-900">{title}</p>
                       {loc.Adress && <p className="truncate text-xs text-neutral-500">{loc.Adress}</p>}
+                      <div className="mt-1.5 flex items-center gap-1.5">
+                        <div className="flex -space-x-1.5">
+                          {avatarSeeds.map((seed, i) => (
+                            <img
+                              key={i}
+                              src={`https://i.pravatar.cc/40?img=${seed}`}
+                              alt=""
+                              className="h-4 w-4 rounded-full border border-white object-cover"
+                            />
+                          ))}
+                        </div>
+                        <span className="text-[10.5px] font-medium text-neutral-500">
+                          Liked by {likedCount} models
+                        </span>
+                      </div>
                     </div>
                     <button
                       type="button"
@@ -518,6 +539,7 @@ export default function ActivitiesHome() {
                   </article>
                 );
               })
+
             )}
           </div>
 
