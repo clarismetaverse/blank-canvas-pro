@@ -131,6 +131,27 @@ export default function ActivitiesHome() {
         const activities = await fetchVicActivities();
         setMyActivitiesRaw(activities);
         setMyActivities(activities.map(mapActivityToTrip));
+
+        // Fetch invited creators per activity in parallel
+        const entries = await Promise.all(
+          activities.map(async (a) => {
+            try {
+              const invited = await fetchActivityInvited(a.id);
+              const creators = invited
+                .filter((i) => i.type === "invited" && i._user_turbo)
+                .map((i) => ({
+                  id: i.user_turbo_id,
+                  name: i._user_turbo?.name || "Invited",
+                  avatarUrl: i._user_turbo?.Profile_pic?.url || "",
+                }))
+                .filter((c) => c.avatarUrl);
+              return [a.id, creators] as const;
+            } catch {
+              return [a.id, []] as const;
+            }
+          })
+        );
+        setInvitedByActivity(Object.fromEntries(entries));
       } catch (error) {
         console.error("Failed to load activities/me", error);
         setMyActivitiesRaw([]);
