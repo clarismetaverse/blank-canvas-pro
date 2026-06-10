@@ -179,11 +179,12 @@ function StatPill({ label, value }: { label: string; value: number }) {
  * Shows pending + rejected counters.
  * Pending = status === "invited" (and "pending" if exists in backend later)
  */
-function InvitedSummaryRow({ invited, accepted, rejected, onViewAll }: {
+function InvitedSummaryRow({ invited, accepted, rejected, onViewAll, onSelect }: {
   invited: InviteLite[];
   accepted: InviteLite[];
   rejected: InviteLite[];
   onViewAll: () => void;
+  onSelect?: (invite: InviteLite) => void;
 }) {
   const pendingCount = invited.length;
   const invitedCount = invited.length + accepted.length + rejected.length;
