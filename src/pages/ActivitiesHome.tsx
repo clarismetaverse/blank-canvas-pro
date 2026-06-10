@@ -7,6 +7,7 @@ import { fetchVicActivities } from "@/services/vicActivity";
 import type { Activity, ActivityStatus } from "@/services/activityApi";
 import InviteExperienceSheet from "@/components/vic/InviteExperienceSheet";
 import { fetchVicLocations, type VicLocation } from "@/services/vicLocationsList";
+import { fetchActivityInvited } from "@/services/activityInvited";
 type ActivitySeed = {
   title: string;
   city?: string;
@@ -121,6 +122,7 @@ export default function ActivitiesHome() {
   const [eventTempsLoading, setEventTempsLoading] = useState(true);
   const [suggestedLocations, setSuggestedLocations] = useState<VicLocation[]>([]);
   const [suggestedLocationsLoading, setSuggestedLocationsLoading] = useState(true);
+  const [invitedByActivity, setInvitedByActivity] = useState<Record<number, Array<{ id: number; name: string; avatarUrl: string }>>>({});
 
   useEffect(() => {
     const loadActivities = async () => {
@@ -129,6 +131,27 @@ export default function ActivitiesHome() {
         const activities = await fetchVicActivities();
         setMyActivitiesRaw(activities);
         setMyActivities(activities.map(mapActivityToTrip));
+
+        // Fetch invited creators per activity in parallel
+        const entries = await Promise.all(
+          activities.map(async (a) => {
+            try {
+              const invited = await fetchActivityInvited(a.id);
+              const creators = invited
+                .filter((i) => i.type === "invited" && i._user_turbo)
+                .map((i) => ({
+                  id: i.user_turbo_id,
+                  name: i._user_turbo?.name || "Invited",
+                  avatarUrl: i._user_turbo?.Profile_pic?.url || "",
+                }))
+                .filter((c) => c.avatarUrl);
+              return [a.id, creators] as const;
+            } catch {
+              return [a.id, []] as const;
+            }
+          })
+        );
+        setInvitedByActivity(Object.fromEntries(entries));
       } catch (error) {
         console.error("Failed to load activities/me", error);
         setMyActivitiesRaw([]);
@@ -245,6 +268,12 @@ export default function ActivitiesHome() {
                     const raw = myActivitiesRaw[index];
                     const statusLabel = raw?.status ? statusLabelMap[raw.status] : "Invited";
                     const statusAccepted = raw?.status === "confirmed";
+                    const fetchedInvited = invitedByActivity[Number(activity.id)] || [];
+                    const previewAvatars = fetchedInvited.length > 0
+                      ? fetchedInvited.slice(0, 4).map((c) => ({ id: String(c.id), creator: { name: c.name, avatarUrl: c.avatarUrl, ig: "" }, status: "invited" as const }))
+                      : activity.invites;
+                    const totalInvited = fetchedInvited.length > 0 ? fetchedInvited.length : (raw?.InvitedUsers?.length ?? 0);
+
 
                     return (
                       <button
@@ -279,11 +308,11 @@ export default function ActivitiesHome() {
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="rounded-full border border-white/40 bg-black/25 p-1 text-white">
-                              {(activity.invites.length > 0 || (raw?.InvitedUsers?.length ?? 0) > 0) ? <Mail className="h-3 w-3" /> : <UserRound className="h-3 w-3" />}
+                              {(previewAvatars.length > 0 || totalInvited > 0) ? <Mail className="h-3 w-3" /> : <UserRound className="h-3 w-3" />}
                             </span>
-                            {activity.invites.length > 0 ? (
+                            {previewAvatars.length > 0 ? (
                               <div className="flex items-center -space-x-2">
-                                {activity.invites.map((invite) => (
+                                {previewAvatars.map((invite) => (
                                   <img
                                     key={invite.id}
                                     src={invite.creator.avatarUrl}
@@ -291,18 +320,19 @@ export default function ActivitiesHome() {
                                     className="h-7 w-7 rounded-full border border-white/80 object-cover"
                                   />
                                 ))}
-                                {(raw?.InvitedUsers?.length ?? 0) > activity.invites.length && (
+                                {totalInvited > previewAvatars.length && (
                                   <span className="flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-black/45 text-[10px] font-semibold text-white">
-                                    +{(raw?.InvitedUsers?.length ?? 0) - activity.invites.length}
+                                    +{totalInvited - previewAvatars.length}
                                   </span>
                                 )}
                               </div>
-                            ) : (raw?.InvitedUsers?.length ?? 0) > 0 ? (
-                              <p className="text-xs text-white/85">{raw!.InvitedUsers!.length} invited creator{raw!.InvitedUsers!.length > 1 ? "s" : ""}</p>
+                            ) : totalInvited > 0 ? (
+                              <p className="text-xs text-white/85">{totalInvited} invited creator{totalInvited > 1 ? "s" : ""}</p>
                             ) : (
                               <p className="text-xs text-white/85">No invited creators yet</p>
                             )}
                           </div>
+
                         </div>
                       </button>
                     );
