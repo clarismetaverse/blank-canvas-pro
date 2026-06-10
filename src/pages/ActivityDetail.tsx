@@ -189,6 +189,19 @@ function InvitedSummaryRow({ invited, accepted, rejected, onViewAll }: {
   const invitedCount = invited.length + accepted.length + rejected.length;
   const rejectedCount = rejected.length;
 
+  const allInvited: InviteLite[] = [...accepted, ...invited, ...rejected];
+
+  const chipStyles: Record<InviteStatus, string> = {
+    accepted: "border-emerald-200 bg-emerald-50/95 text-emerald-700",
+    invited: "border-amber-200 bg-amber-50/95 text-amber-700",
+    rejected: "border-rose-200 bg-rose-50/95 text-rose-700",
+  };
+  const chipLabel: Record<InviteStatus, string> = {
+    accepted: "Approved",
+    invited: "Pending",
+    rejected: "Rejected",
+  };
+
   return (
     <motion.section
       initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
@@ -201,14 +214,9 @@ function InvitedSummaryRow({ invited, accepted, rejected, onViewAll }: {
           <h3 className="text-base font-semibold text-neutral-900">
             Invited models <span className="text-lg">• {invitedCount}</span>
           </h3>
-          {invited.length > 0 ? (
-            <div className="mt-1 flex items-center gap-3">
-              <AvatarStack people={invited} size={32} />
-              <p className="text-xs text-neutral-500">Awaiting replies</p>
-            </div>
-          ) : (
-            <p className="mt-0.5 text-xs text-neutral-500">No one yet</p>
-          )}
+          <p className="mt-0.5 text-xs text-neutral-500">
+            {accepted.length} approved · {pendingCount} pending · {rejectedCount} rejected
+          </p>
         </div>
         <button
           type="button"
@@ -219,11 +227,43 @@ function InvitedSummaryRow({ invited, accepted, rejected, onViewAll }: {
         </button>
       </div>
 
-      <div className="mt-4 flex flex-wrap items-center gap-2">
-          <StatPill label="Accepted" value={accepted.length} />
-          <StatPill label="Pending" value={pendingCount} />
-          <StatPill label="Rejected" value={rejectedCount} />
-      </div>
+      {allInvited.length > 0 ? (
+        <div className="-mx-4 mt-4 overflow-x-auto px-4 pr-[28px] snap-x snap-mandatory [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          <div className="flex gap-3">
+            {allInvited.map((invite) => (
+              <motion.article
+                key={invite.id}
+                className="relative w-[calc((100%-24px)/3)] min-w-[110px] h-[156px] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 shadow-[0_18px_48px_rgba(0,0,0,0.10)]"
+                initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
+                animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+                transition={{ type: "spring", stiffness: 220, damping: 22, mass: 0.9 }}
+              >
+                <img
+                  src={invite.creator.avatarUrl}
+                  alt={invite.creator.name}
+                  className="absolute inset-0 h-full w-full object-cover"
+                  loading="lazy"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/15 to-transparent" />
+
+                <span
+                  className={`absolute left-2 top-2 rounded-full border px-2 py-0.5 text-[10px] font-semibold backdrop-blur ${chipStyles[invite.status]}`}
+                >
+                  {chipLabel[invite.status]}
+                </span>
+
+                <div className="absolute bottom-2 left-2 right-2">
+                  <p className="truncate text-xs font-semibold text-white drop-shadow-[0_10px_22px_rgba(0,0,0,0.55)]">
+                    {invite.creator.name}
+                  </p>
+                </div>
+              </motion.article>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <p className="mt-3 text-xs text-neutral-500">No one yet</p>
+      )}
     </motion.section>
   );
 }
