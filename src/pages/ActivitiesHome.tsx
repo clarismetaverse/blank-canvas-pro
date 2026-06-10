@@ -55,32 +55,8 @@ const cinematicTemplates: ActivitySeed[] = [
   },
 ];
 
-const suggestedLocalActivities: ActivitySeed[] = [
-  {
-    title: "Golden Hour Marina Shoot",
-    city: "Cannes Marina",
-    timing: "Tonight",
-    tags: ["Luxury", "Editorial"],
-    imageUrl:
-      "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    title: "After-hours Gallery Walk",
-    city: "Old Town",
-    timing: "Weekend",
-    tags: ["Fashion", "Wellness"],
-    imageUrl:
-      "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?auto=format&fit=crop&w=600&q=80",
-  },
-  {
-    title: "Beach Club Soft Launch",
-    city: "Croisette",
-    timing: "Tonight",
-    tags: ["Nightlife", "Yachting"],
-    imageUrl:
-      "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=600&q=80",
-  },
-];
+
+
 
 const easeOut = { duration: 0.35, ease: "easeOut" as const };
 const ACTIVITY_PLACEHOLDER_COVER =
