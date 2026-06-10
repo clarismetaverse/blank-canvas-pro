@@ -400,6 +400,7 @@ export default function ActivityDetail() {
   const [inviteModelsOpen, setInviteModelsOpen] = useState(false);
   const [inviteModalInitialTab, setInviteModalInitialTab] = useState<InviteModalTabKey>("discover");
   const [profileSheetCreator, setProfileSheetCreator] = useState<CreatorLite | null>(null);
+  const [profileSheetStatus, setProfileSheetStatus] = useState<"accepted" | "invited" | "pending" | "rejected" | null>(null);
   const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; cityName?: string; total: number; delta: number; avatars: Array<{ id: number; name: string; url: string | null }>; hostAvatarUrl?: string | null }>({
     open: false,
     tripName: "",
@@ -779,6 +780,7 @@ export default function ActivityDetail() {
               IG_account: invite.creator.ig || undefined,
               Profile_pic: invite.creator.avatarUrl ? { url: invite.creator.avatarUrl } : null,
             });
+            setProfileSheetStatus(invite.status as any);
           }}
         />
 
@@ -1082,9 +1084,10 @@ export default function ActivityDetail() {
       <CreatorProfileSheet
         creator={profileSheetCreator}
         open={!!profileSheetCreator}
-        onClose={() => setProfileSheetCreator(null)}
+        onClose={() => { setProfileSheetCreator(null); setProfileSheetStatus(null); }}
         variant="vic"
         profileType="candidate"
+        invitationStatus={profileSheetStatus}
       />
     </div>
   );
