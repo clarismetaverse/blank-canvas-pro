@@ -525,8 +525,9 @@ export default function ActivitiesHome() {
                           ))}
                         </div>
                         <span className="text-[10.5px] font-medium text-neutral-500">
-                          Liked by {likedCount} models
+                          Liked by {likedCount} models · {2 + ((loc.id * 5) % 14)} events held
                         </span>
+
                       </div>
                     </div>
                     <button
