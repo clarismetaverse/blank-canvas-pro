@@ -234,17 +234,91 @@ const normalizeActivityDetail = (
   };
 };
 
+const VIC_ACTIVITY_API = "https://xbut-eryu-hhsg.f2.xano.io/api:vGd6XDW3";
+
+type VicActivityRaw = {
+  id: number;
+  Activity_Name?: string;
+  Name?: string;
+  Destination?: string;
+  Departure?: string | null;
+  Starting_Day?: string | null;
+  Return?: string | null;
+  Max_Girls?: number;
+  ModelLimit?: number;
+  activity?: string[];
+  ActivitiesList?: string;
+  user_turbo_id?: number[] | ActivityDetailInvitedUser[];
+  InvitedUsers?: ActivityDetailInvitedUser[];
+  InvitedUsersExpanded?: ActivityDetailInvitedUser[];
+  organizer?: number;
+  host?: number;
+  transport?: string | null;
+  Transport?: string | null;
+  Cover?: { url?: string | null } | null;
+  Tripcover?: { url?: string | null } | null;
+  Participants?: unknown[];
+  [key: string]: unknown;
+};
+
+const mapVicActivity = (item: VicActivityRaw): ActivityDetailResponse => {
+  const invitedRaw = (item.InvitedUsersExpanded ?? item.InvitedUsers ?? item.user_turbo_id ?? []) as unknown[];
+  const invitedUsers: ActivityDetailInvitedUser[] = invitedRaw.map((u) =>
+    typeof u === "number" ? ({ id: u } as ActivityDetailInvitedUser) : (u as ActivityDetailInvitedUser)
+  );
+
+  return {
+    ...(item as unknown as ActivityDetailResponse),
+    id: item.id,
+    Name: item.Activity_Name || item.Name || "Untitled",
+    Activity_Name: item.Activity_Name || item.Name,
+    Destination: item.Destination || "",
+    Starting_Day: item.Departure ?? item.Starting_Day ?? null,
+    Return: item.Return ?? null,
+    Tripcover: (item.Cover ?? item.Tripcover ?? null) as ActivityDetailResponse["Tripcover"],
+    ActivitiesList: item.ActivitiesList || (item.activity?.join(", ") ?? ""),
+    InvitedUsers: invitedUsers,
+    InvitedUsersExpanded: invitedUsers,
+    host: item.organizer ?? item.host ?? 0,
+    ModelLimit: item.Max_Girls ?? item.ModelLimit ?? 0,
+    Max_Girls: item.Max_Girls,
+    Transport: (item.transport ?? item.Transport ?? undefined) as ActivityDetailResponse["Transport"],
+    Participants: Array.isArray(item.Participants) ? item.Participants : [],
+    status: (item as { status?: ActivityDetailResponse["status"] }).status ?? "active",
+    VICS: (item as { VICS?: number[] }).VICS ?? [],
+    ParticipantsMinimumNumber: (item as { ParticipantsMinimumNumber?: number }).ParticipantsMinimumNumber ?? 0,
+    event_temp_id: (item as { event_temp_id?: number }).event_temp_id ?? 0,
+  } as ActivityDetailResponse;
+};
+
 export async function fetchActivityById(id: string): Promise<ActivityDetailResponse> {
-  const tripId = Number(id);
-  const path = Number.isFinite(tripId) && tripId > 0
-    ? `/activity/NA?trip_id=${tripId}`
-    : `/activity/${encodeURIComponent(id)}`;
+  const token = (await import("@/services/xano")).getAuthToken?.();
+  const headers: Record<string, string> = { Accept: "application/json" };
+  if (token) headers.Authorization = `Bearer ${token}`;
 
-  const response = await request<ActivityDetailResponse | ActivityDetailWrappedResponse>(path, {
-    method: "GET",
-  });
+  const res = await fetch(`${VIC_ACTIVITY_API}/vic_activity`, { method: "GET", headers });
+  if (!res.ok) {
+    const text = await res.text();
+    throw new Error(`vic_activity fetch failed (${res.status}): ${text}`);
+  }
+  const data = (await res.json()) as unknown;
 
-  return normalizeActivityDetail(response);
+  const list: VicActivityRaw[] = Array.isArray(data)
+    ? (data as VicActivityRaw[])
+    : data && typeof data === "object"
+      ? [data as VicActivityRaw]
+      : [];
+
+  const targetId = Number(id);
+  const match =
+    list.find((it) => Number(it.id) === targetId) ??
+    list.find((it) => String(it.id) === String(id));
+
+  if (!match) {
+    throw new Error(`Activity ${id} not found in /vic_activity`);
+  }
+
+  return normalizeActivityDetail(mapVicActivity(match));
 }
 
 export type CreateEventPayload = {
