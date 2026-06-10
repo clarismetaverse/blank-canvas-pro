@@ -6,6 +6,7 @@ import { createEvent, fetchEventTemps, type EventTemp, type InviteLite, type Tri
 import { fetchVicActivities } from "@/services/vicActivity";
 import type { Activity, ActivityStatus } from "@/services/activityApi";
 import InviteExperienceSheet from "@/components/vic/InviteExperienceSheet";
+import { fetchVicLocations, type VicLocation } from "@/services/vicLocationsList";
 type ActivitySeed = {
   title: string;
   city?: string;
