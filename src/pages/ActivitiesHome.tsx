@@ -143,6 +143,8 @@ export default function ActivitiesHome() {
   const [inviteFilterType, setInviteFilterType] = useState<"local" | "trip" | "bali">("local");
   const [eventTemps, setEventTemps] = useState<EventTemp[]>([]);
   const [eventTempsLoading, setEventTempsLoading] = useState(true);
+  const [suggestedLocations, setSuggestedLocations] = useState<VicLocation[]>([]);
+  const [suggestedLocationsLoading, setSuggestedLocationsLoading] = useState(true);
 
   useEffect(() => {
     const loadActivities = async () => {
