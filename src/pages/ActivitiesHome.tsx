@@ -147,7 +147,7 @@ export default function ActivitiesHome() {
     const loadActivities = async () => {
       setMyActivitiesLoading(true);
       try {
-        const activities = await fetchMyActivities();
+        const activities = await fetchVicActivities();
         setMyActivitiesRaw(activities);
         setMyActivities(activities.map(mapActivityToTrip));
       } catch (error) {
