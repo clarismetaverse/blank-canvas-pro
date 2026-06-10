@@ -301,6 +301,7 @@ export default function CreatorProfileSheet({
                   </div>
                 </div>
 
+                {!invitationStatus && (
                 <div className="flex gap-3 border-t border-neutral-200 bg-white px-5 py-4">
                   {shouldShowCandidateActions ? (
                     <>
@@ -381,6 +382,26 @@ export default function CreatorProfileSheet({
                     </>
                   )}
                 </div>
+                )}
+                {invitationStatus && (
+                  <div className="border-t border-neutral-200 bg-white px-5 py-4">
+                    <div
+                      className={`w-full rounded-full px-4 py-3 text-center text-sm font-semibold ${
+                        invitationStatus === "accepted"
+                          ? "bg-emerald-500 text-white"
+                          : invitationStatus === "rejected"
+                            ? "bg-red-500 text-white"
+                            : "bg-amber-100 text-amber-800 border border-amber-200"
+                      }`}
+                    >
+                      {invitationStatus === "accepted"
+                        ? "Invitation accepted"
+                        : invitationStatus === "rejected"
+                          ? "Invitation rejected"
+                          : "Invitation pending"}
+                    </div>
+                  </div>
+                )}
               </>
             ) : (
               <>
