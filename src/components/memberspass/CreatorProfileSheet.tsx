@@ -45,6 +45,7 @@ type CreatorProfileSheetProps = {
   onToggleFavorite?: () => void;
   profileType?: "creator" | "candidate";
   profileSource?: "default" | "vic" | "claris";
+  invitationStatus?: "accepted" | "invited" | "pending" | "rejected" | null;
   onClose: () => void;
   onEndorsed?: () => void;
 };
@@ -61,6 +62,7 @@ export default function CreatorProfileSheet({
   onToggleFavorite,
   profileType = "creator",
   profileSource = "default",
+  invitationStatus = null,
   onClose,
   onEndorsed,
 }: CreatorProfileSheetProps) {
