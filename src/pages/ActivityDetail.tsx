@@ -772,7 +772,16 @@ export default function ActivityDetail() {
             setInviteModalInitialTab("invited");
             setInviteModelsOpen(true);
           }}
+          onSelect={(invite) => {
+            setProfileSheetCreator({
+              id: Number(invite.id) || 0,
+              name: invite.creator.name,
+              IG_account: invite.creator.ig || undefined,
+              Profile_pic: invite.creator.avatarUrl ? { url: invite.creator.avatarUrl } : null,
+            });
+          }}
         />
+
 
         <ParticipantsStrip
           people={participantsPeople}
