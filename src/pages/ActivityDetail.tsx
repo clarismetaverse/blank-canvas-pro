@@ -179,11 +179,12 @@ function StatPill({ label, value }: { label: string; value: number }) {
  * Shows pending + rejected counters.
  * Pending = status === "invited" (and "pending" if exists in backend later)
  */
-function InvitedSummaryRow({ invited, accepted, rejected, onViewAll }: {
+function InvitedSummaryRow({ invited, accepted, rejected, onViewAll, onSelect }: {
   invited: InviteLite[];
   accepted: InviteLite[];
   rejected: InviteLite[];
   onViewAll: () => void;
+  onSelect?: (invite: InviteLite) => void;
 }) {
   const pendingCount = invited.length;
   const invitedCount = invited.length + accepted.length + rejected.length;
@@ -233,7 +234,8 @@ function InvitedSummaryRow({ invited, accepted, rejected, onViewAll }: {
             {allInvited.map((invite) => (
               <motion.article
                 key={invite.id}
-                className="relative w-[calc((100%-24px)/3)] min-w-[110px] h-[156px] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 shadow-[0_18px_48px_rgba(0,0,0,0.10)]"
+                onClick={() => onSelect?.(invite)}
+                className="relative w-[calc((100%-24px)/3)] min-w-[110px] h-[156px] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 shadow-[0_18px_48px_rgba(0,0,0,0.10)] cursor-pointer active:scale-[0.97] transition-transform"
                 initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ type: "spring", stiffness: 220, damping: 22, mass: 0.9 }}
@@ -770,7 +772,16 @@ export default function ActivityDetail() {
             setInviteModalInitialTab("invited");
             setInviteModelsOpen(true);
           }}
+          onSelect={(invite) => {
+            setProfileSheetCreator({
+              id: Number(invite.id) || 0,
+              name: invite.creator.name,
+              IG_account: invite.creator.ig || undefined,
+              Profile_pic: invite.creator.avatarUrl ? { url: invite.creator.avatarUrl } : null,
+            });
+          }}
         />
+
 
         <ParticipantsStrip
           people={participantsPeople}
