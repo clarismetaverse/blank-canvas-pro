@@ -234,7 +234,8 @@ function InvitedSummaryRow({ invited, accepted, rejected, onViewAll, onSelect }:
             {allInvited.map((invite) => (
               <motion.article
                 key={invite.id}
-                className="relative w-[calc((100%-24px)/3)] min-w-[110px] h-[156px] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 shadow-[0_18px_48px_rgba(0,0,0,0.10)]"
+                onClick={() => onSelect?.(invite)}
+                className="relative w-[calc((100%-24px)/3)] min-w-[110px] h-[156px] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 shadow-[0_18px_48px_rgba(0,0,0,0.10)] cursor-pointer active:scale-[0.97] transition-transform"
                 initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ type: "spring", stiffness: 220, damping: 22, mass: 0.9 }}
