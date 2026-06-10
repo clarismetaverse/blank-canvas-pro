@@ -223,156 +223,192 @@ export default function ActivitiesHome() {
       </header>
 
       <main className="mx-auto w-full max-w-md space-y-6 px-4 pb-16 pt-5">
-        <motion.section
-          initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ ...easeOut, delay: 0.05 }}
-          className="relative"
-        >
-          <div className="flex items-center gap-2 px-1">
-            <span className="h-px w-5 bg-[#c9a86a]/80" />
-            <span className="text-[10px] font-medium uppercase tracking-[0.28em] text-[#c9a86a]">By invitation</span>
-          </div>
-          <h2 className="mt-2 px-1 font-serif text-[22px] leading-[1.1] tracking-tight text-neutral-900">
-            Curate a moment
-          </h2>
-          <p className="mt-1 px-1 text-[12px] leading-relaxed text-neutral-500">
-            Choose the form your gathering will take.
-          </p>
+        {(() => {
+          const hasActivities = !myActivitiesLoading && myActivities.length > 0;
 
-          <div className="mt-4 grid grid-cols-2 gap-2.5">
-            {([
-              { label: "Local activity", hint: "An intimate evening, close to home", icon: MapPin, type: "local" as const },
-              { label: "A trip", hint: "Days away, with chosen company", icon: Plane, type: "trip" as const },
-            ]).map((item) => (
-              <button
-                key={item.label}
-                type="button"
-                onClick={() => {
-                  setInviteFilterType(item.type);
-                  setInviteSheetOpen(true);
-                }}
-                className="group relative flex aspect-square flex-col justify-between rounded-2xl border border-neutral-200/80 bg-white p-3.5 text-left transition hover:border-[#c9a86a]/40 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.12)] active:scale-[0.99]"
-              >
-                <span className="flex h-9 w-9 items-center justify-center rounded-full border border-neutral-200 text-neutral-700 transition group-hover:border-[#c9a86a]/50 group-hover:text-[#c9a86a]">
-                  <item.icon className="h-4 w-4" strokeWidth={1.5} />
-                </span>
-                <span className="block">
-                  <span className="block text-[14px] font-medium tracking-tight text-neutral-900">{item.label}</span>
-                  <span className="mt-0.5 block text-[11px] leading-snug text-neutral-500">{item.hint}</span>
-                </span>
-              </button>
-            ))}
-          </div>
+          const upcomingSection = (
+            <motion.section
+              key="upcoming"
+              initial={{ opacity: 0, y: 8, filter: "blur(6px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={easeOut}
+            >
+              <div className="mb-3 px-1">
+                <h2 className="text-sm font-semibold text-neutral-900">Your upcoming activities</h2>
+              </div>
+              {myActivitiesLoading ? (
+                <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pt-1">
+                  {[0, 1].map((item) => (
+                    <div key={item} className="h-52 w-[78%] shrink-0 animate-pulse rounded-3xl border border-neutral-200 bg-neutral-200/70" />
+                  ))}
+                </div>
+              ) : myActivities.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-neutral-200 bg-white px-4 py-6 text-center text-sm text-neutral-500">
+                  No activities yet
+                </div>
+              ) : (
+                <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pt-1">
+                  {myActivities.map((activity, index) => {
+                    const raw = myActivitiesRaw[index];
+                    const statusLabel = raw?.status ? statusLabelMap[raw.status] : "Invited";
+                    const statusAccepted = raw?.status === "confirmed";
 
-          <button
-            type="button"
-            onClick={() => {
-              setInviteFilterType("bali");
-              setInviteSheetOpen(true);
-            }}
-            className="group mt-2.5 flex w-full items-center gap-3 rounded-2xl border border-neutral-200/80 bg-white px-4 py-3.5 text-left transition hover:border-[#c9a86a]/40 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.12)] active:scale-[0.99]"
-          >
-            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-neutral-200 text-neutral-700 transition group-hover:border-[#c9a86a]/50 group-hover:text-[#c9a86a]">
-              <Palmtree className="h-4 w-4" strokeWidth={1.5} />
-            </span>
-            <span className="flex-1 min-w-0">
-              <span className="flex items-center gap-2">
-                <span className="text-[14px] font-medium tracking-tight text-neutral-900">Bali</span>
-                <span className="h-px w-4 bg-[#c9a86a]/60" />
-                <span className="text-[9.5px] font-medium uppercase tracking-[0.24em] text-[#c9a86a]">Featured</span>
-              </span>
-              <span className="mt-0.5 block truncate text-[11px] text-neutral-500">On the island, by invitation</span>
-            </span>
-            <ChevronRight className="h-4 w-4 text-neutral-400 transition group-hover:translate-x-0.5 group-hover:text-[#c9a86a]" />
-          </button>
-        </motion.section>
-
-        <motion.section initial={{ opacity: 0, y: 8, filter: "blur(6px)" }} animate={{ opacity: 1, y: 0, filter: "blur(0px)" }} transition={easeOut}>
-          <div className="mb-3 px-1">
-            <h2 className="text-sm font-semibold text-neutral-900">Your upcoming activities</h2>
-          </div>
-          {myActivitiesLoading ? (
-            <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pt-1">
-              {[0, 1].map((item) => (
-                <div key={item} className="h-52 w-[78%] shrink-0 animate-pulse rounded-3xl border border-neutral-200 bg-neutral-200/70" />
-              ))}
-            </div>
-          ) : myActivities.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-neutral-200 bg-white px-4 py-6 text-center text-sm text-neutral-500">
-              No activities yet
-            </div>
-          ) : (
-            <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pt-1">
-              {myActivities.map((activity, index) => {
-                const raw = myActivitiesRaw[index];
-                const statusLabel = raw?.status ? statusLabelMap[raw.status] : "Invited";
-                const statusAccepted = raw?.status === "confirmed";
-
-                return (
-                  <button
-                    key={activity.id}
-                    type="button"
-                    onClick={() =>
-                      navigate(
-                        location.pathname.startsWith("/memberspass/vic/activities")
-                          ? `/memberspass/vic/activities/${activity.id}`
-                          : `/activities/${activity.id}`
-                      )
-                    }
-                    className="relative h-52 w-[78%] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 text-left shadow-[0_18px_38px_rgba(10,10,20,0.16)]"
-                  >
-                    <img src={activity.coverUrl} alt={activity.title} className="h-full w-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/55" />
-                    <div className="absolute left-4 top-4">
-                      <span
-                        className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wide ${
-                          statusAccepted
-                            ? "border-emerald-200 bg-emerald-50/95 text-emerald-700"
-                            : "border-neutral-200 bg-white/90 text-neutral-700"
-                        }`}
+                    return (
+                      <button
+                        key={activity.id}
+                        type="button"
+                        onClick={() =>
+                          navigate(
+                            location.pathname.startsWith("/memberspass/vic/activities")
+                              ? `/memberspass/vic/activities/${activity.id}`
+                              : `/activities/${activity.id}`
+                          )
+                        }
+                        className="relative h-64 w-[86%] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 text-left shadow-[0_18px_38px_rgba(10,10,20,0.16)]"
                       >
-                        {statusLabel}
-                      </span>
-                    </div>
-                    <div className="absolute bottom-4 left-4 right-4 space-y-2.5">
-                      <div>
-                        <p className="text-base font-semibold text-white">{activity.title}</p>
-                        <p className="text-xs text-white/80">{activity.subtitle}</p>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className="rounded-full border border-white/40 bg-black/25 p-1 text-white">
-                          {(activity.invites.length > 0 || (raw?.InvitedUsers?.length ?? 0) > 0) ? <Mail className="h-3 w-3" /> : <UserRound className="h-3 w-3" />}
-                        </span>
-                        {activity.invites.length > 0 ? (
-                          <div className="flex items-center -space-x-2">
-                            {activity.invites.map((invite) => (
-                              <img
-                                key={invite.id}
-                                src={invite.creator.avatarUrl}
-                                alt={invite.creator.name}
-                                className="h-7 w-7 rounded-full border border-white/80 object-cover"
-                              />
-                            ))}
-                            {(raw?.InvitedUsers?.length ?? 0) > activity.invites.length && (
-                              <span className="flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-black/45 text-[10px] font-semibold text-white">
-                                +{(raw?.InvitedUsers?.length ?? 0) - activity.invites.length}
-                              </span>
+                        <img src={activity.coverUrl} alt={activity.title} className="h-full w-full object-cover" />
+                        <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/55" />
+                        <div className="absolute left-4 top-4">
+                          <span
+                            className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wide ${
+                              statusAccepted
+                                ? "border-emerald-200 bg-emerald-50/95 text-emerald-700"
+                                : "border-neutral-200 bg-white/90 text-neutral-700"
+                            }`}
+                          >
+                            {statusLabel}
+                          </span>
+                        </div>
+                        <div className="absolute bottom-4 left-4 right-4 space-y-2.5">
+                          <div>
+                            <p className="text-base font-semibold text-white">{activity.title}</p>
+                            <p className="text-xs text-white/80">{activity.subtitle}</p>
+                          </div>
+                          <div className="flex items-center gap-2">
+                            <span className="rounded-full border border-white/40 bg-black/25 p-1 text-white">
+                              {(activity.invites.length > 0 || (raw?.InvitedUsers?.length ?? 0) > 0) ? <Mail className="h-3 w-3" /> : <UserRound className="h-3 w-3" />}
+                            </span>
+                            {activity.invites.length > 0 ? (
+                              <div className="flex items-center -space-x-2">
+                                {activity.invites.map((invite) => (
+                                  <img
+                                    key={invite.id}
+                                    src={invite.creator.avatarUrl}
+                                    alt={invite.creator.name}
+                                    className="h-7 w-7 rounded-full border border-white/80 object-cover"
+                                  />
+                                ))}
+                                {(raw?.InvitedUsers?.length ?? 0) > activity.invites.length && (
+                                  <span className="flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-black/45 text-[10px] font-semibold text-white">
+                                    +{(raw?.InvitedUsers?.length ?? 0) - activity.invites.length}
+                                  </span>
+                                )}
+                              </div>
+                            ) : (raw?.InvitedUsers?.length ?? 0) > 0 ? (
+                              <p className="text-xs text-white/85">{raw!.InvitedUsers!.length} invited creator{raw!.InvitedUsers!.length > 1 ? "s" : ""}</p>
+                            ) : (
+                              <p className="text-xs text-white/85">No invited creators yet</p>
                             )}
                           </div>
-                        ) : (raw?.InvitedUsers?.length ?? 0) > 0 ? (
-                          <p className="text-xs text-white/85">{raw!.InvitedUsers!.length} invited creator{raw!.InvitedUsers!.length > 1 ? "s" : ""}</p>
-                        ) : (
-                          <p className="text-xs text-white/85">No invited creators yet</p>
-                        )}
-                      </div>
-                    </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </motion.section>
+          );
+
+          const createSection = (
+            <motion.section
+              key="create"
+              initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
+              animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+              transition={{ ...easeOut, delay: 0.05 }}
+              className="relative"
+            >
+              <div className="flex items-center gap-2 px-1">
+                <span className="h-px w-5 bg-[#c9a86a]/80" />
+                <span className="text-[10px] font-medium uppercase tracking-[0.28em] text-[#c9a86a]">By invitation</span>
+              </div>
+              <h2 className={`mt-2 px-1 font-serif leading-[1.1] tracking-tight text-neutral-900 ${hasActivities ? "text-[17px]" : "text-[22px]"}`}>
+                Curate a moment
+              </h2>
+              {!hasActivities && (
+                <p className="mt-1 px-1 text-[12px] leading-relaxed text-neutral-500">
+                  Choose the form your gathering will take.
+                </p>
+              )}
+
+              <div className={`grid grid-cols-2 gap-2.5 ${hasActivities ? "mt-3" : "mt-4"}`}>
+                {([
+                  { label: "Local activity", hint: "An intimate evening, close to home", icon: MapPin, type: "local" as const },
+                  { label: "A trip", hint: "Days away, with chosen company", icon: Plane, type: "trip" as const },
+                ]).map((item) => (
+                  <button
+                    key={item.label}
+                    type="button"
+                    onClick={() => {
+                      setInviteFilterType(item.type);
+                      setInviteSheetOpen(true);
+                    }}
+                    className={`group relative flex flex-col justify-between rounded-2xl border border-neutral-200/80 bg-white text-left transition hover:border-[#c9a86a]/40 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.12)] active:scale-[0.99] ${
+                      hasActivities ? "p-3" : "aspect-square p-3.5"
+                    }`}
+                  >
+                    <span className={`flex items-center justify-center rounded-full border border-neutral-200 text-neutral-700 transition group-hover:border-[#c9a86a]/50 group-hover:text-[#c9a86a] ${hasActivities ? "h-7 w-7" : "h-9 w-9"}`}>
+                      <item.icon className={hasActivities ? "h-3.5 w-3.5" : "h-4 w-4"} strokeWidth={1.5} />
+                    </span>
+                    <span className={`block ${hasActivities ? "mt-2" : ""}`}>
+                      <span className={`block font-medium tracking-tight text-neutral-900 ${hasActivities ? "text-[13px]" : "text-[14px]"}`}>{item.label}</span>
+                      {!hasActivities && (
+                        <span className="mt-0.5 block text-[11px] leading-snug text-neutral-500">{item.hint}</span>
+                      )}
+                    </span>
                   </button>
-                );
-              })}
-            </div>
-          )}
-        </motion.section>
+                ))}
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setInviteFilterType("bali");
+                  setInviteSheetOpen(true);
+                }}
+                className={`group mt-2.5 flex w-full items-center gap-3 rounded-2xl border border-neutral-200/80 bg-white text-left transition hover:border-[#c9a86a]/40 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.12)] active:scale-[0.99] ${
+                  hasActivities ? "px-3.5 py-2.5" : "px-4 py-3.5"
+                }`}
+              >
+                <span className={`flex shrink-0 items-center justify-center rounded-full border border-neutral-200 text-neutral-700 transition group-hover:border-[#c9a86a]/50 group-hover:text-[#c9a86a] ${hasActivities ? "h-7 w-7" : "h-9 w-9"}`}>
+                  <Palmtree className={hasActivities ? "h-3.5 w-3.5" : "h-4 w-4"} strokeWidth={1.5} />
+                </span>
+                <span className="flex-1 min-w-0">
+                  <span className="flex items-center gap-2">
+                    <span className={`font-medium tracking-tight text-neutral-900 ${hasActivities ? "text-[13px]" : "text-[14px]"}`}>Bali</span>
+                    <span className="h-px w-4 bg-[#c9a86a]/60" />
+                    <span className="text-[9.5px] font-medium uppercase tracking-[0.24em] text-[#c9a86a]">Featured</span>
+                  </span>
+                  {!hasActivities && (
+                    <span className="mt-0.5 block truncate text-[11px] text-neutral-500">On the island, by invitation</span>
+                  )}
+                </span>
+                <ChevronRight className="h-4 w-4 text-neutral-400 transition group-hover:translate-x-0.5 group-hover:text-[#c9a86a]" />
+              </button>
+            </motion.section>
+          );
+
+          return hasActivities ? (
+            <>
+              {upcomingSection}
+              {createSection}
+            </>
+          ) : (
+            <>
+              {createSection}
+              {upcomingSection}
+            </>
+          );
+        })()}
 
         <motion.section
           initial={{ opacity: 0, y: 12, filter: "blur(8px)" }}
