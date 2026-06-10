@@ -175,8 +175,22 @@ export default function ActivitiesHome() {
       }
     };
 
+    const loadSuggestedLocations = async () => {
+      setSuggestedLocationsLoading(true);
+      try {
+        const items = await fetchVicLocations();
+        setSuggestedLocations(items);
+      } catch (error) {
+        console.error("Failed to load vic_location", error);
+        setSuggestedLocations([]);
+      } finally {
+        setSuggestedLocationsLoading(false);
+      }
+    };
+
     void loadActivities();
     void loadEventTemps();
+    void loadSuggestedLocations();
   }, []);
 
   const inviteRoute = useMemo(
