@@ -188,6 +188,23 @@ export default function CreatorProfileSheet({
                       <span className="inline-flex items-center rounded-full bg-white/90 px-3 py-1 text-xs font-semibold text-neutral-900">
                         {displayRole}
                       </span>
+                      {invitationStatus && (
+                        <span
+                          className={`inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold backdrop-blur ${
+                            invitationStatus === "accepted"
+                              ? "bg-emerald-500/95 text-white"
+                              : invitationStatus === "rejected"
+                                ? "bg-red-500/95 text-white"
+                                : "bg-amber-400/95 text-neutral-900"
+                          }`}
+                        >
+                          {invitationStatus === "accepted"
+                            ? "Accepted"
+                            : invitationStatus === "rejected"
+                              ? "Rejected"
+                              : "Pending"}
+                        </span>
+                      )}
                     </div>
                     <div className="absolute right-4 top-4 flex items-center gap-2">
                       <button
