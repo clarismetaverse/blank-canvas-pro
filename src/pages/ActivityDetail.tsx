@@ -1083,7 +1083,8 @@ export default function ActivityDetail() {
         creator={profileSheetCreator}
         open={!!profileSheetCreator}
         onClose={() => setProfileSheetCreator(null)}
-        variant="vic-search"
+        variant="vic"
+        profileType="candidate"
       />
     </div>
   );
