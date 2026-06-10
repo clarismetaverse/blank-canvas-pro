@@ -296,7 +296,8 @@ export async function fetchActivityById(id: string): Promise<ActivityDetailRespo
   const headers: Record<string, string> = { Accept: "application/json" };
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`${VIC_ACTIVITY_API}/vic_activity`, { method: "GET", headers });
+  const url = `${VIC_ACTIVITY_API}/vic_activity?vicmembersactivity_id=${encodeURIComponent(id)}`;
+  const res = await fetch(url, { method: "GET", headers });
   if (!res.ok) {
     const text = await res.text();
     throw new Error(`vic_activity fetch failed (${res.status}): ${text}`);
@@ -312,7 +313,8 @@ export async function fetchActivityById(id: string): Promise<ActivityDetailRespo
   const targetId = Number(id);
   const match =
     list.find((it) => Number(it.id) === targetId) ??
-    list.find((it) => String(it.id) === String(id));
+    list.find((it) => String(it.id) === String(id)) ??
+    list[0];
 
   if (!match) {
     throw new Error(`Activity ${id} not found in /vic_activity`);
