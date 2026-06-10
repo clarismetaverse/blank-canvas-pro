@@ -122,6 +122,7 @@ export default function ActivitiesHome() {
   const [eventTempsLoading, setEventTempsLoading] = useState(true);
   const [suggestedLocations, setSuggestedLocations] = useState<VicLocation[]>([]);
   const [suggestedLocationsLoading, setSuggestedLocationsLoading] = useState(true);
+  const [invitedByActivity, setInvitedByActivity] = useState<Record<number, Array<{ id: number; name: string; avatarUrl: string }>>>({});
 
   useEffect(() => {
     const loadActivities = async () => {
