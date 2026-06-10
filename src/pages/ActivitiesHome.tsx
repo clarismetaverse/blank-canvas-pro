@@ -308,11 +308,11 @@ export default function ActivitiesHome() {
                           </div>
                           <div className="flex items-center gap-2">
                             <span className="rounded-full border border-white/40 bg-black/25 p-1 text-white">
-                              {(activity.invites.length > 0 || (raw?.InvitedUsers?.length ?? 0) > 0) ? <Mail className="h-3 w-3" /> : <UserRound className="h-3 w-3" />}
+                              {(previewAvatars.length > 0 || totalInvited > 0) ? <Mail className="h-3 w-3" /> : <UserRound className="h-3 w-3" />}
                             </span>
-                            {activity.invites.length > 0 ? (
+                            {previewAvatars.length > 0 ? (
                               <div className="flex items-center -space-x-2">
-                                {activity.invites.map((invite) => (
+                                {previewAvatars.map((invite) => (
                                   <img
                                     key={invite.id}
                                     src={invite.creator.avatarUrl}
@@ -320,18 +320,19 @@ export default function ActivitiesHome() {
                                     className="h-7 w-7 rounded-full border border-white/80 object-cover"
                                   />
                                 ))}
-                                {(raw?.InvitedUsers?.length ?? 0) > activity.invites.length && (
+                                {totalInvited > previewAvatars.length && (
                                   <span className="flex h-7 w-7 items-center justify-center rounded-full border border-white/70 bg-black/45 text-[10px] font-semibold text-white">
-                                    +{(raw?.InvitedUsers?.length ?? 0) - activity.invites.length}
+                                    +{totalInvited - previewAvatars.length}
                                   </span>
                                 )}
                               </div>
-                            ) : (raw?.InvitedUsers?.length ?? 0) > 0 ? (
-                              <p className="text-xs text-white/85">{raw!.InvitedUsers!.length} invited creator{raw!.InvitedUsers!.length > 1 ? "s" : ""}</p>
+                            ) : totalInvited > 0 ? (
+                              <p className="text-xs text-white/85">{totalInvited} invited creator{totalInvited > 1 ? "s" : ""}</p>
                             ) : (
                               <p className="text-xs text-white/85">No invited creators yet</p>
                             )}
                           </div>
+
                         </div>
                       </button>
                     );
