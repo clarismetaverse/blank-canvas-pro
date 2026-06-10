@@ -375,7 +375,7 @@ export default function ActivitiesHome() {
                       setInviteFilterType(item.type);
                       setInviteSheetOpen(true);
                     }}
-                    className={`group relative flex flex-col justify-between rounded-2xl border border-neutral-200/80 bg-white text-left transition hover:border-[#c9a86a]/40 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.12)] active:scale-[0.99] ${
+                    className={`group relative flex flex-col justify-between rounded-2xl border border-neutral-200/80 sunset-gradient text-left transition hover:border-[#c9a86a]/40 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.12)] active:scale-[0.99] ${
                       hasActivities ? "p-3" : "aspect-square p-3.5"
                     }`}
                   >
