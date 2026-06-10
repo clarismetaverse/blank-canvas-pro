@@ -533,7 +533,7 @@ export default function ActivitiesHome() {
                     <button
                       type="button"
                       onClick={() => openCreateSheet({ title, city: loc.Adress })}
-                      className="rounded-full border border-neutral-200 bg-neutral-50 px-3 py-1.5 text-xs font-semibold text-neutral-700"
+                      className="rounded-full border border-neutral-200 sunset-gradient px-3 py-1.5 text-xs font-semibold text-neutral-700"
                     >
                       Use
                     </button>
