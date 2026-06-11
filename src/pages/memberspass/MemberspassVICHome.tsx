@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, Lock } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CreatorCard from "@/components/memberspass/CreatorCard";
 import CreatorSearchSelect from "@/components/memberspass/CreatorSearchSelect";
@@ -7,6 +7,8 @@ import CityHangoutCard from "@/components/memberspass/CityHangoutCard";
 import type { CreatorLite } from "@/services/creatorSearch";
 import { fetchNewInTown } from "@/services/newInTown";
 import { fetchCityHangouts, type HangoutGroup } from "@/services/cityHangouts";
+
+const HANGOUT_CITIES = ["Bali", "Dubai", "Milan"];
 
 const placeholderCreators: CreatorLite[] = [
   {
@@ -59,6 +61,10 @@ export default function MemberspassVICHome() {
   const [newInTownLoading, setNewInTownLoading] = useState(true);
   const [hangouts, setHangouts] = useState<HangoutGroup[]>([]);
   const [hangoutsLoading, setHangoutsLoading] = useState(true);
+  const [hangoutCity, setHangoutCity] = useState(() => {
+    if (typeof window === "undefined") return "Bali";
+    return localStorage.getItem("owner_city") || "Bali";
+  });
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   useEffect(() => {
@@ -78,8 +84,7 @@ export default function MemberspassVICHome() {
     const loadHangouts = async () => {
       setHangoutsLoading(true);
       try {
-        const city = typeof window !== "undefined" ? localStorage.getItem("owner_city") || "" : "";
-        const items = await fetchCityHangouts(city);
+        const items = await fetchCityHangouts(hangoutCity);
         if (!active) return;
         setHangouts(items);
       } catch (err) {
@@ -95,7 +100,7 @@ export default function MemberspassVICHome() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [hangoutCity]);
 
   const displayCreators = useMemo(() => {
     if (lastResults.length) return lastResults.slice(0, 10);
@@ -216,11 +221,29 @@ export default function MemberspassVICHome() {
 
             <section className="space-y-4 pt-2">
               <div className="flex items-center justify-between px-1">
-                <h2 className="text-base font-semibold text-neutral-900">Hangouts in {cityName}</h2>
+                <h2 className="text-base font-semibold text-neutral-900">Hangouts in {hangoutCity}</h2>
                 <span className="text-xs text-neutral-400">
                   {hangoutsLoading ? "Loading…" : `${hangouts.length} spots`}
                 </span>
               </div>
+
+              <div className="flex gap-2 px-1">
+                {HANGOUT_CITIES.map((city) => (
+                  <button
+                    key={city}
+                    type="button"
+                    onClick={() => setHangoutCity(city)}
+                    className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
+                      city === hangoutCity
+                        ? "border-neutral-900 bg-neutral-900 text-white"
+                        : "border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-100"
+                    }`}
+                  >
+                    {city}
+                  </button>
+                ))}
+              </div>
+
               {hangoutsLoading ? (
                 <div className="flex gap-[14px] overflow-x-auto pb-3">
                   {[0, 1, 2].map((i) => (
