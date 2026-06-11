@@ -178,16 +178,16 @@ export default function MemberspassVICHome() {
                   See all
                 </button>
               </div>
-              <div className="flex gap-[12px] overflow-x-auto pb-3 snap-x snap-proximity">
+              <div className="flex gap-[14px] overflow-x-auto pb-3 snap-x snap-proximity">
                 {membersCreators.map((creator, index) => (
                   <div
                     key={`members-${creator.id}-${index}`}
-                    className={`${membersLargeIndexes.has(index) ? "w-[210px]" : "w-[180px]"} shrink-0 snap-start`}
+                    className={`${membersLargeIndexes.has(index) ? "w-[260px]" : "w-[220px]"} shrink-0 snap-start`}
                   >
                     <CreatorCard
                       creator={creator}
                       variant="vic"
-                      size={membersLargeIndexes.has(index) ? "large" : "normal"}
+                      size="large"
                       badge={index < memberBadges.length ? memberBadges[index] : undefined}
                     />
                   </div>
