@@ -115,17 +115,7 @@ export default function MemberspassVICHome() {
       </div>
 
       <div className="mx-auto w-full max-w-md space-y-10 px-5 pb-16 pt-6">
-        <section className="space-y-4 rounded-3xl border border-neutral-200 bg-white p-5 shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-semibold">Discover top creators</h2>
-              <p className="mt-2 text-sm text-neutral-500">Connect through curated experiences</p>
-            </div>
-            <span className="rounded-full border border-neutral-200 bg-[#FFF1F4] px-3 py-1 text-xs font-semibold text-[#FF5A7A]">
-              {points.toLocaleString()} pts
-            </span>
-          </div>
-
+        <section className="rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm">
           <CreatorSearchSelect
             value={query}
             onChange={setQuery}
@@ -141,7 +131,7 @@ export default function MemberspassVICHome() {
           />
 
           {selectedCreator && (
-            <div className="flex items-center justify-between rounded-2xl border border-neutral-200 bg-[#FAFAFA] px-4 py-2 text-xs text-neutral-600">
+            <div className="mt-2 flex items-center justify-between rounded-xl border border-neutral-200 bg-[#FAFAFA] px-3 py-1.5 text-xs text-neutral-600">
               <span>
                 Selected: <span className="font-semibold text-neutral-900">{selectedCreator.name}</span>
               </span>
