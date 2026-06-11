@@ -166,40 +166,6 @@ export default function MemberspassVICHome() {
           </section>
         ) : (
           <>
-            <section className="space-y-4">
-              <div className="flex items-center justify-between px-1">
-                <div>
-                  <h2 className="text-base font-semibold text-neutral-900">Candidates</h2>
-                  <p className="mt-1 text-xs text-neutral-500">3 awaiting endorsement</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => navigate("/members/all", { state: { title: "Candidates", creators: candidateCreators } })}
-                  className="text-xs font-medium text-neutral-500 hover:text-neutral-900 transition-colors"
-                >
-                  See all
-                </button>
-              </div>
-              <div className="flex gap-[12px] overflow-x-auto pb-3 snap-x snap-proximity">
-                {showNewInTownSkeletons
-                  ? Array.from({ length: 3 }).map((_, index) => (
-                      <div key={`new-in-town-skeleton-${index}`} className="w-[220px] shrink-0 snap-start">
-                        <div className="h-[300px] w-full rounded-[22px] border border-neutral-200 bg-neutral-100 shadow-[0_10px_28px_rgba(0,0,0,0.10)]" />
-                      </div>
-                    ))
-                  : candidateCreators.map((creator) => (
-                      <div key={creator.id} className="w-[220px] shrink-0 snap-start">
-                        <CreatorCard
-                          creator={creator}
-                          variant="vic"
-                          size="candidate"
-                          profileType="candidate"
-                          profileSource="vic"
-                        />
-                      </div>
-                    ))}
-              </div>
-            </section>
 
             <section className="space-y-4 pt-2">
               <div className="flex items-center justify-between px-1">
