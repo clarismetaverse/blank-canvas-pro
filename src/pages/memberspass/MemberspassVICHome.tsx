@@ -3,8 +3,10 @@ import { ChevronLeft, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CreatorCard from "@/components/memberspass/CreatorCard";
 import CreatorSearchSelect from "@/components/memberspass/CreatorSearchSelect";
+import CityHangoutCard from "@/components/memberspass/CityHangoutCard";
 import type { CreatorLite } from "@/services/creatorSearch";
 import { fetchNewInTown } from "@/services/newInTown";
+import { fetchCityHangouts, type HangoutGroup } from "@/services/cityHangouts";
 
 const placeholderCreators: CreatorLite[] = [
   {
@@ -55,6 +57,8 @@ export default function MemberspassVICHome() {
   const [selectedCreator, setSelectedCreator] = useState<CreatorLite | null>(null);
   const [newInTown, setNewInTown] = useState<CreatorLite[]>([]);
   const [newInTownLoading, setNewInTownLoading] = useState(true);
+  const [hangouts, setHangouts] = useState<HangoutGroup[]>([]);
+  const [hangoutsLoading, setHangoutsLoading] = useState(true);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   useEffect(() => {
@@ -71,7 +75,22 @@ export default function MemberspassVICHome() {
       }
     };
 
+    const loadHangouts = async () => {
+      setHangoutsLoading(true);
+      try {
+        const city = typeof window !== "undefined" ? localStorage.getItem("owner_city") || "" : "";
+        const items = await fetchCityHangouts(city);
+        if (!active) return;
+        setHangouts(items);
+      } catch (err) {
+        console.error("Failed to load city hangouts", err);
+      } finally {
+        if (active) setHangoutsLoading(false);
+      }
+    };
+
     loadNewInTown();
+    loadHangouts();
 
     return () => {
       active = false;
@@ -195,6 +214,34 @@ export default function MemberspassVICHome() {
               </div>
             </section>
 
+            <section className="space-y-4 pt-2">
+              <div className="flex items-center justify-between px-1">
+                <h2 className="text-base font-semibold text-neutral-900">Hangouts in {cityName}</h2>
+                <span className="text-xs text-neutral-400">
+                  {hangoutsLoading ? "Loading…" : `${hangouts.length} spots`}
+                </span>
+              </div>
+              {hangoutsLoading ? (
+                <div className="flex gap-[14px] overflow-x-auto pb-3">
+                  {[0, 1, 2].map((i) => (
+                    <div
+                      key={`hangout-skel-${i}`}
+                      className="h-[220px] w-[240px] shrink-0 animate-pulse rounded-2xl bg-neutral-100"
+                    />
+                  ))}
+                </div>
+              ) : hangouts.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-neutral-200 bg-white px-4 py-6 text-center text-xs text-neutral-500">
+                  No upcoming hangouts yet.
+                </div>
+              ) : (
+                <div className="flex gap-[14px] overflow-x-auto pb-3 snap-x snap-proximity">
+                  {hangouts.map((group) => (
+                    <CityHangoutCard key={group.key} group={group} />
+                  ))}
+                </div>
+              )}
+            </section>
 
             {/* Private list section hidden */}
           </>
