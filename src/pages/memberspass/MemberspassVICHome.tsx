@@ -3,8 +3,10 @@ import { ChevronLeft, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CreatorCard from "@/components/memberspass/CreatorCard";
 import CreatorSearchSelect from "@/components/memberspass/CreatorSearchSelect";
+import CityHangoutCard from "@/components/memberspass/CityHangoutCard";
 import type { CreatorLite } from "@/services/creatorSearch";
 import { fetchNewInTown } from "@/services/newInTown";
+import { fetchCityHangouts, type HangoutGroup } from "@/services/cityHangouts";
 
 const placeholderCreators: CreatorLite[] = [
   {
