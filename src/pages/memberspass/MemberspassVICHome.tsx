@@ -57,6 +57,8 @@ export default function MemberspassVICHome() {
   const [selectedCreator, setSelectedCreator] = useState<CreatorLite | null>(null);
   const [newInTown, setNewInTown] = useState<CreatorLite[]>([]);
   const [newInTownLoading, setNewInTownLoading] = useState(true);
+  const [hangouts, setHangouts] = useState<HangoutGroup[]>([]);
+  const [hangoutsLoading, setHangoutsLoading] = useState(true);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   useEffect(() => {
