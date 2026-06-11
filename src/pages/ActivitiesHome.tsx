@@ -286,7 +286,7 @@ export default function ActivitiesHome() {
                               : `/activities/${activity.id}`
                           )
                         }
-                        className="relative h-64 w-[86%] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 text-left shadow-[0_18px_38px_rgba(10,10,20,0.16)]"
+                        className="relative h-72 w-[92%] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 text-left shadow-[0_18px_38px_rgba(10,10,20,0.16)]"
                       >
                         <img src={activity.coverUrl} alt={activity.title} className="h-full w-full object-cover" />
                         <div className="absolute inset-0 bg-gradient-to-b from-black/15 via-transparent to-black/55" />
