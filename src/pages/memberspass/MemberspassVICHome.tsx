@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft } from "lucide-react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeft, MapPin, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CreatorCard from "@/components/memberspass/CreatorCard";
 import CreatorSearchSelect from "@/components/memberspass/CreatorSearchSelect";
@@ -221,17 +221,23 @@ export default function MemberspassVICHome() {
 
             <section className="space-y-4 pt-2">
               <div className="flex items-center justify-between px-1">
-                <h2 className="text-base font-semibold text-neutral-900">Hangouts in {hangoutCity}</h2>
+                <div className="flex items-center gap-1.5">
+                  <MapPin className="h-4 w-4 text-neutral-900" />
+                  <h2 className="text-base font-semibold text-neutral-900">Hangouts in {hangoutCity}</h2>
+                </div>
                 <div className="flex items-center gap-2">
-                  <select
-                    value={hangoutCity}
-                    onChange={(e) => setHangoutCity(e.target.value)}
-                    className="rounded-lg border border-neutral-200 bg-white px-2 py-1 text-xs font-medium text-neutral-700 outline-none focus:border-neutral-400"
-                  >
-                    {HANGOUT_CITIES.map((city) => (
-                      <option key={city} value={city}>{city}</option>
-                    ))}
-                  </select>
+                  <div className="relative">
+                    <select
+                      value={hangoutCity}
+                      onChange={(e) => setHangoutCity(e.target.value)}
+                      className="appearance-none rounded-lg border border-neutral-200 bg-white pl-2.5 pr-6 py-1.5 text-xs font-medium text-neutral-700 outline-none focus:border-neutral-400"
+                    >
+                      {HANGOUT_CITIES.map((city) => (
+                        <option key={city} value={city}>{city}</option>
+                      ))}
+                    </select>
+                    <ChevronDown className="pointer-events-none absolute right-1.5 top-1/2 h-3 w-3 -translate-y-1/2 text-neutral-400" />
+                  </div>
                   <span className="text-xs text-neutral-400">
                     {hangoutsLoading ? "Loading…" : `${hangouts.length} spots`}
                   </span>
@@ -243,7 +249,7 @@ export default function MemberspassVICHome() {
                   {[0, 1, 2].map((i) => (
                     <div
                       key={`hangout-skel-${i}`}
-                      className="h-[220px] w-[240px] shrink-0 animate-pulse rounded-2xl bg-neutral-100"
+                      className="h-[230px] w-[260px] shrink-0 animate-pulse rounded-2xl bg-neutral-100"
                     />
                   ))}
                 </div>
