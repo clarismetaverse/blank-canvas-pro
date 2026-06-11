@@ -100,7 +100,7 @@ export default function MemberspassVICHome() {
     return () => {
       active = false;
     };
-  }, []);
+  }, [hangoutCity]);
 
   const displayCreators = useMemo(() => {
     if (lastResults.length) return lastResults.slice(0, 10);
