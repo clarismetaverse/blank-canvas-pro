@@ -75,7 +75,22 @@ export default function MemberspassVICHome() {
       }
     };
 
+    const loadHangouts = async () => {
+      setHangoutsLoading(true);
+      try {
+        const city = typeof window !== "undefined" ? localStorage.getItem("owner_city") || "" : "";
+        const items = await fetchCityHangouts(city);
+        if (!active) return;
+        setHangouts(items);
+      } catch (err) {
+        console.error("Failed to load city hangouts", err);
+      } finally {
+        if (active) setHangoutsLoading(false);
+      }
+    };
+
     loadNewInTown();
+    loadHangouts();
 
     return () => {
       active = false;
