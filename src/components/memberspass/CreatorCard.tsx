@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lock } from "lucide-react";
+import { Instagram, Lock } from "lucide-react";
 import type { CreatorLite } from "@/services/creatorSearch";
 import CreatorProfileSheet from "@/components/memberspass/CreatorProfileSheet";
 
@@ -171,6 +171,13 @@ export default function CreatorCard({
 
 
 
+
+              {creator.IG_account?.trim() && (
+                <p className={`mb-1 flex items-center gap-1 text-[11px] ${endorsed ? "text-white/45" : "text-white/70"} transition-opacity duration-300`}>
+                  <Instagram className="h-3 w-3" />
+                  @{creator.IG_account.trim()}
+                </p>
+              )}
 
               {isVic && (
                 <div className="flex items-end justify-between">
