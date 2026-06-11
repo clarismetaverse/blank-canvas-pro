@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { ChevronLeft, Lock } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CreatorCard from "@/components/memberspass/CreatorCard";
 import CreatorSearchSelect from "@/components/memberspass/CreatorSearchSelect";
@@ -7,6 +7,8 @@ import CityHangoutCard from "@/components/memberspass/CityHangoutCard";
 import type { CreatorLite } from "@/services/creatorSearch";
 import { fetchNewInTown } from "@/services/newInTown";
 import { fetchCityHangouts, type HangoutGroup } from "@/services/cityHangouts";
+
+const HANGOUT_CITIES = ["Bali", "Dubai", "Milan"];
 
 const placeholderCreators: CreatorLite[] = [
   {
