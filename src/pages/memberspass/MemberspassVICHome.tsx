@@ -222,26 +222,20 @@ export default function MemberspassVICHome() {
             <section className="space-y-4 pt-2">
               <div className="flex items-center justify-between px-1">
                 <h2 className="text-base font-semibold text-neutral-900">Hangouts in {hangoutCity}</h2>
-                <span className="text-xs text-neutral-400">
-                  {hangoutsLoading ? "Loading…" : `${hangouts.length} spots`}
-                </span>
-              </div>
-
-              <div className="flex gap-2 px-1">
-                {HANGOUT_CITIES.map((city) => (
-                  <button
-                    key={city}
-                    type="button"
-                    onClick={() => setHangoutCity(city)}
-                    className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-                      city === hangoutCity
-                        ? "border-neutral-900 bg-neutral-900 text-white"
-                        : "border-neutral-200 bg-white text-neutral-600 hover:bg-neutral-100"
-                    }`}
+                <div className="flex items-center gap-2">
+                  <select
+                    value={hangoutCity}
+                    onChange={(e) => setHangoutCity(e.target.value)}
+                    className="rounded-lg border border-neutral-200 bg-white px-2 py-1 text-xs font-medium text-neutral-700 outline-none focus:border-neutral-400"
                   >
-                    {city}
-                  </button>
-                ))}
+                    {HANGOUT_CITIES.map((city) => (
+                      <option key={city} value={city}>{city}</option>
+                    ))}
+                  </select>
+                  <span className="text-xs text-neutral-400">
+                    {hangoutsLoading ? "Loading…" : `${hangouts.length} spots`}
+                  </span>
+                </div>
               </div>
 
               {hangoutsLoading ? (
