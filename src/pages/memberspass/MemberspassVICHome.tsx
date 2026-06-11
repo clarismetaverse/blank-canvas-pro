@@ -115,17 +115,7 @@ export default function MemberspassVICHome() {
       </div>
 
       <div className="mx-auto w-full max-w-md space-y-10 px-5 pb-16 pt-6">
-        <section className="space-y-4 rounded-3xl border border-neutral-200 bg-white p-5 shadow-[0_10px_30px_rgba(0,0,0,0.08)]">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <h2 className="text-2xl font-semibold">Discover top creators</h2>
-              <p className="mt-2 text-sm text-neutral-500">Connect through curated experiences</p>
-            </div>
-            <span className="rounded-full border border-neutral-200 bg-[#FFF1F4] px-3 py-1 text-xs font-semibold text-[#FF5A7A]">
-              {points.toLocaleString()} pts
-            </span>
-          </div>
-
+        <section className="rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm">
           <CreatorSearchSelect
             value={query}
             onChange={setQuery}
@@ -141,7 +131,7 @@ export default function MemberspassVICHome() {
           />
 
           {selectedCreator && (
-            <div className="flex items-center justify-between rounded-2xl border border-neutral-200 bg-[#FAFAFA] px-4 py-2 text-xs text-neutral-600">
+            <div className="mt-2 flex items-center justify-between rounded-xl border border-neutral-200 bg-[#FAFAFA] px-3 py-1.5 text-xs text-neutral-600">
               <span>
                 Selected: <span className="font-semibold text-neutral-900">{selectedCreator.name}</span>
               </span>
@@ -176,40 +166,6 @@ export default function MemberspassVICHome() {
           </section>
         ) : (
           <>
-            <section className="space-y-4">
-              <div className="flex items-center justify-between px-1">
-                <div>
-                  <h2 className="text-base font-semibold text-neutral-900">Candidates</h2>
-                  <p className="mt-1 text-xs text-neutral-500">3 awaiting endorsement</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => navigate("/members/all", { state: { title: "Candidates", creators: candidateCreators } })}
-                  className="text-xs font-medium text-neutral-500 hover:text-neutral-900 transition-colors"
-                >
-                  See all
-                </button>
-              </div>
-              <div className="flex gap-[12px] overflow-x-auto pb-3 snap-x snap-proximity">
-                {showNewInTownSkeletons
-                  ? Array.from({ length: 3 }).map((_, index) => (
-                      <div key={`new-in-town-skeleton-${index}`} className="w-[220px] shrink-0 snap-start">
-                        <div className="h-[300px] w-full rounded-[22px] border border-neutral-200 bg-neutral-100 shadow-[0_10px_28px_rgba(0,0,0,0.10)]" />
-                      </div>
-                    ))
-                  : candidateCreators.map((creator) => (
-                      <div key={creator.id} className="w-[220px] shrink-0 snap-start">
-                        <CreatorCard
-                          creator={creator}
-                          variant="vic"
-                          size="candidate"
-                          profileType="candidate"
-                          profileSource="vic"
-                        />
-                      </div>
-                    ))}
-              </div>
-            </section>
 
             <section className="space-y-4 pt-2">
               <div className="flex items-center justify-between px-1">
@@ -222,16 +178,16 @@ export default function MemberspassVICHome() {
                   See all
                 </button>
               </div>
-              <div className="flex gap-[12px] overflow-x-auto pb-3 snap-x snap-proximity">
+              <div className="flex gap-[14px] overflow-x-auto pb-3 snap-x snap-proximity">
                 {membersCreators.map((creator, index) => (
                   <div
                     key={`members-${creator.id}-${index}`}
-                    className={`${membersLargeIndexes.has(index) ? "w-[210px]" : "w-[180px]"} shrink-0 snap-start`}
+                    className={`${membersLargeIndexes.has(index) ? "w-[260px]" : "w-[220px]"} shrink-0 snap-start`}
                   >
                     <CreatorCard
                       creator={creator}
                       variant="vic"
-                      size={membersLargeIndexes.has(index) ? "large" : "normal"}
+                      size="large"
                       badge={index < memberBadges.length ? memberBadges[index] : undefined}
                     />
                   </div>
