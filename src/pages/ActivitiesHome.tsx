@@ -255,7 +255,7 @@ export default function ActivitiesHome() {
               {myActivitiesLoading ? (
                 <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pt-1">
                   {[0, 1].map((item) => (
-                    <div key={item} className="h-52 w-[78%] shrink-0 animate-pulse rounded-3xl border border-neutral-200 bg-neutral-200/70" />
+                    <div key={item} className="h-60 w-[84%] shrink-0 animate-pulse rounded-3xl border border-neutral-200 bg-neutral-200/70" />
                   ))}
                 </div>
               ) : myActivities.length === 0 ? (
