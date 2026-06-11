@@ -84,8 +84,7 @@ export default function MemberspassVICHome() {
     const loadHangouts = async () => {
       setHangoutsLoading(true);
       try {
-        const city = typeof window !== "undefined" ? localStorage.getItem("owner_city") || "" : "";
-        const items = await fetchCityHangouts(city);
+        const items = await fetchCityHangouts(hangoutCity);
         if (!active) return;
         setHangouts(items);
       } catch (err) {
