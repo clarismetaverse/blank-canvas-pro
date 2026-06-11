@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lock } from "lucide-react";
+import { Instagram, Lock } from "lucide-react";
 import type { CreatorLite } from "@/services/creatorSearch";
 import CreatorProfileSheet from "@/components/memberspass/CreatorProfileSheet";
 
