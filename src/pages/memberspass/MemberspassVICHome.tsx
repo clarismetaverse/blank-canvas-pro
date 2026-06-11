@@ -61,6 +61,10 @@ export default function MemberspassVICHome() {
   const [newInTownLoading, setNewInTownLoading] = useState(true);
   const [hangouts, setHangouts] = useState<HangoutGroup[]>([]);
   const [hangoutsLoading, setHangoutsLoading] = useState(true);
+  const [hangoutCity, setHangoutCity] = useState(() => {
+    if (typeof window === "undefined") return "Bali";
+    return localStorage.getItem("owner_city") || "Bali";
+  });
   const [isSearchFocused, setIsSearchFocused] = useState(false);
 
   useEffect(() => {
