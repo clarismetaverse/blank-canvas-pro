@@ -28,6 +28,7 @@ interface RawHangout {
   _restaurant_turbo?: {
     Name?: string;
     Cover?: { url?: string } | null;
+    _cities_01?: { id?: number; CityName?: string } | null;
   };
   _user_turbo?: {
     id?: number;
