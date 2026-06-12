@@ -83,9 +83,9 @@ export async function fetchCityHangouts(city?: string): Promise<HangoutGroup[]> 
     if (!h.restaurant_id || !h.BookingDay) continue;
     const dateObj = new Date(`${h.BookingDay}T00:00:00`);
     if (Number.isNaN(dateObj.getTime()) || dateObj < today) continue;
-    if (wantedCity) {
+    if (wantedCities) {
       const rowCity = h._restaurant_turbo?._cities_01?.CityName?.trim().toLowerCase();
-      if (!rowCity || rowCity !== wantedCity) continue;
+      if (!rowCity || !wantedCities.includes(rowCity)) continue;
     }
 
     const key = `${h.restaurant_id}-${h.BookingDay}`;
