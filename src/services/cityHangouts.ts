@@ -71,11 +71,16 @@ export async function fetchCityHangouts(city?: string): Promise<HangoutGroup[]> 
   today.setHours(0, 0, 0, 0);
 
   const groups = new Map<string, HangoutGroup>();
+  const wantedCity = city?.trim().toLowerCase();
   for (const h of raw) {
     if (h.canceled) continue;
     if (!h.restaurant_id || !h.BookingDay) continue;
     const dateObj = new Date(`${h.BookingDay}T00:00:00`);
     if (Number.isNaN(dateObj.getTime()) || dateObj < today) continue;
+    if (wantedCity) {
+      const rowCity = h._restaurant_turbo?._cities_01?.CityName?.trim().toLowerCase();
+      if (!rowCity || rowCity !== wantedCity) continue;
+    }
 
     const key = `${h.restaurant_id}-${h.BookingDay}`;
     let g = groups.get(key);
