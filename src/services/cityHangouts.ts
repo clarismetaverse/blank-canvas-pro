@@ -71,7 +71,13 @@ export async function fetchCityHangouts(city?: string): Promise<HangoutGroup[]> 
   today.setHours(0, 0, 0, 0);
 
   const groups = new Map<string, HangoutGroup>();
-  const wantedCity = city?.trim().toLowerCase();
+  const cityAliases: Record<string, string[]> = {
+    milan: ["milan", "milano"],
+    bali: ["bali"],
+    dubai: ["dubai"],
+  };
+  const wantedKey = city?.trim().toLowerCase();
+  const wantedCities = wantedKey ? cityAliases[wantedKey] ?? [wantedKey] : undefined;
   for (const h of raw) {
     if (h.canceled) continue;
     if (!h.restaurant_id || !h.BookingDay) continue;
