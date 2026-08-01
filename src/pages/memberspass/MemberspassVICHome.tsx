@@ -229,9 +229,13 @@ export default function MemberspassVICHome() {
                       <option key={city} value={city}>{city}</option>
                     ))}
                   </select>
-                  <span className="text-xs text-neutral-400">
-                    {hangoutsLoading ? "Loading…" : `${hangouts.length} spots`}
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => navigate("/hangouts/all", { state: { city: hangoutCity, hangouts } })}
+                    className="text-xs font-medium text-neutral-500 transition-colors hover:text-neutral-900"
+                  >
+                    See all
+                  </button>
                 </div>
               </div>
 
@@ -240,7 +244,7 @@ export default function MemberspassVICHome() {
                   {[0, 1, 2].map((i) => (
                     <div
                       key={`hangout-skel-${i}`}
-                      className="h-[220px] w-[240px] shrink-0 animate-pulse rounded-2xl bg-neutral-100"
+                      className="h-[260px] w-[290px] shrink-0 animate-pulse rounded-2xl bg-neutral-100"
                     />
                   ))}
                 </div>
@@ -251,11 +255,14 @@ export default function MemberspassVICHome() {
               ) : (
                 <div className="flex gap-[14px] overflow-x-auto pb-3 snap-x snap-proximity">
                   {hangouts.map((group) => (
-                    <CityHangoutCard key={group.key} group={group} />
+                    <div key={group.key} className="w-[290px] shrink-0 snap-start [&>div]:w-full">
+                      <CityHangoutCard group={group} />
+                    </div>
                   ))}
                 </div>
               )}
             </section>
+
 
             {/* Private list section hidden */}
           </>
