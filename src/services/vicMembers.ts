@@ -15,6 +15,8 @@ type UserTurboRecord = {
   FakeCity?: string;
   IG_account?: string;
   Tiktok_account?: string;
+  Ig_handle?: string;
+  user_interest_topics_turbo_id?: Array<number | { id?: number; interest_topics?: string }>;
   Profile_pic?: { url?: string } | null;
 };
 
