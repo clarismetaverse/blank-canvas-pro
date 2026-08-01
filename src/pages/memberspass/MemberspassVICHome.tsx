@@ -258,9 +258,15 @@ export default function MemberspassVICHome() {
               <div className="flex items-center justify-between px-1">
                 <h2 className="text-base font-semibold text-neutral-900">Hangouts in {hangoutCity}</h2>
                 <div className="flex items-center gap-2">
+                  <label className="sr-only" htmlFor="hangout-city">City</label>
                   <select
+                    id="hangout-city"
                     value={hangoutCity}
-                    onChange={(e) => setHangoutCity(e.target.value)}
+                    onChange={(e) => {
+                      setHangoutCity(e.target.value);
+                      setFilters({ ...EMPTY_HANGOUT_FILTERS });
+                      setDebouncedKeyword("");
+                    }}
                     className="rounded-lg border border-neutral-200 bg-white px-2 py-1 text-xs font-medium text-neutral-700 outline-none focus:border-neutral-400"
                   >
                     {HANGOUT_CITIES.map((city) => (
@@ -277,6 +283,12 @@ export default function MemberspassVICHome() {
                 </div>
               </div>
 
+              <HangoutFilters
+                value={filters}
+                onChange={setFilters}
+                showNeighborhoods={isBali(hangoutCity)}
+              />
+
               {hangoutsLoading ? (
                 <div className="flex gap-[14px] overflow-x-auto pb-3">
                   {[0, 1, 2].map((i) => (
@@ -286,10 +298,28 @@ export default function MemberspassVICHome() {
                     />
                   ))}
                 </div>
-              ) : hangouts.length === 0 ? (
+              ) : hangoutsError ? (
                 <div className="rounded-2xl border border-dashed border-neutral-200 bg-white px-4 py-6 text-center text-xs text-neutral-500">
-                  No upcoming hangouts yet.
+                  We couldn’t load hangouts right now. Please try again.
                 </div>
+              ) : hangouts.length === 0 ? (
+                <div className="space-y-2 rounded-2xl border border-dashed border-neutral-200 bg-white px-4 py-6 text-center">
+                  <p className="text-xs text-neutral-500">
+                    {filtersActive
+                      ? "No hangouts match the selected filters."
+                      : "No upcoming hangouts yet."}
+                  </p>
+                  {filtersActive && (
+                    <button
+                      type="button"
+                      onClick={() => setFilters({ ...EMPTY_HANGOUT_FILTERS })}
+                      className="text-xs font-medium text-neutral-900 underline underline-offset-2"
+                    >
+                      Clear filters
+                    </button>
+                  )}
+                </div>
+
               ) : (
                 <div className="flex gap-[14px] overflow-x-auto pb-3 snap-x snap-proximity">
                   {hangouts.map((group) => (
