@@ -64,33 +64,44 @@ function buildTimeframe(h: RawHangout): string | undefined {
   return undefined;
 }
 
+const CITY_IDS: Record<string, number> = {
+  milan: 1,
+  milano: 1,
+  dubai: 2,
+  bali: 3,
+};
+
+function localToday(): string {
+  const d = new Date();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${m}-${day}`;
+}
+
 export async function fetchCityHangouts(city?: string): Promise<HangoutGroup[]> {
   const url = new URL(`${BASE}/modelhangouts`);
-  if (city) url.searchParams.set("city", city);
+  const cityId = city ? CITY_IDS[city.trim().toLowerCase()] : undefined;
+  if (cityId) url.searchParams.set("city_id", String(cityId));
+  url.searchParams.set("from_date", localToday());
   const res = await fetch(url.toString());
   if (!res.ok) throw new Error(`hangouts ${res.status}`);
-  const raw: RawHangout[] = await res.json();
+  const payload = await res.json();
+  const raw: RawHangout[] = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload?.items)
+      ? payload.items
+      : [];
 
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
   const groups = new Map<string, HangoutGroup>();
-  const cityAliases: Record<string, string[]> = {
-    milan: ["milan", "milano"],
-    bali: ["bali"],
-    dubai: ["dubai"],
-  };
-  const wantedKey = city?.trim().toLowerCase();
-  const wantedCities = wantedKey ? cityAliases[wantedKey] ?? [wantedKey] : undefined;
   for (const h of raw) {
     if (h.canceled) continue;
     if (!h.restaurant_id || !h.BookingDay) continue;
     const dateObj = new Date(`${h.BookingDay}T00:00:00`);
     if (Number.isNaN(dateObj.getTime()) || dateObj < today) continue;
-    if (wantedCities) {
-      const rowCity = h._restaurant_turbo?._cities_01?.CityName?.trim().toLowerCase();
-      if (!rowCity || !wantedCities.includes(rowCity)) continue;
-    }
+
 
     const key = `${h.restaurant_id}-${h.BookingDay}`;
     let g = groups.get(key);
