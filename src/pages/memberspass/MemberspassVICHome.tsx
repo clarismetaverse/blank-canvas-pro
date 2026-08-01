@@ -5,8 +5,9 @@ import CreatorCard from "@/components/memberspass/CreatorCard";
 import CreatorSearchSelect from "@/components/memberspass/CreatorSearchSelect";
 import CityHangoutCard from "@/components/memberspass/CityHangoutCard";
 import type { CreatorLite } from "@/services/creatorSearch";
-import { fetchNewInTown } from "@/services/newInTown";
+import { fetchVicMembers } from "@/services/vicMembers";
 import { fetchCityHangouts, type HangoutGroup } from "@/services/cityHangouts";
+
 
 const HANGOUT_CITIES = ["Bali", "Dubai", "Milan"];
 
@@ -57,8 +58,9 @@ export default function MemberspassVICHome() {
   const [query, setQuery] = useState("");
   const [lastResults, setLastResults] = useState<CreatorLite[]>([]);
   const [selectedCreator, setSelectedCreator] = useState<CreatorLite | null>(null);
-  const [newInTown, setNewInTown] = useState<CreatorLite[]>([]);
-  const [newInTownLoading, setNewInTownLoading] = useState(true);
+  const [approvedMembers, setApprovedMembers] = useState<CreatorLite[]>([]);
+  const [pendingMembers, setPendingMembers] = useState<CreatorLite[]>([]);
+  const [membersLoading, setMembersLoading] = useState(true);
   const [hangouts, setHangouts] = useState<HangoutGroup[]>([]);
   const [hangoutsLoading, setHangoutsLoading] = useState(true);
   const [hangoutCity, setHangoutCity] = useState(() => {
@@ -70,14 +72,15 @@ export default function MemberspassVICHome() {
   useEffect(() => {
     let active = true;
 
-    const loadNewInTown = async () => {
-      setNewInTownLoading(true);
+    const loadMembers = async () => {
+      setMembersLoading(true);
       try {
-        const items = await fetchNewInTown();
+        const { approved, pending } = await fetchVicMembers();
         if (!active) return;
-        setNewInTown(items);
+        setApprovedMembers(approved);
+        setPendingMembers(pending);
       } finally {
-        if (active) setNewInTownLoading(false);
+        if (active) setMembersLoading(false);
       }
     };
 
@@ -94,7 +97,7 @@ export default function MemberspassVICHome() {
       }
     };
 
-    loadNewInTown();
+    loadMembers();
     loadHangouts();
 
     return () => {
@@ -104,22 +107,15 @@ export default function MemberspassVICHome() {
 
   const displayCreators = useMemo(() => {
     if (lastResults.length) return lastResults.slice(0, 10);
-    if (newInTown.length) return newInTown.slice(0, 10);
-    return placeholderCreators;
-  }, [lastResults, newInTown]);
+    return [];
+  }, [lastResults]);
 
-  const showNewInTownSkeletons = newInTownLoading && !lastResults.length && !newInTown.length;
-
-  const premiumCreators = useMemo(() => placeholderCreators.slice(0, 3), []);
-  const candidateCreators = useMemo(() => displayCreators.slice(0, 3), [displayCreators]);
-  const membersCreators = useMemo(() => displayCreators.slice(0, 6), [displayCreators]);
-  const suggestedCreators = useMemo(() => [...placeholderCreators, ...displayCreators].slice(0, 6), [displayCreators]);
+  const membersCreators = useMemo(() => approvedMembers.slice(0, 12), [approvedMembers]);
+  const pendingCreators = useMemo(() => pendingMembers.slice(0, 12), [pendingMembers]);
   const isSearchActive = isSearchFocused || query.trim().length > 0;
 
   const membersLargeIndexes = new Set([0, 3]);
-  const suggestedLargeIndexes = new Set([1]);
-  const memberBadges = ["LOCAL", "NEW", "FEATURED"];
-  const suggestedBadges = ["FEATURED", "NEW"];
+
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-[#0B0B0F]">
@@ -202,22 +198,58 @@ export default function MemberspassVICHome() {
                   See all
                 </button>
               </div>
-              <div className="flex gap-[14px] overflow-x-auto pb-3 snap-x snap-proximity">
-                {membersCreators.map((creator, index) => (
-                  <div
-                    key={`members-${creator.id}-${index}`}
-                    className={`${membersLargeIndexes.has(index) ? "w-[260px]" : "w-[220px]"} shrink-0 snap-start`}
-                  >
-                    <CreatorCard
-                      creator={creator}
-                      variant="vic"
-                      size="large"
-                      badge={index < memberBadges.length ? memberBadges[index] : undefined}
-                    />
-                  </div>
-                ))}
-              </div>
+              {membersLoading ? (
+                <div className="flex gap-[14px] overflow-x-auto pb-3">
+                  {[0, 1, 2].map((i) => (
+                    <div key={`member-skel-${i}`} className="h-[330px] w-[220px] shrink-0 animate-pulse rounded-[20px] bg-neutral-100" />
+                  ))}
+                </div>
+              ) : membersCreators.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-neutral-200 bg-white px-4 py-6 text-center text-xs text-neutral-500">
+                  No approved members yet.
+                </div>
+              ) : (
+                <div className="flex gap-[14px] overflow-x-auto pb-3 snap-x snap-proximity">
+                  {membersCreators.map((creator, index) => (
+                    <div
+                      key={`members-${creator.id}-${index}`}
+                      className={`${membersLargeIndexes.has(index) ? "w-[260px]" : "w-[220px]"} shrink-0 snap-start`}
+                    >
+                      <CreatorCard creator={creator} variant="vic" size="large" />
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
+
+            <section className="space-y-4 pt-2">
+              <div className="flex items-center justify-between px-1">
+                <h2 className="text-base font-semibold text-neutral-900">Pending members</h2>
+                <span className="text-xs text-neutral-400">
+                  {membersLoading ? "Loading…" : `${pendingCreators.length} pending`}
+                </span>
+              </div>
+              {membersLoading ? (
+                <div className="flex gap-[14px] overflow-x-auto pb-3">
+                  {[0, 1].map((i) => (
+                    <div key={`pending-skel-${i}`} className="h-[330px] w-[220px] shrink-0 animate-pulse rounded-[20px] bg-neutral-100" />
+                  ))}
+                </div>
+              ) : pendingCreators.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-neutral-200 bg-white px-4 py-6 text-center text-xs text-neutral-500">
+                  No pending members right now.
+                </div>
+              ) : (
+                <div className="flex gap-[14px] overflow-x-auto pb-3 snap-x snap-proximity">
+                  {pendingCreators.map((creator, index) => (
+                    <div key={`pending-${creator.id}-${index}`} className="w-[220px] shrink-0 snap-start">
+                      <CreatorCard creator={creator} variant="vic" size="large" badge="PENDING" />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
 
             <section className="space-y-4 pt-2">
               <div className="flex items-center justify-between px-1">
