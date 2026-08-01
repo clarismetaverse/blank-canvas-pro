@@ -35,11 +35,23 @@ export default function MemberspassVICHome() {
   const [membersLoading, setMembersLoading] = useState(true);
   const [hangouts, setHangouts] = useState<HangoutGroup[]>([]);
   const [hangoutsLoading, setHangoutsLoading] = useState(true);
+  const [hangoutsError, setHangoutsError] = useState(false);
   const [hangoutCity, setHangoutCity] = useState(() => {
     if (typeof window === "undefined") return "Bali";
     return localStorage.getItem("owner_city") || "Bali";
   });
+  const [filters, setFilters] = useState<HangoutFilterState>({ ...EMPTY_HANGOUT_FILTERS });
+  const [debouncedKeyword, setDebouncedKeyword] = useState("");
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+
+  const filtersActive = hangoutFiltersActive(filters);
+  const tagIds = hangoutTagIds(filters);
+  const tagKey = tagIds.join(",");
+
+  useEffect(() => {
+    const handle = window.setTimeout(() => setDebouncedKeyword(filters.keyword.trim()), 350);
+    return () => window.clearTimeout(handle);
+  }, [filters.keyword]);
 
   useEffect(() => {
     let active = true;
@@ -56,26 +68,44 @@ export default function MemberspassVICHome() {
       }
     };
 
+    loadMembers();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let active = true;
+
     const loadHangouts = async () => {
       setHangoutsLoading(true);
+      setHangoutsError(false);
       try {
-        const items = await fetchCityHangouts(hangoutCity);
+        const items = await fetchCityHangouts(hangoutCity, {
+          tagIds: tagKey ? tagKey.split(",").map(Number) : [],
+          keyword: debouncedKeyword,
+        });
         if (!active) return;
         setHangouts(items);
       } catch (err) {
         console.error("Failed to load city hangouts", err);
+        if (active) {
+          setHangouts([]);
+          setHangoutsError(true);
+        }
       } finally {
         if (active) setHangoutsLoading(false);
       }
     };
 
-    loadMembers();
     loadHangouts();
 
     return () => {
       active = false;
     };
-  }, [hangoutCity]);
+  }, [hangoutCity, tagKey, debouncedKeyword]);
+
 
   const displayCreators = useMemo(() => {
     if (lastResults.length) return lastResults.slice(0, 10);
