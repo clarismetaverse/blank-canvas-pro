@@ -18,8 +18,9 @@ export default function CityHangoutCard({ group }: Props) {
   const remaining = Math.max(0, group.models.length - visibleModels.length);
 
   return (
-    <div className="relative w-[240px] shrink-0 snap-start overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
-      <div className="relative h-[150px] w-full bg-neutral-100">
+    <div className="relative w-[290px] shrink-0 snap-start overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
+      <div className="relative h-[185px] w-full bg-neutral-100">
+
         {group.restaurantCover ? (
           <img
             src={group.restaurantCover}
