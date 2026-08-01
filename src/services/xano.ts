@@ -76,19 +76,24 @@ if (!API) {
   throw new Error("Missing Xano API URL");
 }
 
-export async function request<T>(path: string, options: RequestInit = {}) {
+export interface XanoRequestOptions extends RequestInit {
+  skipAuth?: boolean;
+}
+
+export async function request<T>(path: string, options: XanoRequestOptions = {}) {
+  const { skipAuth = false, ...fetchOptions } = options;
   // Build headers dynamically so we attach the logged-in auth token when available
   const headers = new Headers({
     Accept: "application/json",
     "Content-Type": "application/json",
   });
-  if (options.headers) {
-    const opt = new Headers(options.headers as HeadersInit);
+  if (fetchOptions.headers) {
+    const opt = new Headers(fetchOptions.headers as HeadersInit);
     opt.forEach((value, key) => headers.set(key, value));
   }
 
   // If caller didn't provide Authorization, try localStorage token first, then env token
-  if (!headers.has("Authorization")) {
+  if (!skipAuth && !headers.has("Authorization")) {
     let token = getAuthToken();
     if (!token) {
       token = (import.meta as any).env?.VITE_XANO_TOKEN || "";
@@ -100,7 +105,7 @@ export async function request<T>(path: string, options: RequestInit = {}) {
 
   const url = /^https?:\/\//i.test(path) ? path : `${API}${path}`;
   const res = await fetch(url, {
-    ...options,
+    ...fetchOptions,
     headers,
   });
 
