@@ -232,6 +232,22 @@ export default function CreatorCard({
         )}
       </button>
 
+      <button
+        type="button"
+        onClick={(event) => {
+          event.stopPropagation();
+          setOpen(true);
+        }}
+        className={`absolute right-3 z-20 inline-flex items-center gap-1 rounded-full bg-white/95 px-3 py-1.5 text-[11px] font-semibold tracking-[0.02em] text-neutral-900 shadow-[0_4px_14px_rgba(0,0,0,0.18)] backdrop-blur transition-transform duration-200 hover:scale-[1.03] active:scale-95 ${
+          isVicSearch && bioLine ? "bottom-[68px]" : "bottom-3"
+        }`}
+      >
+        <User className="h-3.5 w-3.5" />
+        View profile
+      </button>
+
+
+
 
       <CreatorProfileSheet
         creator={creator}
