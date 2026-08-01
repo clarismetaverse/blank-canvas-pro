@@ -196,7 +196,7 @@ export default function MemberspassVICHome() {
               {membersLoading ? (
                 <div className="flex gap-[14px] overflow-x-auto pb-3">
                   {[0, 1].map((i) => (
-                    <div key={`pending-skel-${i}`} className="h-[330px] w-[220px] shrink-0 animate-pulse rounded-[20px] bg-neutral-100" />
+                    <div key={`pending-skel-${i}`} className="h-[280px] w-[180px] shrink-0 animate-pulse rounded-[20px] bg-neutral-100" />
                   ))}
                 </div>
               ) : pendingCreators.length === 0 ? (
@@ -206,12 +206,13 @@ export default function MemberspassVICHome() {
               ) : (
                 <div className="flex gap-[14px] overflow-x-auto pb-3 snap-x snap-proximity">
                   {pendingCreators.map((creator, index) => (
-                    <div key={`pending-${creator.id}-${index}`} className="w-[220px] shrink-0 snap-start">
+                    <div key={`pending-${creator.id}-${index}`} className="w-[180px] shrink-0 snap-start">
                       <CreatorCard creator={creator} variant="vic" size="large" badge="PENDING" />
                     </div>
                   ))}
                 </div>
               )}
+
             </section>
 
 
