@@ -2,7 +2,9 @@ export interface HangoutModel {
   id: number;
   name?: string;
   avatar?: string;
+  status?: string;
 }
+
 
 export interface HangoutGroup {
   key: string;
