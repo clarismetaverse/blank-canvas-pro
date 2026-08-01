@@ -103,10 +103,17 @@ export default function CreatorCard({
           )}
 
           {badge && !locked && (
-            <span className="absolute right-3 top-3 inline-flex items-center rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-neutral-800">
+            <span
+              className={`absolute right-3 top-3 inline-flex items-center rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.08em] backdrop-blur ${
+                badge.trim().toUpperCase() === "PENDING"
+                  ? "bg-amber-400/60 text-amber-950"
+                  : "bg-white/90 text-neutral-800"
+              }`}
+            >
               {badge}
             </span>
           )}
+
 
           {mode === "select" && isInvited && (
             <span className="absolute left-3 top-3 inline-flex items-center rounded-full bg-emerald-500/90 px-2.5 py-1 text-[10px] font-semibold text-white shadow">
