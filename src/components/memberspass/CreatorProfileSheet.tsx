@@ -92,8 +92,9 @@ export default function CreatorProfileSheet({
   const heroImage = creator?.Profile_pic?.url;
   const displayRole = profileType === "candidate" ? "Candidate" : "Creator";
   const bioText = creator?.bio?.trim() || "";
-  const interests = (creator?.user_interest_topics_turbo_id ?? [])
-    .map((topic) => (typeof topic === "object" && topic ? topic.interest_topics : undefined))
+  const rawInterests = creator?.user_interest_topics_turbo_id;
+  const interests = (Array.isArray(rawInterests) ? rawInterests : rawInterests ? [rawInterests] : [])
+    .map((topic: any) => (typeof topic === "object" && topic ? topic.interest_topics : undefined))
     .filter((label): label is string => Boolean(label && label.trim()));
   const galleryImages = Array.from({ length: 6 }, (_, index) => ({
     id: `gallery-${index}`,
