@@ -36,9 +36,11 @@ interface RawHangout {
     id?: number;
     name?: string;
     NickName?: string;
+    UserStatus?: string | null;
     Profile_pic?: { url?: string } | null;
   };
 }
+
 
 const BASE = "https://xbut-eryu-hhsg.f2.xano.io/api:bwh6Xc5O";
 
