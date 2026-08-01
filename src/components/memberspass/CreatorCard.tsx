@@ -263,8 +263,11 @@ const CREATOR_PLACEHOLDER_IMAGE =
 function getCreatorInterestTags(creator: CreatorLite, interests?: string[]) {
   if (interests && interests.length > 0) return interests;
 
-  return (creator.user_interest_topics_turbo_id || [])
-    .map((topic) => {
+  const raw = creator.user_interest_topics_turbo_id;
+  const topics = Array.isArray(raw) ? raw : raw ? [raw] : [];
+
+  return topics
+    .map((topic: any) => {
       if (typeof topic === "object" && topic !== null && topic.interest_topics) {
         return topic.interest_topics;
       }
