@@ -105,7 +105,7 @@ export async function request<T>(path: string, options: XanoRequestOptions = {})
 
   const url = /^https?:\/\//i.test(path) ? path : `${API}${path}`;
   const res = await fetch(url, {
-    ...options,
+    ...fetchOptions,
     headers,
   });
 
