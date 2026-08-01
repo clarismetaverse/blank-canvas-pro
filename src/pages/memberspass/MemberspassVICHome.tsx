@@ -58,8 +58,9 @@ export default function MemberspassVICHome() {
   const [query, setQuery] = useState("");
   const [lastResults, setLastResults] = useState<CreatorLite[]>([]);
   const [selectedCreator, setSelectedCreator] = useState<CreatorLite | null>(null);
-  const [newInTown, setNewInTown] = useState<CreatorLite[]>([]);
-  const [newInTownLoading, setNewInTownLoading] = useState(true);
+  const [approvedMembers, setApprovedMembers] = useState<CreatorLite[]>([]);
+  const [pendingMembers, setPendingMembers] = useState<CreatorLite[]>([]);
+  const [membersLoading, setMembersLoading] = useState(true);
   const [hangouts, setHangouts] = useState<HangoutGroup[]>([]);
   const [hangoutsLoading, setHangoutsLoading] = useState(true);
   const [hangoutCity, setHangoutCity] = useState(() => {
@@ -71,14 +72,15 @@ export default function MemberspassVICHome() {
   useEffect(() => {
     let active = true;
 
-    const loadNewInTown = async () => {
-      setNewInTownLoading(true);
+    const loadMembers = async () => {
+      setMembersLoading(true);
       try {
-        const items = await fetchNewInTown();
+        const { approved, pending } = await fetchVicMembers();
         if (!active) return;
-        setNewInTown(items);
+        setApprovedMembers(approved);
+        setPendingMembers(pending);
       } finally {
-        if (active) setNewInTownLoading(false);
+        if (active) setMembersLoading(false);
       }
     };
 
@@ -95,7 +97,7 @@ export default function MemberspassVICHome() {
       }
     };
 
-    loadNewInTown();
+    loadMembers();
     loadHangouts();
 
     return () => {
@@ -105,22 +107,15 @@ export default function MemberspassVICHome() {
 
   const displayCreators = useMemo(() => {
     if (lastResults.length) return lastResults.slice(0, 10);
-    if (newInTown.length) return newInTown.slice(0, 10);
-    return placeholderCreators;
-  }, [lastResults, newInTown]);
+    return [];
+  }, [lastResults]);
 
-  const showNewInTownSkeletons = newInTownLoading && !lastResults.length && !newInTown.length;
-
-  const premiumCreators = useMemo(() => placeholderCreators.slice(0, 3), []);
-  const candidateCreators = useMemo(() => displayCreators.slice(0, 3), [displayCreators]);
-  const membersCreators = useMemo(() => displayCreators.slice(0, 6), [displayCreators]);
-  const suggestedCreators = useMemo(() => [...placeholderCreators, ...displayCreators].slice(0, 6), [displayCreators]);
+  const membersCreators = useMemo(() => approvedMembers.slice(0, 12), [approvedMembers]);
+  const pendingCreators = useMemo(() => pendingMembers.slice(0, 12), [pendingMembers]);
   const isSearchActive = isSearchFocused || query.trim().length > 0;
 
   const membersLargeIndexes = new Set([0, 3]);
-  const suggestedLargeIndexes = new Set([1]);
-  const memberBadges = ["LOCAL", "NEW", "FEATURED"];
-  const suggestedBadges = ["FEATURED", "NEW"];
+
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-[#0B0B0F]">
