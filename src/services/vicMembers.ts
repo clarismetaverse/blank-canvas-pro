@@ -15,6 +15,8 @@ type UserTurboRecord = {
   FakeCity?: string;
   IG_account?: string;
   Tiktok_account?: string;
+  Ig_handle?: string;
+  user_interest_topics_turbo_id?: Array<number | { id?: number; interest_topics?: string }>;
   Profile_pic?: { url?: string } | null;
 };
 
@@ -48,8 +50,9 @@ function mapMember(user: UserTurboRecord): CreatorLite {
     Agency: user.Agency,
     Profession: user.Profession,
     City: user.City || user.FakeCity,
-    IG_account: user.IG_account,
+    IG_account: (user.IG_account && user.IG_account.trim()) || user.Ig_handle,
     Tiktok_account: user.Tiktok_account,
+    user_interest_topics_turbo_id: user.user_interest_topics_turbo_id,
     Profile_pic: user.Profile_pic ?? null,
   };
 }

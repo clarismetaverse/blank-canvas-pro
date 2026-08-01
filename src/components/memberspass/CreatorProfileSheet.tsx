@@ -91,10 +91,10 @@ export default function CreatorProfileSheet({
   const handleToggleFavorite = onToggleFavorite ?? (() => {});
   const heroImage = creator?.Profile_pic?.url;
   const displayRole = profileType === "candidate" ? "Candidate" : "Creator";
-  const bioText =
-    creator?.bio ||
-    "A premium profile curated for cinematic storytelling, exclusive experiences, and refined collaborations.";
-  const interests = ["Travel", "Fine dining", "Art", "Wellness", "Music", "Fashion"];
+  const bioText = creator?.bio?.trim() || "";
+  const interests = (creator?.user_interest_topics_turbo_id ?? [])
+    .map((topic) => (typeof topic === "object" && topic ? topic.interest_topics : undefined))
+    .filter((label): label is string => Boolean(label && label.trim()));
   const galleryImages = Array.from({ length: 6 }, (_, index) => ({
     id: `gallery-${index}`,
     src: heroImage,
@@ -226,8 +226,37 @@ export default function CreatorProfileSheet({
                   <div className="px-5 pb-4 pt-6">
                     <div>
                       <h3 className="text-sm font-semibold text-neutral-900">Bio</h3>
-                      <p className="mt-2 text-sm leading-relaxed text-neutral-600">{bioText}</p>
+                      {bioText ? (
+                        <p className="mt-2 text-sm leading-relaxed text-neutral-600">{bioText}</p>
+                      ) : (
+                        <p className="mt-2 text-sm text-neutral-400">No bio available yet.</p>
+                      )}
                     </div>
+
+                    {(instagramUrl || tiktokUrl) && (
+                      <div className="mt-6 flex flex-wrap gap-2">
+                        {instagramUrl && (
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 text-xs font-semibold text-neutral-700 shadow-sm"
+                            onClick={() => window.open(instagramUrl, "_blank", "noopener,noreferrer")}
+                          >
+                            <Instagram className="h-4 w-4" />
+                            Instagram
+                          </button>
+                        )}
+                        {tiktokUrl && (
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-2 text-xs font-semibold text-neutral-700 shadow-sm"
+                            onClick={() => window.open(tiktokUrl, "_blank", "noopener,noreferrer")}
+                          >
+                            <Music2 className="h-4 w-4" />
+                            TikTok
+                          </button>
+                        )}
+                      </div>
+                    )}
 
                     {locked && (
                       <div className="mt-6 rounded-2xl border border-neutral-200 bg-white px-4 py-3 shadow-sm">
@@ -247,19 +276,22 @@ export default function CreatorProfileSheet({
                       </div>
                     )}
 
-                    <div className="mt-6">
-                      <h3 className="text-sm font-semibold text-neutral-900">Interests</h3>
-                      <div className="mt-3 flex flex-wrap gap-2">
-                        {interests.map((interest) => (
-                          <span
-                            key={interest}
-                            className="rounded-full border border-neutral-200 bg-white px-3 py-1 text-xs font-medium text-neutral-700"
-                          >
-                            {interest}
-                          </span>
-                        ))}
+                    {interests.length > 0 && (
+                      <div className="mt-6">
+                        <h3 className="text-sm font-semibold text-neutral-900">Interests</h3>
+                        <div className="mt-3 flex flex-wrap gap-2">
+                          {interests.map((interest) => (
+                            <span
+                              key={interest}
+                              className="rounded-full border border-neutral-200 bg-white px-3 py-1 text-xs font-medium text-neutral-700"
+                            >
+                              {interest}
+                            </span>
+                          ))}
+                        </div>
                       </div>
-                    </div>
+                    )}
+
 
                     {/* <div className="mt-6">
                       <h3 className="text-sm font-semibold text-neutral-900">Gallery</h3>
