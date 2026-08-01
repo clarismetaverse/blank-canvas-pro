@@ -198,22 +198,58 @@ export default function MemberspassVICHome() {
                   See all
                 </button>
               </div>
-              <div className="flex gap-[14px] overflow-x-auto pb-3 snap-x snap-proximity">
-                {membersCreators.map((creator, index) => (
-                  <div
-                    key={`members-${creator.id}-${index}`}
-                    className={`${membersLargeIndexes.has(index) ? "w-[260px]" : "w-[220px]"} shrink-0 snap-start`}
-                  >
-                    <CreatorCard
-                      creator={creator}
-                      variant="vic"
-                      size="large"
-                      badge={index < memberBadges.length ? memberBadges[index] : undefined}
-                    />
-                  </div>
-                ))}
-              </div>
+              {membersLoading ? (
+                <div className="flex gap-[14px] overflow-x-auto pb-3">
+                  {[0, 1, 2].map((i) => (
+                    <div key={`member-skel-${i}`} className="h-[330px] w-[220px] shrink-0 animate-pulse rounded-[20px] bg-neutral-100" />
+                  ))}
+                </div>
+              ) : membersCreators.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-neutral-200 bg-white px-4 py-6 text-center text-xs text-neutral-500">
+                  No approved members yet.
+                </div>
+              ) : (
+                <div className="flex gap-[14px] overflow-x-auto pb-3 snap-x snap-proximity">
+                  {membersCreators.map((creator, index) => (
+                    <div
+                      key={`members-${creator.id}-${index}`}
+                      className={`${membersLargeIndexes.has(index) ? "w-[260px]" : "w-[220px]"} shrink-0 snap-start`}
+                    >
+                      <CreatorCard creator={creator} variant="vic" size="large" />
+                    </div>
+                  ))}
+                </div>
+              )}
             </section>
+
+            <section className="space-y-4 pt-2">
+              <div className="flex items-center justify-between px-1">
+                <h2 className="text-base font-semibold text-neutral-900">Pending members</h2>
+                <span className="text-xs text-neutral-400">
+                  {membersLoading ? "Loading…" : `${pendingCreators.length} pending`}
+                </span>
+              </div>
+              {membersLoading ? (
+                <div className="flex gap-[14px] overflow-x-auto pb-3">
+                  {[0, 1].map((i) => (
+                    <div key={`pending-skel-${i}`} className="h-[330px] w-[220px] shrink-0 animate-pulse rounded-[20px] bg-neutral-100" />
+                  ))}
+                </div>
+              ) : pendingCreators.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-neutral-200 bg-white px-4 py-6 text-center text-xs text-neutral-500">
+                  No pending members right now.
+                </div>
+              ) : (
+                <div className="flex gap-[14px] overflow-x-auto pb-3 snap-x snap-proximity">
+                  {pendingCreators.map((creator, index) => (
+                    <div key={`pending-${creator.id}-${index}`} className="w-[220px] shrink-0 snap-start">
+                      <CreatorCard creator={creator} variant="vic" size="large" badge="PENDING" />
+                    </div>
+                  ))}
+                </div>
+              )}
+            </section>
+
 
             <section className="space-y-4 pt-2">
               <div className="flex items-center justify-between px-1">
