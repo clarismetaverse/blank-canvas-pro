@@ -49,6 +49,15 @@ export default function App() {
           }
         />
         <Route
+          path="/hangouts/all"
+          element={
+            <ProtectedLayout>
+              <HangoutsSeeAll />
+            </ProtectedLayout>
+          }
+        />
+
+        <Route
           path="/activities"
           element={
             <ProtectedLayout>
