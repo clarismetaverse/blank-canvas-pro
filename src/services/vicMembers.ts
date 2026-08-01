@@ -1,0 +1,80 @@
+import type { CreatorLite } from "@/services/creatorSearch";
+import { getAuthToken, request } from "@/services/xano";
+
+type UserTurboRecord = {
+  id?: number | string;
+  name?: string;
+  NickName?: string;
+  bio?: string;
+  tagline?: string;
+  description?: string;
+  nationality?: string;
+  Agency?: string;
+  Profession?: string;
+  City?: string;
+  FakeCity?: string;
+  IG_account?: string;
+  Tiktok_account?: string;
+  Profile_pic?: { url?: string } | null;
+};
+
+type PagedUsers = {
+  items?: UserTurboRecord[];
+};
+
+type VicMembersResponse = {
+  approved?: PagedUsers | UserTurboRecord[];
+  pending?: PagedUsers | UserTurboRecord[];
+};
+
+export type VicMembers = {
+  approved: CreatorLite[];
+  pending: CreatorLite[];
+};
+
+function toItems(group: PagedUsers | UserTurboRecord[] | undefined): UserTurboRecord[] {
+  if (Array.isArray(group)) return group;
+  return group?.items ?? [];
+}
+
+function mapMember(user: UserTurboRecord): CreatorLite {
+  return {
+    id: Number(user.id),
+    name: user.name || user.NickName,
+    bio: user.bio,
+    tagline: user.tagline,
+    description: user.description,
+    nationality: user.nationality,
+    Agency: user.Agency,
+    Profession: user.Profession,
+    City: user.City || user.FakeCity,
+    IG_account: user.IG_account,
+    Tiktok_account: user.Tiktok_account,
+    Profile_pic: user.Profile_pic ?? null,
+  };
+}
+
+function mapGroup(group: PagedUsers | UserTurboRecord[] | undefined): CreatorLite[] {
+  return toItems(group)
+    .map(mapMember)
+    .filter((member) => Number.isFinite(member.id) && member.id > 0);
+}
+
+export async function fetchVicMembers(): Promise<VicMembers> {
+  try {
+    // This API group expects the raw token (no "Bearer" prefix)
+    const token = getAuthToken();
+    const data = await request<VicMembersResponse>("/vic/members", {
+      method: "GET",
+      headers: token ? { Authorization: token } : undefined,
+    });
+
+    return {
+      approved: mapGroup(data.approved),
+      pending: mapGroup(data.pending),
+    };
+  } catch (error) {
+    console.error("Failed to fetch VIC members", error);
+    return { approved: [], pending: [] };
+  }
+}
