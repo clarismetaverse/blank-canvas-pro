@@ -30,6 +30,9 @@ interface RawHangout {
   _restaurant_turbo?: {
     Name?: string;
     Cover?: { url?: string } | null;
+    Adress?: string | null;
+    category_venues_turbo_id?: number | number[] | null;
+    category_venuesNEW?: unknown;
     _cities_01?: { id?: number; CityName?: string } | null;
   };
   _user_turbo?: {
@@ -78,11 +81,28 @@ function localToday(): string {
   return `${d.getFullYear()}-${m}-${day}`;
 }
 
-export async function fetchCityHangouts(city?: string): Promise<HangoutGroup[]> {
+export interface CityHangoutFilters {
+  tagIds?: number[];
+  keyword?: string;
+}
+
+export async function fetchCityHangouts(
+  city?: string,
+  filters?: CityHangoutFilters,
+): Promise<HangoutGroup[]> {
   const url = new URL(`${BASE}/modelhangouts`);
   const cityId = city ? CITY_IDS[city.trim().toLowerCase()] : undefined;
   if (cityId) url.searchParams.set("city_id", String(cityId));
   url.searchParams.set("from_date", localToday());
+
+  const tagIds = (filters?.tagIds ?? [])
+    .map((id) => Number(id))
+    .filter((id) => Number.isFinite(id) && id > 0);
+  for (const id of tagIds) url.searchParams.append("tag_ids[]", String(id));
+
+  const keyword = filters?.keyword?.trim();
+  if (keyword) url.searchParams.set("keyword", keyword);
+
   const res = await fetch(url.toString());
   if (!res.ok) throw new Error(`hangouts ${res.status}`);
   const payload = await res.json();
