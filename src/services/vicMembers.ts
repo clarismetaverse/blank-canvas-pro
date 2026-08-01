@@ -65,6 +65,7 @@ export async function fetchVicMembers(): Promise<VicMembers> {
     // Public endpoint — no Authorization header needed
     const data = await request<VicMembersResponse>("/members/vic-home", {
       method: "GET",
+      skipAuth: true,
     });
 
     return {
