@@ -1,6 +1,8 @@
 import { Navigate, Route, Routes } from "react-router-dom";
 import MemberspassVICHome from "@/pages/memberspass/MemberspassVICHome";
 import MembersSeeAll from "@/pages/memberspass/MembersSeeAll";
+import HangoutsSeeAll from "@/pages/memberspass/HangoutsSeeAll";
+
 import ActivitiesHome from "@/pages/ActivitiesHome";
 import ActivityDetail from "@/pages/ActivityDetail";
 import ActivitiesInvite from "@/pages/ActivitiesInvite";
