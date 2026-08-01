@@ -4,12 +4,20 @@ import { useNavigate } from "react-router-dom";
 import CreatorCard from "@/components/memberspass/CreatorCard";
 import CreatorSearchSelect from "@/components/memberspass/CreatorSearchSelect";
 import CityHangoutCard from "@/components/memberspass/CityHangoutCard";
+import HangoutFilters, {
+  EMPTY_HANGOUT_FILTERS,
+  hangoutFiltersActive,
+  hangoutTagIds,
+  type HangoutFilterState,
+} from "@/components/memberspass/HangoutFilters";
 import type { CreatorLite } from "@/services/creatorSearch";
 import { fetchVicMembers } from "@/services/vicMembers";
 import { fetchCityHangouts, type HangoutGroup } from "@/services/cityHangouts";
 
 
 const HANGOUT_CITIES = ["Bali", "Dubai", "Milan"];
+const isBali = (city: string) => city.trim().toLowerCase() === "bali";
+
 
 export default function MemberspassVICHome() {
   const navigate = useNavigate();
