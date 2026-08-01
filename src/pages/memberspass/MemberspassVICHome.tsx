@@ -11,46 +11,10 @@ import { fetchCityHangouts, type HangoutGroup } from "@/services/cityHangouts";
 
 const HANGOUT_CITIES = ["Bali", "Dubai", "Milan"];
 
-const placeholderCreators: CreatorLite[] = [
-  {
-    id: 1,
-    name: "Aria Vela",
-    IG_account: "aria.ugc",
-    Tiktok_account: "ariaugc",
-    Profile_pic: {
-      url: "https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?auto=format&fit=crop&w=600&q=80",
-    },
-  },
-  {
-    id: 2,
-    name: "Luca Mendez",
-    IG_account: "luca.m",
-    Profile_pic: {
-      url: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=600&q=80",
-    },
-  },
-  {
-    id: 3,
-    name: "Kei Nakamura",
-    Tiktok_account: "keinakama",
-    Profile_pic: {
-      url: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80",
-    },
-  },
-  {
-    id: 4,
-    name: "Nina Rossi",
-    IG_account: "nina.ugc",
-    Profile_pic: {
-      url: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=600&q=80",
-    },
-  },
-];
-
 export default function MemberspassVICHome() {
   const navigate = useNavigate();
-  const [points] = useState(2450);
   const [cityName] = useState(() => {
+
     if (typeof window === "undefined") return "your city";
     return localStorage.getItem("owner_city") || "your city";
   });
