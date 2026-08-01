@@ -123,8 +123,10 @@ export async function fetchCityHangouts(city?: string): Promise<HangoutGroup[]> 
         id: userId,
         name: h._user_turbo?.NickName || h._user_turbo?.name,
         avatar: h._user_turbo?.Profile_pic?.url,
+        status: h._user_turbo?.UserStatus || undefined,
       });
     }
+
   }
 
   return Array.from(groups.values())
