@@ -1,5 +1,5 @@
 import type { CreatorLite } from "@/services/creatorSearch";
-import { getAuthToken, request } from "@/services/xano";
+import { request } from "@/services/xano";
 
 type UserTurboRecord = {
   id?: number | string;
@@ -62,11 +62,9 @@ function mapGroup(group: PagedUsers | UserTurboRecord[] | undefined): CreatorLit
 
 export async function fetchVicMembers(): Promise<VicMembers> {
   try {
-    // This API group expects the raw token (no "Bearer" prefix)
-    const token = getAuthToken();
-    const data = await request<VicMembersResponse>("/vic/members", {
+    // Public endpoint — no Authorization header needed
+    const data = await request<VicMembersResponse>("/members/vic-home", {
       method: "GET",
-      headers: token ? { Authorization: token } : undefined,
     });
 
     return {
