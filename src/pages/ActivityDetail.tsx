@@ -412,7 +412,7 @@ export default function ActivityDetail() {
   const [inviteModalInitialTab, setInviteModalInitialTab] = useState<InviteModalTabKey>("discover");
   const [profileSheetCreator, setProfileSheetCreator] = useState<CreatorLite | null>(null);
   const [profileSheetStatus, setProfileSheetStatus] = useState<"accepted" | "invited" | "pending" | "rejected" | null>(null);
-  const [selectedInviteId, setSelectedInviteId] = useState<string | null>(null);
+  const [selectedInvitation, setSelectedInvitation] = useState<ActivityInvitedItem | null>(null);
   const [invitedRaw, setInvitedRaw] = useState<ActivityInvitedItem[]>([]);
   const [decisionPending, setDecisionPending] = useState(false);
   const [invitedReloadKey, setInvitedReloadKey] = useState(0);
@@ -536,8 +536,11 @@ export default function ActivityDetail() {
   }, [activityId, navigate, invitedReloadKey]);
 
   const handleInvitationDecision = async (decision: "approve" | "reject") => {
-    if (!activityId || !selectedInviteId) return;
-    const invitation = invitedRaw.find((item) => String(item.id) === selectedInviteId);
+    if (!activityId) return;
+    // Always use the exact raw invitation object (keeps id, source and booking_id intact).
+    const invitation =
+      selectedInvitation &&
+      (invitedRaw.find((item) => item.id === selectedInvitation.id) ?? selectedInvitation);
     if (!invitation) {
       toast.error("Could not find this invitation");
       return;
@@ -549,7 +552,7 @@ export default function ActivityDetail() {
       toast.success(decision === "approve" ? "Model approved" : "Model rejected");
       setProfileSheetCreator(null);
       setProfileSheetStatus(null);
-      setSelectedInviteId(null);
+      setSelectedInvitation(null);
       setInvitedReloadKey((prev) => prev + 1);
     } catch (error) {
       console.error("[ActivityDetail] decision failed", error);
@@ -817,14 +820,25 @@ export default function ActivityDetail() {
             setInviteModelsOpen(true);
           }}
           onSelect={(invite) => {
+            // Resolve the raw invitation: primary by invitation id, fallback by user/vic identity.
+            const raw =
+              invitedRaw.find((item) => String(item.id) === String(invite.id)) ??
+              invitedRaw.find(
+                (item) =>
+                  item.type !== "organizer" &&
+                  (String(item.user_turbo_id) === String(invite.id) ||
+                    (item._user_turbo?.name && item._user_turbo.name === invite.creator.name))
+              ) ??
+              null;
+
             setProfileSheetCreator({
-              id: Number(invite.id) || 0,
+              id: Number(raw?.user_turbo_id ?? invite.id) || 0,
               name: invite.creator.name,
               IG_account: invite.creator.ig || undefined,
               Profile_pic: invite.creator.avatarUrl ? { url: invite.creator.avatarUrl } : null,
             });
             setProfileSheetStatus(invite.status as any);
-            setSelectedInviteId(invite.id);
+            setSelectedInvitation(raw);
           }}
         />
 
@@ -1132,12 +1146,12 @@ export default function ActivityDetail() {
           if (decisionPending) return;
           setProfileSheetCreator(null);
           setProfileSheetStatus(null);
-          setSelectedInviteId(null);
+          setSelectedInvitation(null);
         }}
         variant="vic"
         profileType="candidate"
         invitationStatus={profileSheetStatus}
-        onDecision={selectedInviteId ? (decision) => void handleInvitationDecision(decision) : undefined}
+        onDecision={selectedInvitation ? (decision) => void handleInvitationDecision(decision) : undefined}
         decisionPending={decisionPending}
       />
     </div>
