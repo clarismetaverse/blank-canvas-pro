@@ -536,8 +536,11 @@ export default function ActivityDetail() {
   }, [activityId, navigate, invitedReloadKey]);
 
   const handleInvitationDecision = async (decision: "approve" | "reject") => {
-    if (!activityId || !selectedInviteId) return;
-    const invitation = invitedRaw.find((item) => String(item.id) === selectedInviteId);
+    if (!activityId) return;
+    // Always use the exact raw invitation object (keeps id, source and booking_id intact).
+    const invitation =
+      selectedInvitation &&
+      (invitedRaw.find((item) => item.id === selectedInvitation.id) ?? selectedInvitation);
     if (!invitation) {
       toast.error("Could not find this invitation");
       return;
@@ -549,7 +552,7 @@ export default function ActivityDetail() {
       toast.success(decision === "approve" ? "Model approved" : "Model rejected");
       setProfileSheetCreator(null);
       setProfileSheetStatus(null);
-      setSelectedInviteId(null);
+      setSelectedInvitation(null);
       setInvitedReloadKey((prev) => prev + 1);
     } catch (error) {
       console.error("[ActivityDetail] decision failed", error);
