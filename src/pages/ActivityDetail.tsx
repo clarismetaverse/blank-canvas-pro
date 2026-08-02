@@ -15,6 +15,7 @@ import { fetchActivityInvited, submitActivityInvitationDecision, type ActivityIn
 import { toast } from "sonner";
 import { getValidInvitedUsers, putTripsInvite } from "@/services/tripsInvite";
 import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityInviteModelsModal";
+import PendingModelsSheet from "@/components/vic/PendingModelsSheet";
 import InvitesSentPopup from "@/components/vic/InvitesSentPopup";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -414,6 +415,7 @@ export default function ActivityDetail() {
   const [profileSheetStatus, setProfileSheetStatus] = useState<"accepted" | "invited" | "pending" | "rejected" | null>(null);
   const [selectedInvitation, setSelectedInvitation] = useState<ActivityInvitedItem | null>(null);
   const [invitedRaw, setInvitedRaw] = useState<ActivityInvitedItem[]>([]);
+  const [pendingModelsOpen, setPendingModelsOpen] = useState(false);
   const [decisionPending, setDecisionPending] = useState(false);
   const [invitedReloadKey, setInvitedReloadKey] = useState(0);
   const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; cityName?: string; total: number; delta: number; avatars: Array<{ id: number; name: string; url: string | null }>; hostAvatarUrl?: string | null }>({
@@ -534,6 +536,16 @@ export default function ActivityDetail() {
 
     void load();
   }, [activityId, navigate, invitedReloadKey]);
+
+  const pendingClarisInvites = useMemo(
+    () =>
+      invitedRaw.filter(
+        (item) =>
+          item.source === "claris" &&
+          (item.status === "pending request" || item.status === "invited")
+      ),
+    [invitedRaw]
+  );
 
   const handleInvitationDecision = async (decision: "approve" | "reject") => {
     if (!activityId) return;
@@ -816,8 +828,7 @@ export default function ActivityDetail() {
           accepted={groupedInvites.accepted}
           rejected={groupedInvites.rejected}
           onViewAll={() => {
-            setInviteModalInitialTab("invited");
-            setInviteModelsOpen(true);
+            setPendingModelsOpen(true);
           }}
           onSelect={(invite) => {
             // Resolve the raw invitation: primary by invitation id, fallback by user/vic identity.
@@ -1137,6 +1148,22 @@ export default function ActivityDetail() {
             console.error("[ActivityDetail] Failed to send invites", err);
           }
           setInviteModelsOpen(false);
+        }}
+      />
+      <PendingModelsSheet
+        open={pendingModelsOpen}
+        items={pendingClarisInvites}
+        onClose={() => setPendingModelsOpen(false)}
+        onSelect={(item) => {
+          setPendingModelsOpen(false);
+          setProfileSheetCreator({
+            id: Number(item.user_turbo_id) || 0,
+            name: item._user_turbo?.name || "Model",
+            IG_account: item._user_turbo?.IG_account || undefined,
+            Profile_pic: item._user_turbo?.Profile_pic?.url ? { url: item._user_turbo.Profile_pic.url } : null,
+          });
+          setProfileSheetStatus("pending");
+          setSelectedInvitation(item);
         }}
       />
       <CreatorProfileSheet
