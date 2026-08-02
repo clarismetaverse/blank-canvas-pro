@@ -323,8 +323,10 @@ export default function ActivitiesHome() {
                 <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pt-1">
                   {myActivities.map((activity, index) => {
                     const raw = myActivitiesRaw[index];
-                    const statusLabel = raw?.status ? statusLabelMap[raw.status] : "Invited";
+                    const statusLabel =
+                      raw?.statusLabel || (raw?.status ? statusLabelMap[raw.status] : "Invited");
                     const statusAccepted = raw?.status === "confirmed";
+                    const statusOnReview = raw?.status === "on_review";
                     const fetchedInvited = invitedByActivity[Number(activity.id)] || [];
                     const previewAvatars = fetchedInvited.length > 0
                       ? fetchedInvited.slice(0, 4).map((c) => ({ id: String(c.id), creator: { name: c.name, avatarUrl: c.avatarUrl, ig: "" }, status: "invited" as const }))
@@ -352,7 +354,9 @@ export default function ActivitiesHome() {
                             className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wide ${
                               statusAccepted
                                 ? "border-emerald-200 bg-emerald-50/95 text-emerald-700"
-                                : "border-neutral-200 bg-white/90 text-neutral-700"
+                                : statusOnReview
+                                  ? "border-amber-200 bg-amber-50/90 text-amber-700"
+                                  : "border-neutral-200 bg-white/90 text-neutral-700"
                             }`}
                           >
                             {statusLabel}
