@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import { Toaster } from "sonner";
 import MemberspassVICHome from "@/pages/memberspass/MemberspassVICHome";
 import MembersSeeAll from "@/pages/memberspass/MembersSeeAll";
 import HangoutsSeeAll from "@/pages/memberspass/HangoutsSeeAll";
