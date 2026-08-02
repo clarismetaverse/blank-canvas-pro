@@ -1150,6 +1150,22 @@ export default function ActivityDetail() {
           setInviteModelsOpen(false);
         }}
       />
+      <PendingModelsSheet
+        open={pendingModelsOpen}
+        items={pendingClarisInvites}
+        onClose={() => setPendingModelsOpen(false)}
+        onSelect={(item) => {
+          setPendingModelsOpen(false);
+          setProfileSheetCreator({
+            id: Number(item.user_turbo_id) || 0,
+            name: item._user_turbo?.name || "Model",
+            IG_account: item._user_turbo?.IG_account || undefined,
+            Profile_pic: item._user_turbo?.Profile_pic?.url ? { url: item._user_turbo.Profile_pic.url } : null,
+          });
+          setProfileSheetStatus("pending");
+          setSelectedInvitation(item);
+        }}
+      />
       <CreatorProfileSheet
         creator={profileSheetCreator}
         open={!!profileSheetCreator}
