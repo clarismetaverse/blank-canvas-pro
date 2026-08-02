@@ -624,95 +624,144 @@ export default function ActivitiesHome() {
               className="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-md rounded-t-3xl border border-neutral-200 bg-white px-4 pb-20 pt-4"
             >
               <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-neutral-200" />
-              <h3 className="text-base font-semibold text-neutral-900">Create activity</h3>
+              <h3 className="font-serif text-[19px] leading-tight text-neutral-900">Create a local activity</h3>
+              <p className="mt-1 text-[11.5px] text-neutral-500">
+                Curate the moment. Our team reviews it before it goes live.
+              </p>
 
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 max-h-[62vh] space-y-3.5 overflow-y-auto pr-0.5">
+                <div>
+                  <span className="mb-1.5 block text-xs font-medium text-neutral-600">Cover image</span>
+                  {coverPreview ? (
+                    <div className="relative h-40 w-full overflow-hidden rounded-2xl">
+                      <img src={coverPreview} alt="Activity cover" className="h-full w-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => handleCoverSelect(null)}
+                        className="absolute right-2 top-2 rounded-full bg-black/50 p-1.5 text-white backdrop-blur-sm"
+                        aria-label="Remove cover"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex h-32 w-full cursor-pointer items-center justify-center rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 text-neutral-500 transition hover:border-[#c9a86a]/50">
+                      <span className="inline-flex items-center gap-2 text-xs font-medium">
+                        <ImagePlus className="h-4 w-4" />
+                        Add a cover image
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(event) => handleCoverSelect(event.target.files?.[0] ?? null)}
+                      />
+                    </label>
+                  )}
+                </div>
+
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-neutral-600">Name</span>
+                  <span className="mb-1 block text-xs font-medium text-neutral-600">City</span>
+                  <select
+                    value={form.cityId}
+                    onChange={(event) => setForm((prev) => ({ ...prev, cityId: Number(event.target.value) }))}
+                    className="w-full rounded-2xl border border-neutral-200 bg-white px-3 py-2.5 text-sm focus:outline-none"
+                  >
+                    {CURATE_CITIES.map((city) => (
+                      <option key={city.id} value={city.id}>
+                        {city.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium text-neutral-600">Title</span>
                   <input
-                    value={form.name}
-                    onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
-                    placeholder="Activity name"
+                    value={form.title}
+                    onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
+                    placeholder="Sunset dinner at Jungle Sky"
                     className="w-full rounded-2xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none"
                   />
                 </label>
 
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-neutral-600">City / area (optional)</span>
+                  <span className="mb-1 block text-xs font-medium text-neutral-600">Description</span>
+                  <textarea
+                    value={form.description}
+                    onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))}
+                    rows={3}
+                    placeholder="Tell your guests what the evening feels like."
+                    className="w-full resize-none rounded-2xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium text-neutral-600">Address</span>
                   <input
-                    value={form.city}
-                    onChange={(event) => setForm((prev) => ({ ...prev, city: event.target.value }))}
-                    placeholder="Cannes"
+                    value={form.address}
+                    onChange={(event) => setForm((prev) => ({ ...prev, address: event.target.value }))}
+                    placeholder="Venue name, street"
                     className="w-full rounded-2xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none"
                   />
                 </label>
 
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-neutral-600">Date (optional)</span>
+                  <span className="mb-1 block text-xs font-medium text-neutral-600">Date</span>
                   <input
+                    type="date"
                     value={form.date}
                     onChange={(event) => setForm((prev) => ({ ...prev, date: event.target.value }))}
-                    placeholder="May 10"
                     className="w-full rounded-2xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none"
                   />
                 </label>
 
-                <div>
-                  <p className="mb-2 text-xs font-medium text-neutral-600">Tags (optional)</p>
-                  <div className="flex flex-wrap gap-2">
-                    {availableTags.map((tag) => {
-                      const selected = form.tags.includes(tag);
-                      return (
-                        <button
-                          key={tag}
-                          type="button"
-                          onClick={() => toggleTag(tag)}
-                          className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-                            selected
-                              ? "border-neutral-900 bg-neutral-900 text-white"
-                              : "border-neutral-200 bg-white text-neutral-600"
-                          }`}
-                        >
-                          {tag}
-                        </button>
-                      );
-                    })}
-                  </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="block">
+                    <span className="mb-1 block text-xs font-medium text-neutral-600">Start time</span>
+                    <input
+                      type="time"
+                      value={form.startTime}
+                      onChange={(event) => setForm((prev) => ({ ...prev, startTime: event.target.value }))}
+                      className="w-full rounded-2xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-xs font-medium text-neutral-600">End time</span>
+                    <input
+                      type="time"
+                      value={form.endTime}
+                      onChange={(event) => setForm((prev) => ({ ...prev, endTime: event.target.value }))}
+                      className="w-full rounded-2xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none"
+                    />
+                  </label>
                 </div>
+
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium text-neutral-600">Maximum guests</span>
+                  <input
+                    type="number"
+                    min={1}
+                    value={form.maxGuests}
+                    onChange={(event) => setForm((prev) => ({ ...prev, maxGuests: event.target.value }))}
+                    className="w-full rounded-2xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none"
+                  />
+                </label>
               </div>
+
+              {formError && (
+                <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-[11.5px] font-medium text-red-600">{formError}</p>
+              )}
 
               <button
                 type="button"
-                disabled={submitting || !form.name.trim()}
-                onClick={async () => {
-                  setSubmitting(true);
-                  try {
-                    await createEvent({
-                      Name: form.name.trim(),
-                      cities_id: null,
-                      Date: form.date.trim() || null,
-                      Tags: form.tags,
-                      Cover: null,
-                    });
-                    setSheetOpen(false);
-                    navigate(inviteRoute, {
-                      state: {
-                        activityName: form.name.trim(),
-                        city: form.city.trim(),
-                        date: form.date.trim(),
-                        tags: form.tags,
-                      },
-                    });
-                  } catch (err) {
-                    console.error("Failed to create event:", err);
-                  } finally {
-                    setSubmitting(false);
-                  }
-                }}
-                className="mt-5 w-full rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
+                disabled={submitting || !canSubmit}
+                onClick={handleCreateActivity}
+                className="mt-4 w-full rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
               >
-                {submitting ? "Creating…" : "Continue"}
+                {submitting ? "Submitting…" : "Create activity"}
               </button>
+
             </motion.section>
           </>
         )}
