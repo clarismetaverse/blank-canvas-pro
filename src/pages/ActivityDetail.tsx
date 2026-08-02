@@ -415,6 +415,7 @@ export default function ActivityDetail() {
   const [profileSheetStatus, setProfileSheetStatus] = useState<"accepted" | "invited" | "pending" | "rejected" | null>(null);
   const [selectedInvitation, setSelectedInvitation] = useState<ActivityInvitedItem | null>(null);
   const [invitedRaw, setInvitedRaw] = useState<ActivityInvitedItem[]>([]);
+  const [pendingModelsOpen, setPendingModelsOpen] = useState(false);
   const [decisionPending, setDecisionPending] = useState(false);
   const [invitedReloadKey, setInvitedReloadKey] = useState(0);
   const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; cityName?: string; total: number; delta: number; avatars: Array<{ id: number; name: string; url: string | null }>; hostAvatarUrl?: string | null }>({
