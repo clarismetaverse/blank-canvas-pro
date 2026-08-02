@@ -1146,12 +1146,12 @@ export default function ActivityDetail() {
           if (decisionPending) return;
           setProfileSheetCreator(null);
           setProfileSheetStatus(null);
-          setSelectedInviteId(null);
+          setSelectedInvitation(null);
         }}
         variant="vic"
         profileType="candidate"
         invitationStatus={profileSheetStatus}
-        onDecision={selectedInviteId ? (decision) => void handleInvitationDecision(decision) : undefined}
+        onDecision={selectedInvitation ? (decision) => void handleInvitationDecision(decision) : undefined}
         decisionPending={decisionPending}
       />
     </div>
