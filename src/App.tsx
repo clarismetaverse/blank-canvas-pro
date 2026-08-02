@@ -26,8 +26,11 @@ function ProtectedLayout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
+    <>
+    <Toaster position="top-center" />
     <Routes>
       <Route path="/login" element={<Login />} />
+
       <Route path="/apply" element={<Apply />} />
       <Route path="/apply/thanks" element={<ApplyThanks />} />
       <Route path="/register" element={<RegisterVIC />} />
