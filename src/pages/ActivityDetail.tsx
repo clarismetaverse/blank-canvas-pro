@@ -1160,6 +1160,7 @@ export default function ActivityDetail() {
             id: Number(item.user_turbo_id) || 0,
             name: item._user_turbo?.name || "Model",
             IG_account: item._user_turbo?.IG_account || undefined,
+            Tiktok_account: item._user_turbo?.Tiktok_account || undefined,
             Profile_pic: item._user_turbo?.Profile_pic?.url ? { url: item._user_turbo.Profile_pic.url } : null,
           });
           setProfileSheetStatus("pending");
