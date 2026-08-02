@@ -74,7 +74,8 @@ export default function PendingModelsSheet({ open, items, onClose, onSelect }: P
                 <ul className="space-y-2">
                   {items.map((item) => {
                     const name = item._user_turbo?.name || "Model";
-                    const ig = handleFrom(item._user_turbo?.IG_account);
+                    const ig = normalizeHandle(item._user_turbo?.IG_account, "instagram.com");
+                    const tiktok = normalizeHandle(item._user_turbo?.Tiktok_account, "tiktok.com");
                     return (
                       <li key={item.id}>
                         <button
@@ -90,7 +91,18 @@ export default function PendingModelsSheet({ open, items, onClose, onSelect }: P
                           />
                           <span className="min-w-0 flex-1">
                             <span className="block truncate text-sm font-semibold text-neutral-900">{name}</span>
-                            {ig && <span className="block truncate text-xs text-neutral-500">@{ig}</span>}
+                            {ig && (
+                              <span className="mt-0.5 flex items-center gap-1 text-xs text-neutral-500">
+                                <Instagram className="h-3 w-3 shrink-0" aria-hidden="true" />
+                                <span className="truncate">@{ig}</span>
+                              </span>
+                            )}
+                            {tiktok && (
+                              <span className="mt-0.5 flex items-center gap-1 text-xs text-neutral-500">
+                                <Music2 className="h-3 w-3 shrink-0" aria-hidden="true" />
+                                <span className="truncate">@{tiktok}</span>
+                              </span>
+                            )}
                           </span>
                           <span className="rounded-full bg-amber-400/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-amber-700">
                             Pending
