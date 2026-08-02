@@ -1128,10 +1128,17 @@ export default function ActivityDetail() {
       <CreatorProfileSheet
         creator={profileSheetCreator}
         open={!!profileSheetCreator}
-        onClose={() => { setProfileSheetCreator(null); setProfileSheetStatus(null); }}
+        onClose={() => {
+          if (decisionPending) return;
+          setProfileSheetCreator(null);
+          setProfileSheetStatus(null);
+          setSelectedInviteId(null);
+        }}
         variant="vic"
         profileType="candidate"
         invitationStatus={profileSheetStatus}
+        onDecision={selectedInviteId ? (decision) => void handleInvitationDecision(decision) : undefined}
+        decisionPending={decisionPending}
       />
     </div>
   );
