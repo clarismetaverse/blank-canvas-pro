@@ -824,6 +824,7 @@ export default function ActivityDetail() {
               Profile_pic: invite.creator.avatarUrl ? { url: invite.creator.avatarUrl } : null,
             });
             setProfileSheetStatus(invite.status as any);
+            setSelectedInviteId(invite.id);
           }}
         />
 
