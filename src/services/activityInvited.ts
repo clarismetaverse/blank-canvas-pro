@@ -19,6 +19,7 @@ export type ActivityInvitedItem = {
   _user_turbo?: {
     name?: string;
     IG_account?: string;
+    Tiktok_account?: string;
     Profile_pic?: { url?: string | null } | null;
   } | null;
   _vic?: {
