@@ -209,32 +209,70 @@ export default function ActivitiesHome() {
     void loadActivities();
     void loadEventTemps();
     void loadSuggestedLocations();
-  }, []);
-
-  const inviteRoute = useMemo(
-    () =>
-      location.pathname.startsWith("/memberspass/vic/activities")
-        ? "/memberspass/vic/activities/invite"
-        : "/activities/invite",
-    [location.pathname]
-  );
+  }, [loadActivities]);
 
   const openCreateSheet = (seed?: ActivitySeed) => {
-    setForm({
-      name: seed?.title ?? "",
-      city: seed?.city ?? "",
-      date: "",
-      tags: seed?.tags ?? [],
-    });
+    setForm({ ...emptyCreateForm, title: seed?.title ?? "", address: seed?.city ?? "" });
+    setCoverFile(null);
+    setCoverPreview("");
+    setFormError("");
     setSheetOpen(true);
   };
 
-  const toggleTag = (tag: string) => {
-    setForm((prev) => ({
-      ...prev,
-      tags: prev.tags.includes(tag) ? prev.tags.filter((item) => item !== tag) : [...prev.tags, tag],
-    }));
+  const handleCoverSelect = (file: File | null) => {
+    setCoverFile(file);
+    setCoverPreview(file ? URL.createObjectURL(file) : "");
   };
+
+  const maxGuestsValue = Number(form.maxGuests) > 0 ? Number(form.maxGuests) : 5;
+
+  const canSubmit =
+    !!coverFile &&
+    !!form.title.trim() &&
+    !!form.description.trim() &&
+    !!form.address.trim() &&
+    !!form.date &&
+    !!form.startTime &&
+    !!form.endTime;
+
+  const handleCreateActivity = async () => {
+    setFormError("");
+    if (!canSubmit || !coverFile) {
+      setFormError("Please complete every field and add a cover image.");
+      return;
+    }
+    if (form.endTime <= form.startTime) {
+      setFormError("End time must be after the start time.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const result = await curateLocalActivity({
+        cityId: form.cityId,
+        title: form.title.trim(),
+        description: form.description.trim(),
+        address: form.address.trim(),
+        activityDate: form.date,
+        startTime: form.startTime,
+        endTime: form.endTime,
+        maxGuests: maxGuestsValue,
+        cover: coverFile,
+      });
+
+      setSheetOpen(false);
+      setForm(emptyCreateForm);
+      handleCoverSelect(null);
+      toast.success(`Activity submitted — ${result.status_label || "On Review"}`);
+      await loadActivities();
+    } catch (err) {
+      console.error("Failed to curate activity:", err);
+      setFormError("We couldn't create this activity. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-[#0B0B0F]">
