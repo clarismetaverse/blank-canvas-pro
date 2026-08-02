@@ -17,6 +17,26 @@ type MyActivityResponse = {
   transport?: string | null;
   organizer?: number;
   Cover?: { url?: string | null } | null;
+  status?: string;
+  status_label?: string;
+};
+
+const KNOWN_STATUSES = ["draft", "active", "reserved", "confirmed", "cancelled", "on_review"] as const;
+
+function normalizeStatus(raw?: string): Activity["status"] {
+  const value = (raw || "").trim().toLowerCase().replace(/[\s-]+/g, "_");
+  return (KNOWN_STATUSES as readonly string[]).includes(value)
+    ? (value as Activity["status"])
+    : "active";
+}
+
+const DEFAULT_STATUS_LABELS: Record<string, string> = {
+  draft: "Draft",
+  active: "Invited",
+  reserved: "Reserved",
+  confirmed: "Accepted",
+  cancelled: "Cancelled",
+  on_review: "On Review",
 };
 
 function mapMyActivity(item: MyActivityResponse): Activity {
@@ -29,7 +49,9 @@ function mapMyActivity(item: MyActivityResponse): Activity {
     Tripcover: item.Cover || null,
     ActivitiesList: item.activity?.join(", ") || "",
     InvitedUsers: item.user_turbo_id || [],
-    status: "active",
+    status: normalizeStatus(item.status),
+    statusLabel:
+      item.status_label || DEFAULT_STATUS_LABELS[normalizeStatus(item.status)],
     VICS: [],
     ParticipantsMinimumNumber: 0,
     event_temp_id: 0,

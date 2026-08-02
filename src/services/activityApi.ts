@@ -32,6 +32,7 @@ export type ActivityPayload = {
 
 export type Activity = ActivityPayload & {
   id: number;
+  statusLabel?: string;
   created_at?: number;
   updated_at?: number;
   ModelsList?: Array<{ id?: number; name?: string; Profile_pic?: { url?: string } | null }>;
