@@ -828,8 +828,7 @@ export default function ActivityDetail() {
           accepted={groupedInvites.accepted}
           rejected={groupedInvites.rejected}
           onViewAll={() => {
-            setInviteModalInitialTab("invited");
-            setInviteModelsOpen(true);
+            setPendingModelsOpen(true);
           }}
           onSelect={(invite) => {
             // Resolve the raw invitation: primary by invitation id, fallback by user/vic identity.
