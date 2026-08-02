@@ -2,6 +2,7 @@ import type { HangoutGroup } from "@/services/cityHangouts";
 
 interface Props {
   group: HangoutGroup;
+  variant?: "default" | "people-first";
 }
 
 function formatDate(d: string) {
@@ -13,9 +14,65 @@ function formatDate(d: string) {
   });
 }
 
-export default function CityHangoutCard({ group }: Props) {
-  const visibleModels = group.models.slice(0, 4);
+export default function CityHangoutCard({ group, variant = "default" }: Props) {
+  const visibleModels = group.models.slice(0, variant === "people-first" ? 5 : 4);
   const remaining = Math.max(0, group.models.length - visibleModels.length);
+
+  if (variant === "people-first") {
+    return (
+      <div className="flex w-full items-stretch gap-3 overflow-hidden rounded-2xl border border-neutral-200 bg-white p-3 shadow-sm">
+        <div className="h-[72px] w-[72px] shrink-0 overflow-hidden rounded-xl bg-neutral-100">
+          {group.restaurantCover ? (
+            <img
+              src={group.restaurantCover}
+              alt={group.restaurantName}
+              className="h-full w-full object-cover"
+              loading="lazy"
+            />
+          ) : null}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+            <span>{formatDate(group.date)}</span>
+            {group.timeframe ? <span className="text-neutral-300">·</span> : null}
+            {group.timeframe ? <span>{group.timeframe}</span> : null}
+          </div>
+          <h3 className="mt-0.5 truncate text-sm font-semibold text-neutral-900">
+            {group.restaurantName}
+          </h3>
+
+          <div className="mt-2.5 flex items-center gap-3">
+            <div className="flex -space-x-3">
+              {visibleModels.map((m) => (
+                <div
+                  key={m.id}
+                  className="h-12 w-12 overflow-hidden rounded-full border-2 border-white bg-neutral-200 shadow-sm"
+                  title={m.name}
+                >
+                  {m.avatar ? (
+                    <img src={m.avatar} alt={m.name || ""} className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-sm font-semibold text-neutral-500">
+                      {(m.name || "?").slice(0, 1)}
+                    </div>
+                  )}
+                </div>
+              ))}
+              {remaining > 0 && (
+                <div className="flex h-12 w-12 items-center justify-center rounded-full border-2 border-white bg-neutral-900 text-xs font-semibold text-white shadow-sm">
+                  +{remaining}
+                </div>
+              )}
+            </div>
+            <span className="shrink-0 text-[11px] font-medium text-neutral-500">
+              {group.models.length} {group.models.length === 1 ? "model" : "models"}
+            </span>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative w-[290px] shrink-0 snap-start overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
