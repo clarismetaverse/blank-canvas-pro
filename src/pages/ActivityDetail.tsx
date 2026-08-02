@@ -412,7 +412,7 @@ export default function ActivityDetail() {
   const [inviteModalInitialTab, setInviteModalInitialTab] = useState<InviteModalTabKey>("discover");
   const [profileSheetCreator, setProfileSheetCreator] = useState<CreatorLite | null>(null);
   const [profileSheetStatus, setProfileSheetStatus] = useState<"accepted" | "invited" | "pending" | "rejected" | null>(null);
-  const [selectedInviteId, setSelectedInviteId] = useState<string | null>(null);
+  const [selectedInvitation, setSelectedInvitation] = useState<ActivityInvitedItem | null>(null);
   const [invitedRaw, setInvitedRaw] = useState<ActivityInvitedItem[]>([]);
   const [decisionPending, setDecisionPending] = useState(false);
   const [invitedReloadKey, setInvitedReloadKey] = useState(0);
