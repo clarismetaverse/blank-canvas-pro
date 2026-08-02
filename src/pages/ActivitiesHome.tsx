@@ -429,6 +429,10 @@ export default function ActivitiesHome() {
                     key={item.label}
                     type="button"
                     onClick={() => {
+                      if (item.type === "local") {
+                        openCreateSheet();
+                        return;
+                      }
                       setInviteFilterType(item.type);
                       setInviteSheetOpen(true);
                     }}
@@ -449,31 +453,6 @@ export default function ActivitiesHome() {
                 ))}
               </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setInviteFilterType("bali");
-                  setInviteSheetOpen(true);
-                }}
-                className={`group mt-2.5 flex w-full items-center gap-3 rounded-2xl border border-neutral-200/80 sunset-gradient text-left transition hover:border-[#c9a86a]/40 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.12)] active:scale-[0.99] ${
-                  hasActivities ? "px-3.5 py-2.5" : "px-4 py-3.5"
-                }`}
-              >
-                <span className={`flex shrink-0 items-center justify-center rounded-full border border-neutral-200 text-neutral-700 transition group-hover:border-[#c9a86a]/50 group-hover:text-[#c9a86a] ${hasActivities ? "h-7 w-7" : "h-9 w-9"}`}>
-                  <Palmtree className={hasActivities ? "h-3.5 w-3.5" : "h-4 w-4"} strokeWidth={1.5} />
-                </span>
-                <span className="flex-1 min-w-0">
-                  <span className="flex items-center gap-2">
-                    <span className={`font-medium tracking-tight text-neutral-900 ${hasActivities ? "text-[13px]" : "text-[14px]"}`}>Bali</span>
-                    <span className="h-px w-4 bg-[#c9a86a]/60" />
-                    <span className="text-[9.5px] font-medium uppercase tracking-[0.24em] text-[#c9a86a]">Featured</span>
-                  </span>
-                  {!hasActivities && (
-                    <span className="mt-0.5 block truncate text-[11px] text-neutral-500">On the island, by invitation</span>
-                  )}
-                </span>
-                <ChevronRight className="h-4 w-4 text-neutral-400 transition group-hover:translate-x-0.5 group-hover:text-[#c9a86a]" />
-              </button>
             </motion.section>
           );
 
