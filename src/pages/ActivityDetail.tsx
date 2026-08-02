@@ -15,6 +15,7 @@ import { fetchActivityInvited, submitActivityInvitationDecision, type ActivityIn
 import { toast } from "sonner";
 import { getValidInvitedUsers, putTripsInvite } from "@/services/tripsInvite";
 import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityInviteModelsModal";
+import PendingModelsSheet from "@/components/vic/PendingModelsSheet";
 import InvitesSentPopup from "@/components/vic/InvitesSentPopup";
 import { useAuth } from "@/hooks/useAuth";
 
