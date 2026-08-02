@@ -1,16 +1,18 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronRight, Users, X } from "lucide-react";
+import { ChevronRight, Instagram, Music2, Users, X } from "lucide-react";
 import type { ActivityInvitedItem } from "@/services/activityInvited";
 
 const FALLBACK_AVATAR = "https://i.pravatar.cc/100?img=65";
 
-const handleFrom = (igAccount?: string) => {
-  const trimmed = igAccount?.trim();
+const normalizeHandle = (raw: string | undefined, domain: "instagram.com" | "tiktok.com") => {
+  const trimmed = raw?.trim();
   if (!trimmed) return "";
-  const match = trimmed.match(/instagram\.com\/([A-Za-z0-9._]+)/i);
-  if (match?.[1]) return match[1];
-  return trimmed.startsWith("@") ? trimmed.slice(1) : trimmed;
+  const escaped = domain.replace(".", "\\.");
+  const match = trimmed.match(new RegExp(`${escaped}/@?([A-Za-z0-9._]+)`, "i"));
+  const value = match?.[1] ?? trimmed;
+  return value.replace(/^@+/, "").replace(/\/+$/, "");
 };
+
 
 type Props = {
   open: boolean;
