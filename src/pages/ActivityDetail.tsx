@@ -537,6 +537,16 @@ export default function ActivityDetail() {
     void load();
   }, [activityId, navigate, invitedReloadKey]);
 
+  const pendingClarisInvites = useMemo(
+    () =>
+      invitedRaw.filter(
+        (item) =>
+          item.source === "claris" &&
+          (item.status === "pending request" || item.status === "invited")
+      ),
+    [invitedRaw]
+  );
+
   const handleInvitationDecision = async (decision: "approve" | "reject") => {
     if (!activityId) return;
     // Always use the exact raw invitation object (keeps id, source and booking_id intact).
