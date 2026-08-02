@@ -820,14 +820,25 @@ export default function ActivityDetail() {
             setInviteModelsOpen(true);
           }}
           onSelect={(invite) => {
+            // Resolve the raw invitation: primary by invitation id, fallback by user/vic identity.
+            const raw =
+              invitedRaw.find((item) => String(item.id) === String(invite.id)) ??
+              invitedRaw.find(
+                (item) =>
+                  item.type !== "organizer" &&
+                  (String(item.user_turbo_id) === String(invite.id) ||
+                    (item._user_turbo?.name && item._user_turbo.name === invite.creator.name))
+              ) ??
+              null;
+
             setProfileSheetCreator({
-              id: Number(invite.id) || 0,
+              id: Number(raw?.user_turbo_id ?? invite.id) || 0,
               name: invite.creator.name,
               IG_account: invite.creator.ig || undefined,
               Profile_pic: invite.creator.avatarUrl ? { url: invite.creator.avatarUrl } : null,
             });
             setProfileSheetStatus(invite.status as any);
-            setSelectedInviteId(invite.id);
+            setSelectedInvitation(raw);
           }}
         />
 
