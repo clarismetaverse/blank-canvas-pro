@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import { Toaster } from "sonner";
 import MemberspassVICHome from "@/pages/memberspass/MemberspassVICHome";
 import MembersSeeAll from "@/pages/memberspass/MembersSeeAll";
 import HangoutsSeeAll from "@/pages/memberspass/HangoutsSeeAll";
@@ -25,8 +26,11 @@ function ProtectedLayout({ children }: { children: React.ReactNode }) {
 
 export default function App() {
   return (
+    <>
+    <Toaster position="top-center" />
     <Routes>
       <Route path="/login" element={<Login />} />
+
       <Route path="/apply" element={<Apply />} />
       <Route path="/apply/thanks" element={<ApplyThanks />} />
       <Route path="/register" element={<RegisterVIC />} />
@@ -93,5 +97,7 @@ export default function App() {
 
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
+
   );
 }

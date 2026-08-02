@@ -11,7 +11,8 @@ import { useNavigate, useParams } from "react-router-dom";
 import CreatorProfileSheet from "@/components/memberspass/CreatorProfileSheet";
 import type { CreatorLite } from "@/services/creatorSearch";
 import { fetchActivityById, type ActivityDetailResponse, type InviteLite, type InviteStatus, type TripActivity } from "@/services/activities";
-import { fetchActivityInvited, type ActivityInvitedItem } from "@/services/activityInvited";
+import { fetchActivityInvited, submitActivityInvitationDecision, type ActivityInvitedItem } from "@/services/activityInvited";
+import { toast } from "sonner";
 import { getValidInvitedUsers, putTripsInvite } from "@/services/tripsInvite";
 import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityInviteModelsModal";
 import InvitesSentPopup from "@/components/vic/InvitesSentPopup";
@@ -234,8 +235,18 @@ function InvitedSummaryRow({ invited, accepted, rejected, onViewAll, onSelect }:
             {allInvited.map((invite) => (
               <motion.article
                 key={invite.id}
+                role="button"
+                tabIndex={0}
+                aria-label={`${invite.creator.name} — ${chipLabel[invite.status]}`}
                 onClick={() => onSelect?.(invite)}
-                className="relative w-[calc((100%-24px)/3)] min-w-[110px] h-[156px] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 shadow-[0_18px_48px_rgba(0,0,0,0.10)] cursor-pointer active:scale-[0.97] transition-transform"
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    onSelect?.(invite);
+                  }
+                }}
+                className="relative w-[calc((100%-24px)/3)] min-w-[110px] h-[156px] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 bg-neutral-100 shadow-[0_18px_48px_rgba(0,0,0,0.10)] cursor-pointer active:scale-[0.97] transition-transform focus:outline-none focus-visible:ring-2 focus-visible:ring-neutral-900/40"
+
                 initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
                 animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
                 transition={{ type: "spring", stiffness: 220, damping: 22, mass: 0.9 }}
@@ -401,6 +412,10 @@ export default function ActivityDetail() {
   const [inviteModalInitialTab, setInviteModalInitialTab] = useState<InviteModalTabKey>("discover");
   const [profileSheetCreator, setProfileSheetCreator] = useState<CreatorLite | null>(null);
   const [profileSheetStatus, setProfileSheetStatus] = useState<"accepted" | "invited" | "pending" | "rejected" | null>(null);
+  const [selectedInviteId, setSelectedInviteId] = useState<string | null>(null);
+  const [invitedRaw, setInvitedRaw] = useState<ActivityInvitedItem[]>([]);
+  const [decisionPending, setDecisionPending] = useState(false);
+  const [invitedReloadKey, setInvitedReloadKey] = useState(0);
   const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; cityName?: string; total: number; delta: number; avatars: Array<{ id: number; name: string; url: string | null }>; hostAvatarUrl?: string | null }>({
     open: false,
     tripName: "",
@@ -495,6 +510,7 @@ export default function ActivityDetail() {
         if (invitedList.length > 0) {
           mapped.invites = mapInvitedToInvites(invitedList);
         }
+        setInvitedRaw(invitedList);
         setActivityRaw(data);
         setActivity(mapped);
         setEditForm({
@@ -517,7 +533,34 @@ export default function ActivityDetail() {
     };
 
     void load();
-  }, [activityId, navigate]);
+  }, [activityId, navigate, invitedReloadKey]);
+
+  const handleInvitationDecision = async (decision: "approve" | "reject") => {
+    if (!activityId || !selectedInviteId) return;
+    const invitation = invitedRaw.find((item) => String(item.id) === selectedInviteId);
+    if (!invitation) {
+      toast.error("Could not find this invitation");
+      return;
+    }
+
+    setDecisionPending(true);
+    try {
+      await submitActivityInvitationDecision({ activityId, invitation, decision });
+      toast.success(decision === "approve" ? "Model approved" : "Model rejected");
+      setProfileSheetCreator(null);
+      setProfileSheetStatus(null);
+      setSelectedInviteId(null);
+      setInvitedReloadKey((prev) => prev + 1);
+    } catch (error) {
+      console.error("[ActivityDetail] decision failed", error);
+      toast.error(
+        error instanceof Error ? `Could not save decision: ${error.message}` : "Could not save decision"
+      );
+    } finally {
+      setDecisionPending(false);
+    }
+  };
+
 
   const groupedInvites = useMemo(() => {
     if (!activity) return { accepted: [], invited: [], rejected: [] } as Record<InviteStatus, InviteLite[]>;
@@ -781,6 +824,7 @@ export default function ActivityDetail() {
               Profile_pic: invite.creator.avatarUrl ? { url: invite.creator.avatarUrl } : null,
             });
             setProfileSheetStatus(invite.status as any);
+            setSelectedInviteId(invite.id);
           }}
         />
 
@@ -1084,10 +1128,17 @@ export default function ActivityDetail() {
       <CreatorProfileSheet
         creator={profileSheetCreator}
         open={!!profileSheetCreator}
-        onClose={() => { setProfileSheetCreator(null); setProfileSheetStatus(null); }}
+        onClose={() => {
+          if (decisionPending) return;
+          setProfileSheetCreator(null);
+          setProfileSheetStatus(null);
+          setSelectedInviteId(null);
+        }}
         variant="vic"
         profileType="candidate"
         invitationStatus={profileSheetStatus}
+        onDecision={selectedInviteId ? (decision) => void handleInvitationDecision(decision) : undefined}
+        decisionPending={decisionPending}
       />
     </div>
   );
