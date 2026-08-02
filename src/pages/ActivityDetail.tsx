@@ -412,6 +412,10 @@ export default function ActivityDetail() {
   const [inviteModalInitialTab, setInviteModalInitialTab] = useState<InviteModalTabKey>("discover");
   const [profileSheetCreator, setProfileSheetCreator] = useState<CreatorLite | null>(null);
   const [profileSheetStatus, setProfileSheetStatus] = useState<"accepted" | "invited" | "pending" | "rejected" | null>(null);
+  const [selectedInviteId, setSelectedInviteId] = useState<string | null>(null);
+  const [invitedRaw, setInvitedRaw] = useState<ActivityInvitedItem[]>([]);
+  const [decisionPending, setDecisionPending] = useState(false);
+  const [invitedReloadKey, setInvitedReloadKey] = useState(0);
   const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; cityName?: string; total: number; delta: number; avatars: Array<{ id: number; name: string; url: string | null }>; hostAvatarUrl?: string | null }>({
     open: false,
     tripName: "",
