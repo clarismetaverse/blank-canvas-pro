@@ -19,6 +19,11 @@ type MyActivityResponse = {
   Cover?: { url?: string | null } | null;
   status?: string;
   status_label?: string;
+  xdo?: {
+    status?: string;
+    status_label?: string;
+    [key: string]: unknown;
+  } | null;
 };
 
 const KNOWN_STATUSES = ["draft", "active", "reserved", "confirmed", "cancelled", "on_review"] as const;
@@ -40,6 +45,7 @@ const DEFAULT_STATUS_LABELS: Record<string, string> = {
 };
 
 function mapMyActivity(item: MyActivityResponse): Activity {
+  const status = normalizeStatus(item.xdo?.status ?? item.status);
   return {
     id: item.id,
     Name: item.Activity_Name || "Untitled",
@@ -49,9 +55,9 @@ function mapMyActivity(item: MyActivityResponse): Activity {
     Tripcover: item.Cover || null,
     ActivitiesList: item.activity?.join(", ") || "",
     InvitedUsers: item.user_turbo_id || [],
-    status: normalizeStatus(item.status),
+    status,
     statusLabel:
-      item.status_label || DEFAULT_STATUS_LABELS[normalizeStatus(item.status)],
+      item.xdo?.status_label || item.status_label || DEFAULT_STATUS_LABELS[status],
     VICS: [],
     ParticipantsMinimumNumber: 0,
     event_temp_id: 0,
