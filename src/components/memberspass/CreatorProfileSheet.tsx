@@ -46,6 +46,8 @@ type CreatorProfileSheetProps = {
   profileType?: "creator" | "candidate";
   profileSource?: "default" | "vic" | "claris";
   invitationStatus?: "accepted" | "invited" | "pending" | "rejected" | null;
+  onDecision?: (decision: "approve" | "reject") => void;
+  decisionPending?: boolean;
   onClose: () => void;
   onEndorsed?: () => void;
 };
@@ -63,9 +65,12 @@ export default function CreatorProfileSheet({
   profileType = "creator",
   profileSource = "default",
   invitationStatus = null,
+  onDecision,
+  decisionPending = false,
   onClose,
   onEndorsed,
 }: CreatorProfileSheetProps) {
+  const isPendingInvitation = invitationStatus === "invited" || invitationStatus === "pending";
   const { user } = useAuth();
   const [inviteOpen, setInviteOpen] = useState(false);
   const [isGiftDrawerOpen, setIsGiftDrawerOpen] = useState(false);
