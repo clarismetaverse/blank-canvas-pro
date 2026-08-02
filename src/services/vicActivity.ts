@@ -19,6 +19,11 @@ type MyActivityResponse = {
   Cover?: { url?: string | null } | null;
   status?: string;
   status_label?: string;
+  xdo?: {
+    status?: string;
+    status_label?: string;
+    [key: string]: unknown;
+  } | null;
 };
 
 const KNOWN_STATUSES = ["draft", "active", "reserved", "confirmed", "cancelled", "on_review"] as const;
