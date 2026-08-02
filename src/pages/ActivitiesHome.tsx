@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, Mail, MapPin, Plane, Palmtree, ChevronRight, UserRound } from "lucide-react";
+import { ChevronLeft, ImagePlus, Mail, MapPin, Plane, Trash2, UserRound } from "lucide-react";
+import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom";
-import { createEvent, fetchEventTemps, type EventTemp, type InviteLite, type TripActivity } from "@/services/activities";
+import { fetchEventTemps, type EventTemp, type InviteLite, type TripActivity } from "@/services/activities";
+import { CURATE_CITIES, curateLocalActivity } from "@/services/curateActivity";
 import { fetchVicActivities } from "@/services/vicActivity";
 import type { Activity, ActivityStatus } from "@/services/activityApi";
 import InviteExperienceSheet from "@/components/vic/InviteExperienceSheet";
@@ -16,14 +18,27 @@ type ActivitySeed = {
   timing?: "Tonight" | "Weekend";
 };
 
-type ActivityFormState = {
-  name: string;
-  city: string;
+type CreateActivityFormState = {
+  cityId: number;
+  title: string;
+  description: string;
+  address: string;
   date: string;
-  tags: string[];
+  startTime: string;
+  endTime: string;
+  maxGuests: string;
 };
 
-const availableTags = ["Fashion", "Nightlife", "Yachting", "Wellness", "Luxury", "Editorial"];
+const emptyCreateForm: CreateActivityFormState = {
+  cityId: CURATE_CITIES[0].id,
+  title: "",
+  description: "",
+  address: "",
+  date: "",
+  startTime: "",
+  endTime: "",
+  maxGuests: "5",
+};
 
 const cinematicTemplates: ActivitySeed[] = [
   {
@@ -69,6 +84,7 @@ const statusLabelMap: Record<ActivityStatus, string> = {
   reserved: "Reserved",
   confirmed: "Accepted",
   cancelled: "Cancelled",
+  on_review: "On Review",
 };
 
 const toInviteStatus = (status?: ActivityStatus): InviteLite["status"] => {
@@ -112,20 +128,22 @@ export default function ActivitiesHome() {
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState<ActivityFormState>({ name: "", city: "", date: "", tags: [] });
+  const [form, setForm] = useState<CreateActivityFormState>(emptyCreateForm);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string>("");
+  const [formError, setFormError] = useState<string>("");
   const [myActivities, setMyActivities] = useState<TripActivity[]>([]);
   const [myActivitiesRaw, setMyActivitiesRaw] = useState<Activity[]>([]);
   const [myActivitiesLoading, setMyActivitiesLoading] = useState(true);
   const [inviteSheetOpen, setInviteSheetOpen] = useState(false);
-  const [inviteFilterType, setInviteFilterType] = useState<"local" | "trip" | "bali">("local");
+  const [inviteFilterType, setInviteFilterType] = useState<"local" | "trip" | "bali">("trip");
   const [eventTemps, setEventTemps] = useState<EventTemp[]>([]);
   const [eventTempsLoading, setEventTempsLoading] = useState(true);
   const [suggestedLocations, setSuggestedLocations] = useState<VicLocation[]>([]);
   const [suggestedLocationsLoading, setSuggestedLocationsLoading] = useState(true);
   const [invitedByActivity, setInvitedByActivity] = useState<Record<number, Array<{ id: number; name: string; avatarUrl: string }>>>({});
 
-  useEffect(() => {
-    const loadActivities = async () => {
+  const loadActivities = useCallback(async () => {
       setMyActivitiesLoading(true);
       try {
         const activities = await fetchVicActivities();
@@ -159,8 +177,9 @@ export default function ActivitiesHome() {
       } finally {
         setMyActivitiesLoading(false);
       }
-    };
+  }, []);
 
+  useEffect(() => {
     const loadEventTemps = async () => {
       setEventTempsLoading(true);
       try {
