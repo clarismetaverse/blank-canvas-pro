@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { ChevronLeft, Mail, MapPin, Plane, Palmtree, ChevronRight, UserRound } from "lucide-react";
+import { ChevronLeft, ImagePlus, Mail, MapPin, Plane, Trash2, UserRound } from "lucide-react";
+import { toast } from "sonner";
 import { useLocation, useNavigate } from "react-router-dom";
-import { createEvent, fetchEventTemps, type EventTemp, type InviteLite, type TripActivity } from "@/services/activities";
+import { fetchEventTemps, type EventTemp, type InviteLite, type TripActivity } from "@/services/activities";
+import { CURATE_CITIES, curateLocalActivity } from "@/services/curateActivity";
 import { fetchVicActivities } from "@/services/vicActivity";
 import type { Activity, ActivityStatus } from "@/services/activityApi";
 import InviteExperienceSheet from "@/components/vic/InviteExperienceSheet";
@@ -16,14 +18,27 @@ type ActivitySeed = {
   timing?: "Tonight" | "Weekend";
 };
 
-type ActivityFormState = {
-  name: string;
-  city: string;
+type CreateActivityFormState = {
+  cityId: number;
+  title: string;
+  description: string;
+  address: string;
   date: string;
-  tags: string[];
+  startTime: string;
+  endTime: string;
+  maxGuests: string;
 };
 
-const availableTags = ["Fashion", "Nightlife", "Yachting", "Wellness", "Luxury", "Editorial"];
+const emptyCreateForm: CreateActivityFormState = {
+  cityId: CURATE_CITIES[0].id,
+  title: "",
+  description: "",
+  address: "",
+  date: "",
+  startTime: "",
+  endTime: "",
+  maxGuests: "5",
+};
 
 const cinematicTemplates: ActivitySeed[] = [
   {
@@ -69,6 +84,7 @@ const statusLabelMap: Record<ActivityStatus, string> = {
   reserved: "Reserved",
   confirmed: "Accepted",
   cancelled: "Cancelled",
+  on_review: "On Review",
 };
 
 const toInviteStatus = (status?: ActivityStatus): InviteLite["status"] => {
@@ -112,20 +128,22 @@ export default function ActivitiesHome() {
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const [form, setForm] = useState<ActivityFormState>({ name: "", city: "", date: "", tags: [] });
+  const [form, setForm] = useState<CreateActivityFormState>(emptyCreateForm);
+  const [coverFile, setCoverFile] = useState<File | null>(null);
+  const [coverPreview, setCoverPreview] = useState<string>("");
+  const [formError, setFormError] = useState<string>("");
   const [myActivities, setMyActivities] = useState<TripActivity[]>([]);
   const [myActivitiesRaw, setMyActivitiesRaw] = useState<Activity[]>([]);
   const [myActivitiesLoading, setMyActivitiesLoading] = useState(true);
   const [inviteSheetOpen, setInviteSheetOpen] = useState(false);
-  const [inviteFilterType, setInviteFilterType] = useState<"local" | "trip" | "bali">("local");
+  const [inviteFilterType, setInviteFilterType] = useState<"local" | "trip" | "bali">("trip");
   const [eventTemps, setEventTemps] = useState<EventTemp[]>([]);
   const [eventTempsLoading, setEventTempsLoading] = useState(true);
   const [suggestedLocations, setSuggestedLocations] = useState<VicLocation[]>([]);
   const [suggestedLocationsLoading, setSuggestedLocationsLoading] = useState(true);
   const [invitedByActivity, setInvitedByActivity] = useState<Record<number, Array<{ id: number; name: string; avatarUrl: string }>>>({});
 
-  useEffect(() => {
-    const loadActivities = async () => {
+  const loadActivities = useCallback(async () => {
       setMyActivitiesLoading(true);
       try {
         const activities = await fetchVicActivities();
@@ -159,8 +177,9 @@ export default function ActivitiesHome() {
       } finally {
         setMyActivitiesLoading(false);
       }
-    };
+  }, []);
 
+  useEffect(() => {
     const loadEventTemps = async () => {
       setEventTempsLoading(true);
       try {
@@ -190,32 +209,70 @@ export default function ActivitiesHome() {
     void loadActivities();
     void loadEventTemps();
     void loadSuggestedLocations();
-  }, []);
-
-  const inviteRoute = useMemo(
-    () =>
-      location.pathname.startsWith("/memberspass/vic/activities")
-        ? "/memberspass/vic/activities/invite"
-        : "/activities/invite",
-    [location.pathname]
-  );
+  }, [loadActivities]);
 
   const openCreateSheet = (seed?: ActivitySeed) => {
-    setForm({
-      name: seed?.title ?? "",
-      city: seed?.city ?? "",
-      date: "",
-      tags: seed?.tags ?? [],
-    });
+    setForm({ ...emptyCreateForm, title: seed?.title ?? "", address: seed?.city ?? "" });
+    setCoverFile(null);
+    setCoverPreview("");
+    setFormError("");
     setSheetOpen(true);
   };
 
-  const toggleTag = (tag: string) => {
-    setForm((prev) => ({
-      ...prev,
-      tags: prev.tags.includes(tag) ? prev.tags.filter((item) => item !== tag) : [...prev.tags, tag],
-    }));
+  const handleCoverSelect = (file: File | null) => {
+    setCoverFile(file);
+    setCoverPreview(file ? URL.createObjectURL(file) : "");
   };
+
+  const maxGuestsValue = Number(form.maxGuests) > 0 ? Number(form.maxGuests) : 5;
+
+  const canSubmit =
+    !!coverFile &&
+    !!form.title.trim() &&
+    !!form.description.trim() &&
+    !!form.address.trim() &&
+    !!form.date &&
+    !!form.startTime &&
+    !!form.endTime;
+
+  const handleCreateActivity = async () => {
+    setFormError("");
+    if (!canSubmit || !coverFile) {
+      setFormError("Please complete every field and add a cover image.");
+      return;
+    }
+    if (form.endTime <= form.startTime) {
+      setFormError("End time must be after the start time.");
+      return;
+    }
+
+    setSubmitting(true);
+    try {
+      const result = await curateLocalActivity({
+        cityId: form.cityId,
+        title: form.title.trim(),
+        description: form.description.trim(),
+        address: form.address.trim(),
+        activityDate: form.date,
+        startTime: form.startTime,
+        endTime: form.endTime,
+        maxGuests: maxGuestsValue,
+        cover: coverFile,
+      });
+
+      setSheetOpen(false);
+      setForm(emptyCreateForm);
+      handleCoverSelect(null);
+      toast.success(`Activity submitted — ${result.status_label || "On Review"}`);
+      await loadActivities();
+    } catch (err) {
+      console.error("Failed to curate activity:", err);
+      setFormError("We couldn't create this activity. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-[#0B0B0F]">
@@ -266,8 +323,10 @@ export default function ActivitiesHome() {
                 <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pt-1">
                   {myActivities.map((activity, index) => {
                     const raw = myActivitiesRaw[index];
-                    const statusLabel = raw?.status ? statusLabelMap[raw.status] : "Invited";
+                    const statusLabel =
+                      raw?.statusLabel || (raw?.status ? statusLabelMap[raw.status] : "Invited");
                     const statusAccepted = raw?.status === "confirmed";
+                    const statusOnReview = raw?.status === "on_review";
                     const fetchedInvited = invitedByActivity[Number(activity.id)] || [];
                     const previewAvatars = fetchedInvited.length > 0
                       ? fetchedInvited.slice(0, 4).map((c) => ({ id: String(c.id), creator: { name: c.name, avatarUrl: c.avatarUrl, ig: "" }, status: "invited" as const }))
@@ -295,7 +354,9 @@ export default function ActivitiesHome() {
                             className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wide ${
                               statusAccepted
                                 ? "border-emerald-200 bg-emerald-50/95 text-emerald-700"
-                                : "border-neutral-200 bg-white/90 text-neutral-700"
+                                : statusOnReview
+                                  ? "border-amber-200 bg-amber-50/90 text-amber-700"
+                                  : "border-neutral-200 bg-white/90 text-neutral-700"
                             }`}
                           >
                             {statusLabel}
@@ -372,6 +433,10 @@ export default function ActivitiesHome() {
                     key={item.label}
                     type="button"
                     onClick={() => {
+                      if (item.type === "local") {
+                        openCreateSheet();
+                        return;
+                      }
                       setInviteFilterType(item.type);
                       setInviteSheetOpen(true);
                     }}
@@ -392,31 +457,6 @@ export default function ActivitiesHome() {
                 ))}
               </div>
 
-              <button
-                type="button"
-                onClick={() => {
-                  setInviteFilterType("bali");
-                  setInviteSheetOpen(true);
-                }}
-                className={`group mt-2.5 flex w-full items-center gap-3 rounded-2xl border border-neutral-200/80 sunset-gradient text-left transition hover:border-[#c9a86a]/40 hover:shadow-[0_8px_24px_-12px_rgba(0,0,0,0.12)] active:scale-[0.99] ${
-                  hasActivities ? "px-3.5 py-2.5" : "px-4 py-3.5"
-                }`}
-              >
-                <span className={`flex shrink-0 items-center justify-center rounded-full border border-neutral-200 text-neutral-700 transition group-hover:border-[#c9a86a]/50 group-hover:text-[#c9a86a] ${hasActivities ? "h-7 w-7" : "h-9 w-9"}`}>
-                  <Palmtree className={hasActivities ? "h-3.5 w-3.5" : "h-4 w-4"} strokeWidth={1.5} />
-                </span>
-                <span className="flex-1 min-w-0">
-                  <span className="flex items-center gap-2">
-                    <span className={`font-medium tracking-tight text-neutral-900 ${hasActivities ? "text-[13px]" : "text-[14px]"}`}>Bali</span>
-                    <span className="h-px w-4 bg-[#c9a86a]/60" />
-                    <span className="text-[9.5px] font-medium uppercase tracking-[0.24em] text-[#c9a86a]">Featured</span>
-                  </span>
-                  {!hasActivities && (
-                    <span className="mt-0.5 block truncate text-[11px] text-neutral-500">On the island, by invitation</span>
-                  )}
-                </span>
-                <ChevronRight className="h-4 w-4 text-neutral-400 transition group-hover:translate-x-0.5 group-hover:text-[#c9a86a]" />
-              </button>
             </motion.section>
           );
 
@@ -567,95 +607,144 @@ export default function ActivitiesHome() {
               className="fixed inset-x-0 bottom-0 z-50 mx-auto w-full max-w-md rounded-t-3xl border border-neutral-200 bg-white px-4 pb-20 pt-4"
             >
               <div className="mx-auto mb-4 h-1.5 w-10 rounded-full bg-neutral-200" />
-              <h3 className="text-base font-semibold text-neutral-900">Create activity</h3>
+              <h3 className="font-serif text-[19px] leading-tight text-neutral-900">Create a local activity</h3>
+              <p className="mt-1 text-[11.5px] text-neutral-500">
+                Curate the moment. Our team reviews it before it goes live.
+              </p>
 
-              <div className="mt-4 space-y-3">
+              <div className="mt-4 max-h-[62vh] space-y-3.5 overflow-y-auto pr-0.5">
+                <div>
+                  <span className="mb-1.5 block text-xs font-medium text-neutral-600">Cover image</span>
+                  {coverPreview ? (
+                    <div className="relative h-40 w-full overflow-hidden rounded-2xl">
+                      <img src={coverPreview} alt="Activity cover" className="h-full w-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => handleCoverSelect(null)}
+                        className="absolute right-2 top-2 rounded-full bg-black/50 p-1.5 text-white backdrop-blur-sm"
+                        aria-label="Remove cover"
+                      >
+                        <Trash2 className="h-3.5 w-3.5" />
+                      </button>
+                    </div>
+                  ) : (
+                    <label className="flex h-32 w-full cursor-pointer items-center justify-center rounded-2xl border border-dashed border-neutral-300 bg-neutral-50 text-neutral-500 transition hover:border-[#c9a86a]/50">
+                      <span className="inline-flex items-center gap-2 text-xs font-medium">
+                        <ImagePlus className="h-4 w-4" />
+                        Add a cover image
+                      </span>
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        onChange={(event) => handleCoverSelect(event.target.files?.[0] ?? null)}
+                      />
+                    </label>
+                  )}
+                </div>
+
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-neutral-600">Name</span>
+                  <span className="mb-1 block text-xs font-medium text-neutral-600">City</span>
+                  <select
+                    value={form.cityId}
+                    onChange={(event) => setForm((prev) => ({ ...prev, cityId: Number(event.target.value) }))}
+                    className="w-full rounded-2xl border border-neutral-200 bg-white px-3 py-2.5 text-sm focus:outline-none"
+                  >
+                    {CURATE_CITIES.map((city) => (
+                      <option key={city.id} value={city.id}>
+                        {city.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium text-neutral-600">Title</span>
                   <input
-                    value={form.name}
-                    onChange={(event) => setForm((prev) => ({ ...prev, name: event.target.value }))}
-                    placeholder="Activity name"
+                    value={form.title}
+                    onChange={(event) => setForm((prev) => ({ ...prev, title: event.target.value }))}
+                    placeholder="Sunset dinner at Jungle Sky"
                     className="w-full rounded-2xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none"
                   />
                 </label>
 
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-neutral-600">City / area (optional)</span>
+                  <span className="mb-1 block text-xs font-medium text-neutral-600">Description</span>
+                  <textarea
+                    value={form.description}
+                    onChange={(event) => setForm((prev) => ({ ...prev, description: event.target.value }))}
+                    rows={3}
+                    placeholder="Tell your guests what the evening feels like."
+                    className="w-full resize-none rounded-2xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none"
+                  />
+                </label>
+
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium text-neutral-600">Address</span>
                   <input
-                    value={form.city}
-                    onChange={(event) => setForm((prev) => ({ ...prev, city: event.target.value }))}
-                    placeholder="Cannes"
+                    value={form.address}
+                    onChange={(event) => setForm((prev) => ({ ...prev, address: event.target.value }))}
+                    placeholder="Venue name, street"
                     className="w-full rounded-2xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none"
                   />
                 </label>
 
                 <label className="block">
-                  <span className="mb-1 block text-xs font-medium text-neutral-600">Date (optional)</span>
+                  <span className="mb-1 block text-xs font-medium text-neutral-600">Date</span>
                   <input
+                    type="date"
                     value={form.date}
                     onChange={(event) => setForm((prev) => ({ ...prev, date: event.target.value }))}
-                    placeholder="May 10"
                     className="w-full rounded-2xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none"
                   />
                 </label>
 
-                <div>
-                  <p className="mb-2 text-xs font-medium text-neutral-600">Tags (optional)</p>
-                  <div className="flex flex-wrap gap-2">
-                    {availableTags.map((tag) => {
-                      const selected = form.tags.includes(tag);
-                      return (
-                        <button
-                          key={tag}
-                          type="button"
-                          onClick={() => toggleTag(tag)}
-                          className={`rounded-full border px-3 py-1 text-xs font-medium transition ${
-                            selected
-                              ? "border-neutral-900 bg-neutral-900 text-white"
-                              : "border-neutral-200 bg-white text-neutral-600"
-                          }`}
-                        >
-                          {tag}
-                        </button>
-                      );
-                    })}
-                  </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <label className="block">
+                    <span className="mb-1 block text-xs font-medium text-neutral-600">Start time</span>
+                    <input
+                      type="time"
+                      value={form.startTime}
+                      onChange={(event) => setForm((prev) => ({ ...prev, startTime: event.target.value }))}
+                      className="w-full rounded-2xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none"
+                    />
+                  </label>
+                  <label className="block">
+                    <span className="mb-1 block text-xs font-medium text-neutral-600">End time</span>
+                    <input
+                      type="time"
+                      value={form.endTime}
+                      onChange={(event) => setForm((prev) => ({ ...prev, endTime: event.target.value }))}
+                      className="w-full rounded-2xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none"
+                    />
+                  </label>
                 </div>
+
+                <label className="block">
+                  <span className="mb-1 block text-xs font-medium text-neutral-600">Maximum guests</span>
+                  <input
+                    type="number"
+                    min={1}
+                    value={form.maxGuests}
+                    onChange={(event) => setForm((prev) => ({ ...prev, maxGuests: event.target.value }))}
+                    className="w-full rounded-2xl border border-neutral-200 px-3 py-2.5 text-sm focus:outline-none"
+                  />
+                </label>
               </div>
+
+              {formError && (
+                <p className="mt-3 rounded-xl bg-red-50 px-3 py-2 text-[11.5px] font-medium text-red-600">{formError}</p>
+              )}
 
               <button
                 type="button"
-                disabled={submitting || !form.name.trim()}
-                onClick={async () => {
-                  setSubmitting(true);
-                  try {
-                    await createEvent({
-                      Name: form.name.trim(),
-                      cities_id: null,
-                      Date: form.date.trim() || null,
-                      Tags: form.tags,
-                      Cover: null,
-                    });
-                    setSheetOpen(false);
-                    navigate(inviteRoute, {
-                      state: {
-                        activityName: form.name.trim(),
-                        city: form.city.trim(),
-                        date: form.date.trim(),
-                        tags: form.tags,
-                      },
-                    });
-                  } catch (err) {
-                    console.error("Failed to create event:", err);
-                  } finally {
-                    setSubmitting(false);
-                  }
-                }}
-                className="mt-5 w-full rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
+                disabled={submitting || !canSubmit}
+                onClick={handleCreateActivity}
+                className="mt-4 w-full rounded-2xl bg-neutral-900 px-4 py-3 text-sm font-semibold text-white disabled:opacity-50"
               >
-                {submitting ? "Creating…" : "Continue"}
+                {submitting ? "Submitting…" : "Create activity"}
               </button>
+
             </motion.section>
           </>
         )}

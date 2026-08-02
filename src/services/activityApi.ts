@@ -1,6 +1,13 @@
 import { xanoFetch } from "@/services/xanoClient";
 
-export type ActivityStatus = "draft" | "active" | "reserved" | "confirmed" | "cancelled";
+export type ActivityStatus =
+  | "draft"
+  | "active"
+  | "reserved"
+  | "confirmed"
+  | "cancelled"
+  | "on_review";
+
 
 export type TransportEnum = "Yes" | "Uber" | "Private Ferry" | "Private Driver" | "Flight tickets";
 
@@ -25,6 +32,7 @@ export type ActivityPayload = {
 
 export type Activity = ActivityPayload & {
   id: number;
+  statusLabel?: string;
   created_at?: number;
   updated_at?: number;
   ModelsList?: Array<{ id?: number; name?: string; Profile_pic?: { url?: string } | null }>;
