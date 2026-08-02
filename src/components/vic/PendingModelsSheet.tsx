@@ -39,6 +39,7 @@ export default function PendingModelsSheet({ open, items, onClose, onSelect }: P
             role="dialog"
             aria-modal="true"
             aria-label="Pending models"
+            data-testid="pending-models-sheet"
             className="max-h-[85vh] w-full max-w-md overflow-hidden rounded-t-3xl border border-neutral-200 bg-white shadow-[0_-10px_40px_rgba(0,0,0,0.15)]"
           >
             <div className="flex items-center justify-between border-b border-neutral-100 px-5 py-4">
