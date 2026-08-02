@@ -510,6 +510,7 @@ export default function ActivityDetail() {
         if (invitedList.length > 0) {
           mapped.invites = mapInvitedToInvites(invitedList);
         }
+        setInvitedRaw(invitedList);
         setActivityRaw(data);
         setActivity(mapped);
         setEditForm({
@@ -532,7 +533,34 @@ export default function ActivityDetail() {
     };
 
     void load();
-  }, [activityId, navigate]);
+  }, [activityId, navigate, invitedReloadKey]);
+
+  const handleInvitationDecision = async (decision: "approve" | "reject") => {
+    if (!activityId || !selectedInviteId) return;
+    const invitation = invitedRaw.find((item) => String(item.id) === selectedInviteId);
+    if (!invitation) {
+      toast.error("Could not find this invitation");
+      return;
+    }
+
+    setDecisionPending(true);
+    try {
+      await submitActivityInvitationDecision({ activityId, invitation, decision });
+      toast.success(decision === "approve" ? "Model approved" : "Model rejected");
+      setProfileSheetCreator(null);
+      setProfileSheetStatus(null);
+      setSelectedInviteId(null);
+      setInvitedReloadKey((prev) => prev + 1);
+    } catch (error) {
+      console.error("[ActivityDetail] decision failed", error);
+      toast.error(
+        error instanceof Error ? `Could not save decision: ${error.message}` : "Could not save decision"
+      );
+    } finally {
+      setDecisionPending(false);
+    }
+  };
+
 
   const groupedInvites = useMemo(() => {
     if (!activity) return { accepted: [], invited: [], rejected: [] } as Record<InviteStatus, InviteLite[]>;
