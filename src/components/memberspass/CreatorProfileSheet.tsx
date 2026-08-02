@@ -418,23 +418,45 @@ export default function CreatorProfileSheet({
                 )}
                 {invitationStatus && (
                   <div className="border-t border-neutral-200 bg-white px-5 py-4">
-                    <div
-                      className={`w-full rounded-full px-4 py-3 text-center text-sm font-semibold ${
-                        invitationStatus === "accepted"
-                          ? "bg-emerald-500 text-white"
+                    {isPendingInvitation && onDecision ? (
+                      <div className="flex gap-3">
+                        <button
+                          type="button"
+                          disabled={decisionPending}
+                          onClick={() => onDecision("reject")}
+                          className="flex-1 rounded-full border border-red-200 bg-white px-4 py-3 text-sm font-semibold text-red-600 transition-colors disabled:opacity-50"
+                        >
+                          {decisionPending ? "Please wait…" : "Reject"}
+                        </button>
+                        <button
+                          type="button"
+                          disabled={decisionPending}
+                          onClick={() => onDecision("approve")}
+                          className="flex-1 rounded-full bg-emerald-500 px-4 py-3 text-sm font-semibold text-white transition-colors disabled:opacity-50"
+                        >
+                          {decisionPending ? "Please wait…" : "Approve"}
+                        </button>
+                      </div>
+                    ) : (
+                      <div
+                        className={`w-full rounded-full px-4 py-3 text-center text-sm font-semibold ${
+                          invitationStatus === "accepted"
+                            ? "bg-emerald-500 text-white"
+                            : invitationStatus === "rejected"
+                              ? "bg-red-500 text-white"
+                              : "bg-amber-100 text-amber-800 border border-amber-200"
+                        }`}
+                      >
+                        {invitationStatus === "accepted"
+                          ? "Invitation accepted"
                           : invitationStatus === "rejected"
-                            ? "bg-red-500 text-white"
-                            : "bg-amber-100 text-amber-800 border border-amber-200"
-                      }`}
-                    >
-                      {invitationStatus === "accepted"
-                        ? "Invitation accepted"
-                        : invitationStatus === "rejected"
-                          ? "Invitation rejected"
-                          : "Invitation pending"}
-                    </div>
+                            ? "Invitation rejected"
+                            : "Invitation pending"}
+                      </div>
+                    )}
                   </div>
                 )}
+
               </>
             ) : (
               <>
