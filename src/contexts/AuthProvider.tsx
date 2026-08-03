@@ -28,6 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     setUser(profile as User);
+    identifyOneSignalUser((profile as User).id);
     return true;
   }, []);
 
@@ -35,6 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(() => {
     setAuthToken(null);
     setUser(null);
+    clearOneSignalUser();
     navigate("/login", { replace: true });
   }, [navigate]);
 
