@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import CreatorCard from "@/components/memberspass/CreatorCard";
@@ -12,7 +13,7 @@ import HangoutFilters, {
 } from "@/components/memberspass/HangoutFilters";
 import type { CreatorLite } from "@/services/creatorSearch";
 import { fetchVicMembers } from "@/services/vicMembers";
-import { fetchCityHangouts, type HangoutGroup } from "@/services/cityHangouts";
+import { fetchCityHangouts } from "@/services/cityHangouts";
 
 
 const HANGOUT_CITIES = ["Bali", "Dubai", "Milan"];
@@ -30,12 +31,6 @@ export default function MemberspassVICHome() {
   const [query, setQuery] = useState("");
   const [lastResults, setLastResults] = useState<CreatorLite[]>([]);
   const [selectedCreator, setSelectedCreator] = useState<CreatorLite | null>(null);
-  const [approvedMembers, setApprovedMembers] = useState<CreatorLite[]>([]);
-  const [pendingMembers, setPendingMembers] = useState<CreatorLite[]>([]);
-  const [membersLoading, setMembersLoading] = useState(true);
-  const [hangouts, setHangouts] = useState<HangoutGroup[]>([]);
-  const [hangoutsLoading, setHangoutsLoading] = useState(true);
-  const [hangoutsError, setHangoutsError] = useState(false);
   const [hangoutCity, setHangoutCity] = useState(() => {
     if (typeof window === "undefined") return "Bali";
     return localStorage.getItem("owner_city") || "Bali";
@@ -53,59 +48,28 @@ export default function MemberspassVICHome() {
     return () => window.clearTimeout(handle);
   }, [filters.keyword]);
 
-  useEffect(() => {
-    let active = true;
+  const membersQuery = useQuery({
+    queryKey: ["vic-members"],
+    queryFn: fetchVicMembers,
+  });
 
-    const loadMembers = async () => {
-      setMembersLoading(true);
-      try {
-        const { approved, pending } = await fetchVicMembers();
-        if (!active) return;
-        setApprovedMembers(approved);
-        setPendingMembers(pending);
-      } finally {
-        if (active) setMembersLoading(false);
-      }
-    };
+  const approvedMembers = membersQuery.data?.approved ?? [];
+  const pendingMembers = membersQuery.data?.pending ?? [];
+  const membersLoading = membersQuery.isPending;
 
-    loadMembers();
+  const hangoutsQuery = useQuery({
+    queryKey: ["city-hangouts", hangoutCity, tagKey, debouncedKeyword],
+    queryFn: () =>
+      fetchCityHangouts(hangoutCity, {
+        tagIds: tagKey ? tagKey.split(",").map(Number) : [],
+        keyword: debouncedKeyword,
+      }),
+    placeholderData: keepPreviousData,
+  });
 
-    return () => {
-      active = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    let active = true;
-
-    const loadHangouts = async () => {
-      setHangoutsLoading(true);
-      setHangoutsError(false);
-      try {
-        const items = await fetchCityHangouts(hangoutCity, {
-          tagIds: tagKey ? tagKey.split(",").map(Number) : [],
-          keyword: debouncedKeyword,
-        });
-        if (!active) return;
-        setHangouts(items);
-      } catch (err) {
-        console.error("Failed to load city hangouts", err);
-        if (active) {
-          setHangouts([]);
-          setHangoutsError(true);
-        }
-      } finally {
-        if (active) setHangoutsLoading(false);
-      }
-    };
-
-    loadHangouts();
-
-    return () => {
-      active = false;
-    };
-  }, [hangoutCity, tagKey, debouncedKeyword]);
-
+  const hangouts = hangoutsQuery.data ?? [];
+  const hangoutsLoading = hangoutsQuery.isPending;
+  const hangoutsError = hangoutsQuery.isError;
 
   const displayCreators = useMemo(() => {
     if (lastResults.length) return lastResults.slice(0, 10);
