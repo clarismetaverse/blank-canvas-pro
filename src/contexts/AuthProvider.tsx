@@ -64,6 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const onUnauthorized = () => {
       setUser(null);
+      clearOneSignalUser();
       navigate("/login", { replace: true });
     };
 
