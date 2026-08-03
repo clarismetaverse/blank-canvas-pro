@@ -4,6 +4,7 @@ import type { AuthContextType, User } from "./AuthContext";
 import { UNAUTHORIZED_EVENT, apiFetch, getAuthToken, setAuthToken } from "@/services";
 import { fetchVicProfile } from "@/services/vic";
 import { clearOneSignalUser, identifyOneSignalUser } from "@/services/oneSignal";
+import { clearQueryCache } from "@/lib/queryClient";
 
 interface AuthResponse {
   auth_token?: string;
@@ -19,6 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const hydrateUser = useCallback(async (token: string | null) => {
     if (!token) {
       setUser(null);
+      clearQueryCache();
       return false;
     }
 
@@ -37,6 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthToken(null);
     setUser(null);
     clearOneSignalUser();
+    clearQueryCache();
     navigate("/login", { replace: true });
   }, [navigate]);
 
@@ -44,6 +47,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const bootstrap = async () => {
       const token = getAuthToken();
       if (!token) {
+        clearQueryCache();
         setIsLoading(false);
         return;
       }
@@ -65,6 +69,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const onUnauthorized = () => {
       setUser(null);
       clearOneSignalUser();
+      clearQueryCache();
       navigate("/login", { replace: true });
     };
 
