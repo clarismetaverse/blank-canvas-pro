@@ -17,14 +17,13 @@ export default function MembersSeeAll() {
   const title = passedState?.title ?? "Members";
   const passedCreators = passedState?.creators ?? [];
 
-  const { data, isPending } = useQuery({
+  const membersQuery = useQuery({
     queryKey: ["vic-members"],
     queryFn: fetchVicMembers,
-    initialData: passedCreators.length ? { approved: passedCreators, pending: [] } : undefined,
   });
 
-  const creators = data?.approved ?? passedCreators;
-  const loading = isPending && creators.length === 0;
+  const creators = passedCreators.length ? passedCreators : membersQuery.data?.approved ?? [];
+  const loading = creators.length === 0 && membersQuery.isPending;
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-[#0B0B0F]">

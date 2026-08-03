@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ImagePlus, Mail, MapPin, Plane, Trash2, UserRound } from "lucide-react";
 import { toast } from "sonner";
@@ -128,6 +128,7 @@ const mapActivityToTrip = (activity: Activity): TripActivity => {
 export default function ActivitiesHome() {
   const navigate = useNavigate();
   const location = useLocation();
+  const queryClient = useQueryClient();
 
   const [sheetOpen, setSheetOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -186,8 +187,8 @@ export default function ActivitiesHome() {
   );
 
   const loadActivities = useCallback(async () => {
-    await activitiesHomeQuery.refetch();
-  }, [activitiesHomeQuery]);
+    await queryClient.invalidateQueries({ queryKey: ["vic-activities-home"] });
+  }, [queryClient]);
 
   useEffect(() => {
     const loadEventTemps = async () => {
@@ -216,7 +217,6 @@ export default function ActivitiesHome() {
       }
     };
 
-    void loadActivities();
     if (SHOW_DISCOVERY_SECTIONS) {
       void loadEventTemps();
       void loadSuggestedLocations();
@@ -224,7 +224,8 @@ export default function ActivitiesHome() {
       setEventTempsLoading(false);
       setSuggestedLocationsLoading(false);
     }
-  }, [loadActivities]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const openCreateSheet = (seed?: ActivitySeed) => {
     setForm({ ...emptyCreateForm, title: seed?.title ?? "", address: seed?.city ?? "" });
