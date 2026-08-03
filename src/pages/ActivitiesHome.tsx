@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ImagePlus, Mail, MapPin, Plane, Trash2, UserRound } from "lucide-react";
 import { toast } from "sonner";
@@ -134,52 +135,59 @@ export default function ActivitiesHome() {
   const [coverFile, setCoverFile] = useState<File | null>(null);
   const [coverPreview, setCoverPreview] = useState<string>("");
   const [formError, setFormError] = useState<string>("");
-  const [myActivities, setMyActivities] = useState<TripActivity[]>([]);
-  const [myActivitiesRaw, setMyActivitiesRaw] = useState<Activity[]>([]);
-  const [myActivitiesLoading, setMyActivitiesLoading] = useState(true);
   const [inviteSheetOpen, setInviteSheetOpen] = useState(false);
   const [inviteFilterType, setInviteFilterType] = useState<"local" | "trip" | "bali">("trip");
   const [eventTemps, setEventTemps] = useState<EventTemp[]>([]);
   const [eventTempsLoading, setEventTempsLoading] = useState(true);
   const [suggestedLocations, setSuggestedLocations] = useState<VicLocation[]>([]);
   const [suggestedLocationsLoading, setSuggestedLocationsLoading] = useState(true);
-  const [invitedByActivity, setInvitedByActivity] = useState<Record<number, Array<{ id: number; name: string; avatarUrl: string }>>>({});
+
+  const activitiesHomeQuery = useQuery({
+    queryKey: ["vic-activities-home"],
+    queryFn: async () => {
+      const activities = await fetchVicActivities();
+
+      // Fetch invited creators per activity in parallel
+      const entries = await Promise.all(
+        activities.map(async (a) => {
+          try {
+            const invited = await fetchActivityInvited(a.id);
+            const creators = invited
+              .filter((i) => i.type === "invited" && i._user_turbo)
+              .map((i) => ({
+                id: i.user_turbo_id,
+                name: i._user_turbo?.name || "Invited",
+                avatarUrl: i._user_turbo?.Profile_pic?.url || "",
+              }))
+              .filter((c) => c.avatarUrl);
+            return [a.id, creators] as const;
+          } catch {
+            return [a.id, []] as const;
+          }
+        })
+      );
+
+      return {
+        activities,
+        invitedByActivity: Object.fromEntries(entries) as Record<
+          number,
+          Array<{ id: number; name: string; avatarUrl: string }>
+        >,
+      };
+    },
+  });
+
+  const myActivitiesRaw: Activity[] = activitiesHomeQuery.data?.activities ?? [];
+  const invitedByActivity = activitiesHomeQuery.data?.invitedByActivity ?? {};
+  const myActivitiesLoading = activitiesHomeQuery.isPending;
+  const myActivities = useMemo<TripActivity[]>(
+    () => myActivitiesRaw.map(mapActivityToTrip),
+    [myActivitiesRaw],
+  );
 
   const loadActivities = useCallback(async () => {
-      setMyActivitiesLoading(true);
-      try {
-        const activities = await fetchVicActivities();
-        setMyActivitiesRaw(activities);
-        setMyActivities(activities.map(mapActivityToTrip));
-
-        // Fetch invited creators per activity in parallel
-        const entries = await Promise.all(
-          activities.map(async (a) => {
-            try {
-              const invited = await fetchActivityInvited(a.id);
-              const creators = invited
-                .filter((i) => i.type === "invited" && i._user_turbo)
-                .map((i) => ({
-                  id: i.user_turbo_id,
-                  name: i._user_turbo?.name || "Invited",
-                  avatarUrl: i._user_turbo?.Profile_pic?.url || "",
-                }))
-                .filter((c) => c.avatarUrl);
-              return [a.id, creators] as const;
-            } catch {
-              return [a.id, []] as const;
-            }
-          })
-        );
-        setInvitedByActivity(Object.fromEntries(entries));
-      } catch (error) {
-        console.error("Failed to load activities/me", error);
-        setMyActivitiesRaw([]);
-        setMyActivities([]);
-      } finally {
-        setMyActivitiesLoading(false);
-      }
-  }, []);
+    await activitiesHomeQuery.refetch();
+  }, [activitiesHomeQuery]);
 
   useEffect(() => {
     const loadEventTemps = async () => {
