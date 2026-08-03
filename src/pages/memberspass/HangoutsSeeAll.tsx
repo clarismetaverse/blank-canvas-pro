@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import CityHangoutCard from "@/components/memberspass/CityHangoutCard";
@@ -15,24 +15,14 @@ export default function HangoutsSeeAll() {
   const passedState = location.state as SeeAllState | null;
   const city = passedState?.city ?? "Bali";
 
-  const [hangouts, setHangouts] = useState<HangoutGroup[]>(passedState?.hangouts ?? []);
-  const [loading, setLoading] = useState(!passedState?.hangouts?.length);
+  const { data, isPending } = useQuery({
+    queryKey: ["city-hangouts", city, "", ""],
+    queryFn: () => fetchCityHangouts(city, { tagIds: [], keyword: "" }),
+    initialData: passedState?.hangouts?.length ? passedState.hangouts : undefined,
+  });
 
-  useEffect(() => {
-    if (passedState?.hangouts?.length) return;
-    let active = true;
-    fetchCityHangouts(city)
-      .then((items) => {
-        if (active) setHangouts(items);
-      })
-      .catch((err) => console.error("Failed to load city hangouts", err))
-      .finally(() => {
-        if (active) setLoading(false);
-      });
-    return () => {
-      active = false;
-    };
-  }, [city]);
+  const hangouts = data ?? [];
+  const loading = isPending;
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-[#0B0B0F]">

@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { ChevronLeft } from "lucide-react";
 import { useLocation, useNavigate } from "react-router-dom";
 import CreatorCard from "@/components/memberspass/CreatorCard";
 import type { CreatorLite } from "@/services/creatorSearch";
-import { fetchNewInTown } from "@/services/newInTown";
+import { fetchVicMembers } from "@/services/vicMembers";
 
 type SeeAllState = {
   title: string;
@@ -14,18 +14,17 @@ export default function MembersSeeAll() {
   const navigate = useNavigate();
   const location = useLocation();
   const passedState = location.state as SeeAllState | null;
-
-  const [creators, setCreators] = useState<CreatorLite[]>(passedState?.creators ?? []);
-  const [loading, setLoading] = useState(!passedState?.creators?.length);
   const title = passedState?.title ?? "Members";
+  const passedCreators = passedState?.creators ?? [];
 
-  useEffect(() => {
-    if (!passedState?.creators?.length) {
-      fetchNewInTown()
-        .then(setCreators)
-        .finally(() => setLoading(false));
-    }
-  }, []);
+  const { data, isPending } = useQuery({
+    queryKey: ["vic-members"],
+    queryFn: fetchVicMembers,
+    initialData: passedCreators.length ? { approved: passedCreators, pending: [] } : undefined,
+  });
+
+  const creators = data?.approved ?? passedCreators;
+  const loading = isPending && creators.length === 0;
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-[#0B0B0F]">
