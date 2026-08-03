@@ -21,6 +21,21 @@
         await OneSignal.init({
           appId: "1fd29660-6397-47cd-a0e6-d9e3ffafdeb4",
           serviceWorkerPath: "/OneSignalSDKWorker.js",
+          promptOptions: {
+            slidedown: {
+              prompts: [
+                {
+                  type: "push",
+                  autoPrompt: false,
+                  text: {
+                    actionMessage: "Get notified when a new participation request arrives.",
+                    acceptButton: "Allow",
+                    cancelButton: "Not now",
+                  },
+                },
+              ],
+            },
+          },
         });
       } catch (err) {
         console.warn("[oneSignal] init failed", err);
