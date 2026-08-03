@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import type { AuthContextType, User } from "./AuthContext";
 import { UNAUTHORIZED_EVENT, apiFetch, getAuthToken, setAuthToken } from "@/services";
 import { fetchVicProfile } from "@/services/vic";
+import { clearOneSignalUser, identifyOneSignalUser } from "@/services/oneSignal";
 
 interface AuthResponse {
   auth_token?: string;
@@ -27,6 +28,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     setUser(profile as User);
+    identifyOneSignalUser((profile as User).id);
     return true;
   }, []);
 
@@ -34,6 +36,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = useCallback(() => {
     setAuthToken(null);
     setUser(null);
+    clearOneSignalUser();
     navigate("/login", { replace: true });
   }, [navigate]);
 
@@ -61,6 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const onUnauthorized = () => {
       setUser(null);
+      clearOneSignalUser();
       navigate("/login", { replace: true });
     };
 
