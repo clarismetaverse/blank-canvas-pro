@@ -31,7 +31,7 @@ function queue(fn: OneSignalDeferredFn) {
   window.OneSignalDeferred.push(fn);
 }
 
-async function ensurePushSubscription(OneSignal: OneSignalApi) {
+async function ensurePushSubscription(OneSignal: OneSignalApi, userId: string) {
   try {
     const granted = OneSignal.Notifications?.permission === true;
     const subscription = OneSignal.User?.PushSubscription;
@@ -45,6 +45,24 @@ async function ensurePushSubscription(OneSignal: OneSignalApi) {
 
     if (OneSignal.Slidedown?.promptPush) {
       await OneSignal.Slidedown.promptPush();
+
+      // Re-attach the newly created browser push subscription to the VIC external ID.
+      try {
+        await OneSignal.login(userId);
+      } catch (err) {
+        console.warn("[oneSignal] re-login after prompt failed", err);
+      }
+
+      const grantedAfterPrompt = OneSignal.Notifications?.permission === true;
+      const subscriptionAfterPrompt = OneSignal.User?.PushSubscription;
+      if (
+        grantedAfterPrompt &&
+        subscriptionAfterPrompt &&
+        subscriptionAfterPrompt.optedIn !== true &&
+        subscriptionAfterPrompt.optIn
+      ) {
+        await subscriptionAfterPrompt.optIn();
+      }
     }
   } catch (err) {
     console.warn("[oneSignal] push subscription setup failed", err);
@@ -53,13 +71,14 @@ async function ensurePushSubscription(OneSignal: OneSignalApi) {
 
 export function identifyOneSignalUser(userId: string | number | null | undefined) {
   if (userId === null || userId === undefined || userId === "") return;
+  const externalId = String(userId);
   queue(async (OneSignal) => {
     try {
-      await OneSignal.login(String(userId));
+      await OneSignal.login(externalId);
     } catch (err) {
       console.warn("[oneSignal] login failed", err);
     }
-    await ensurePushSubscription(OneSignal);
+    await ensurePushSubscription(OneSignal, externalId);
   });
 }
 
