@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import type { AuthContextType, User } from "./AuthContext";
 import { UNAUTHORIZED_EVENT, apiFetch, getAuthToken, setAuthToken } from "@/services";
 import { fetchVicProfile } from "@/services/vic";
+import { clearOneSignalUser, identifyOneSignalUser } from "@/services/oneSignal";
 
 interface AuthResponse {
   auth_token?: string;
