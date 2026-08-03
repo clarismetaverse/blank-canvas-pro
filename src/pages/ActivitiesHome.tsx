@@ -10,6 +10,8 @@ import type { Activity, ActivityStatus } from "@/services/activityApi";
 import InviteExperienceSheet from "@/components/vic/InviteExperienceSheet";
 import { fetchVicLocations, type VicLocation } from "@/services/vicLocationsList";
 import { fetchActivityInvited } from "@/services/activityInvited";
+
+const SHOW_DISCOVERY_SECTIONS = false;
 type ActivitySeed = {
   title: string;
   city?: string;
@@ -207,8 +209,13 @@ export default function ActivitiesHome() {
     };
 
     void loadActivities();
-    void loadEventTemps();
-    void loadSuggestedLocations();
+    if (SHOW_DISCOVERY_SECTIONS) {
+      void loadEventTemps();
+      void loadSuggestedLocations();
+    } else {
+      setEventTempsLoading(false);
+      setSuggestedLocationsLoading(false);
+    }
   }, [loadActivities]);
 
   const openCreateSheet = (seed?: ActivitySeed) => {
@@ -473,118 +480,120 @@ export default function ActivitiesHome() {
           );
         })()}
 
-        <motion.section
-          initial={{ opacity: 0, y: 12, filter: "blur(8px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ ...easeOut, delay: 0.1 }}
-          className="space-y-3"
-        >
-          <div className="px-1">
-            <h2 className="text-sm font-semibold text-neutral-900">✨ Highlights and International events 🌍</h2>
-          </div>
-          <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2">
-            {eventTempsLoading ? (
-              [0, 1].map((i) => (
-                <div key={i} className="h-56 w-[76%] shrink-0 animate-pulse rounded-3xl border border-neutral-200 bg-neutral-200/70" />
-              ))
-            ) : eventTemps.length === 0 ? (
-              <div className="w-full rounded-2xl border border-dashed border-neutral-200 bg-white px-4 py-6 text-center text-sm text-neutral-500">
-                No event templates yet
-              </div>
-            ) : (
-              eventTemps.map((template) => {
-                const coverUrl = template.Cover?.url || "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1400&q=80";
-                return (
-                  <button
-                    key={template.id}
-                    type="button"
-                    onClick={() => navigate(`/activities/${template.id}`)}
-                    className="relative h-56 w-[76%] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 text-left shadow-[0_14px_34px_rgba(0,0,0,0.12)]"
-                  >
-                    <img src={coverUrl} alt={template.Name} className="h-full w-full object-cover" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-black/10" />
-                    <span className="absolute right-4 top-4 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-neutral-800">
-                      {template.Type || "Template"}
-                    </span>
-                    <div className="absolute bottom-4 left-4">
-                      <p className="text-lg font-semibold text-white">{template.Name}</p>
-                      {template.Date_start && <p className="text-xs text-white/80">{template.Date_start}</p>}
-                    </div>
-                  </button>
-                );
-              })
-            )}
-          </div>
-
-        </motion.section>
-
-        <motion.section
-          initial={{ opacity: 0, y: 12, filter: "blur(8px)" }}
-          animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-          transition={{ ...easeOut, delay: 0.15 }}
-          className="space-y-3"
-        >
-          <h2 className="px-1 text-sm font-semibold text-neutral-900">Suggested locations</h2>
-          <div className="space-y-3">
-            {suggestedLocationsLoading ? (
-              Array.from({ length: 3 }).map((_, idx) => (
-                <div key={idx} className="h-[68px] animate-pulse rounded-2xl border border-neutral-200 bg-neutral-100" />
-              ))
-            ) : suggestedLocations.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-neutral-200 bg-white px-4 py-6 text-center text-sm text-neutral-500">
-                No locations yet
-              </div>
-            ) : (
-              suggestedLocations.slice(0, 6).map((loc) => {
-                const cover = loc.Cover?.url || loc.GaIIery?.[0]?.url || ACTIVITY_PLACEHOLDER_COVER;
-                const title = loc.Title || "Untitled location";
-                const likedCount = 6 + ((loc.id * 13) % 38);
-                const avatarSeeds = [
-                  ((loc.id * 7) % 70) + 1,
-                  ((loc.id * 11) % 70) + 1,
-                  ((loc.id * 17) % 70) + 1,
-                ];
-                return (
-                  <article
-                    key={loc.id}
-                    className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-3 shadow-[0_8px_20px_rgba(0,0,0,0.05)]"
-                  >
-                    <img src={cover} alt={title} className="h-12 w-12 rounded-xl object-cover" />
-                    <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-medium text-neutral-900">{title}</p>
-                      {loc.Adress && <p className="truncate text-xs text-neutral-500">{loc.Adress}</p>}
-                      <div className="mt-1.5 flex items-center gap-1.5">
-                        <div className="flex -space-x-1.5">
-                          {avatarSeeds.map((seed, i) => (
-                            <img
-                              key={i}
-                              src={`https://i.pravatar.cc/40?img=${seed}`}
-                              alt=""
-                              className="h-4 w-4 rounded-full border border-white object-cover"
-                            />
-                          ))}
-                        </div>
-                        <span className="text-[10.5px] font-medium text-neutral-500">
-                          Liked by {likedCount} models · {2 + ((loc.id * 5) % 14)} events held
-                        </span>
-
-                      </div>
-                    </div>
+        {SHOW_DISCOVERY_SECTIONS && (
+          <motion.section
+            initial={{ opacity: 0, y: 12, filter: "blur(8px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ ...easeOut, delay: 0.1 }}
+            className="space-y-3"
+          >
+            <div className="px-1">
+              <h2 className="text-sm font-semibold text-neutral-900">✨ Highlights and International events 🌍</h2>
+            </div>
+            <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2">
+              {eventTempsLoading ? (
+                [0, 1].map((i) => (
+                  <div key={i} className="h-56 w-[76%] shrink-0 animate-pulse rounded-3xl border border-neutral-200 bg-neutral-200/70" />
+                ))
+              ) : eventTemps.length === 0 ? (
+                <div className="w-full rounded-2xl border border-dashed border-neutral-200 bg-white px-4 py-6 text-center text-sm text-neutral-500">
+                  No event templates yet
+                </div>
+              ) : (
+                eventTemps.map((template) => {
+                  const coverUrl = template.Cover?.url || "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=1400&q=80";
+                  return (
                     <button
+                      key={template.id}
                       type="button"
-                      onClick={() => openCreateSheet({ title, city: loc.Adress })}
-                      className="rounded-full border border-neutral-200 sunset-gradient px-3 py-1.5 text-xs font-semibold text-neutral-700"
+                      onClick={() => navigate(`/activities/${template.id}`)}
+                      className="relative h-56 w-[76%] shrink-0 snap-start overflow-hidden rounded-3xl border border-neutral-200 text-left shadow-[0_14px_34px_rgba(0,0,0,0.12)]"
                     >
-                      Use
+                      <img src={coverUrl} alt={template.Name} className="h-full w-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/20 to-black/10" />
+                      <span className="absolute right-4 top-4 rounded-full bg-white/90 px-2.5 py-1 text-[10px] font-semibold tracking-wide text-neutral-800">
+                        {template.Type || "Template"}
+                      </span>
+                      <div className="absolute bottom-4 left-4">
+                        <p className="text-lg font-semibold text-white">{template.Name}</p>
+                        {template.Date_start && <p className="text-xs text-white/80">{template.Date_start}</p>}
+                      </div>
                     </button>
-                  </article>
-                );
-              })
+                  );
+                })
+              )}
+            </div>
 
-            )}
-          </div>
+          </motion.section>
 
-        </motion.section>
+          <motion.section
+            initial={{ opacity: 0, y: 12, filter: "blur(8px)" }}
+            animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+            transition={{ ...easeOut, delay: 0.15 }}
+            className="space-y-3"
+          >
+            <h2 className="px-1 text-sm font-semibold text-neutral-900">Suggested locations</h2>
+            <div className="space-y-3">
+              {suggestedLocationsLoading ? (
+                Array.from({ length: 3 }).map((_, idx) => (
+                  <div key={idx} className="h-[68px] animate-pulse rounded-2xl border border-neutral-200 bg-neutral-100" />
+                ))
+              ) : suggestedLocations.length === 0 ? (
+                <div className="rounded-2xl border border-dashed border-neutral-200 bg-white px-4 py-6 text-center text-sm text-neutral-500">
+                  No locations yet
+                </div>
+              ) : (
+                suggestedLocations.slice(0, 6).map((loc) => {
+                  const cover = loc.Cover?.url || loc.GaIIery?.[0]?.url || ACTIVITY_PLACEHOLDER_COVER;
+                  const title = loc.Title || "Untitled location";
+                  const likedCount = 6 + ((loc.id * 13) % 38);
+                  const avatarSeeds = [
+                    ((loc.id * 7) % 70) + 1,
+                    ((loc.id * 11) % 70) + 1,
+                    ((loc.id * 17) % 70) + 1,
+                  ];
+                  return (
+                    <article
+                      key={loc.id}
+                      className="flex items-center gap-3 rounded-2xl border border-neutral-200 bg-white p-3 shadow-[0_8px_20px_rgba(0,0,0,0.05)]"
+                    >
+                      <img src={cover} alt={title} className="h-12 w-12 rounded-xl object-cover" />
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-medium text-neutral-900">{title}</p>
+                        {loc.Adress && <p className="truncate text-xs text-neutral-500">{loc.Adress}</p>}
+                        <div className="mt-1.5 flex items-center gap-1.5">
+                          <div className="flex -space-x-1.5">
+                            {avatarSeeds.map((seed, i) => (
+                              <img
+                                key={i}
+                                src={`https://i.pravatar.cc/40?img=${seed}`}
+                                alt=""
+                                className="h-4 w-4 rounded-full border border-white object-cover"
+                              />
+                            ))}
+                          </div>
+                          <span className="text-[10.5px] font-medium text-neutral-500">
+                            Liked by {likedCount} models · {2 + ((loc.id * 5) % 14)} events held
+                          </span>
+
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => openCreateSheet({ title, city: loc.Adress })}
+                        className="rounded-full border border-neutral-200 sunset-gradient px-3 py-1.5 text-xs font-semibold text-neutral-700"
+                      >
+                        Use
+                      </button>
+                    </article>
+                  );
+                })
+
+              )}
+            </div>
+
+          </motion.section>
+        )}
       </main>
 
       <AnimatePresence>
