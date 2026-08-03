@@ -481,6 +481,7 @@ export default function ActivitiesHome() {
         })()}
 
         {SHOW_DISCOVERY_SECTIONS && (
+          <>
           <motion.section
             initial={{ opacity: 0, y: 12, filter: "blur(8px)" }}
             animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
@@ -593,6 +594,7 @@ export default function ActivitiesHome() {
             </div>
 
           </motion.section>
+          </>
         )}
       </main>
 
