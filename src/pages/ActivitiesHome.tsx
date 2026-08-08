@@ -32,6 +32,16 @@ type CreateActivityFormState = {
   maxGuests: string;
 };
 
+type ActivityTimingFilter = "upcoming" | "past";
+
+type ActivityListItem = {
+  key: string;
+  raw: Activity;
+  activity: TripActivity;
+  timing: ActivityTimingFilter;
+  isSynthetic: boolean;
+};
+
 const emptyCreateForm: CreateActivityFormState = {
   cityId: CURATE_CITIES[0].id,
   title: "",
@@ -80,6 +90,7 @@ const cinematicTemplates: ActivitySeed[] = [
 const easeOut = { duration: 0.35, ease: "easeOut" as const };
 const ACTIVITY_PLACEHOLDER_COVER =
   "https://images.unsplash.com/photo-1519677100203-a0e668c92439?auto=format&fit=crop&w=1200&q=80";
+const ROCKFISH_ACTIVITY_PATTERN = /rockfish/i;
 
 const statusLabelMap: Record<ActivityStatus, string> = {
   draft: "Draft",
@@ -125,6 +136,39 @@ const mapActivityToTrip = (activity: Activity): TripActivity => {
   };
 };
 
+const parseActivityDate = (value?: string | null): Date | null => {
+  if (!value) return null;
+  const match = value.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (!match) return null;
+
+  const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const formatActivityDateValue = (date: Date): string => [
+  date.getFullYear(),
+  String(date.getMonth() + 1).padStart(2, "0"),
+  String(date.getDate()).padStart(2, "0"),
+].join("-");
+
+const shiftActivityDate = (value: string | null, days: number): string | null => {
+  const date = parseActivityDate(value);
+  if (!date) return value;
+  date.setDate(date.getDate() + days);
+  return formatActivityDateValue(date);
+};
+
+const getActivityTiming = (activity: Activity, today: Date): ActivityTimingFilter => {
+  const activityEnd = parseActivityDate(activity.Return) ?? parseActivityDate(activity.Starting_Day);
+  return activityEnd && activityEnd < today ? "past" : "upcoming";
+};
+
+const formatActivityDateLabel = (value?: string | null): string => {
+  const date = parseActivityDate(value);
+  if (!date) return "";
+  return new Intl.DateTimeFormat("en", { day: "numeric", month: "short" }).format(date);
+};
+
 export default function ActivitiesHome() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -142,6 +186,7 @@ export default function ActivitiesHome() {
   const [eventTempsLoading, setEventTempsLoading] = useState(true);
   const [suggestedLocations, setSuggestedLocations] = useState<VicLocation[]>([]);
   const [suggestedLocationsLoading, setSuggestedLocationsLoading] = useState(true);
+  const [activityTimingFilter, setActivityTimingFilter] = useState<ActivityTimingFilter>("upcoming");
 
   const activitiesHomeQuery = useQuery({
     queryKey: ["vic-activities-home"],
@@ -181,10 +226,67 @@ export default function ActivitiesHome() {
   const myActivitiesRaw: Activity[] = activitiesHomeQuery.data?.activities ?? [];
   const invitedByActivity = activitiesHomeQuery.data?.invitedByActivity ?? {};
   const myActivitiesLoading = activitiesHomeQuery.isPending;
-  const myActivities = useMemo<TripActivity[]>(
-    () => myActivitiesRaw.map(mapActivityToTrip),
-    [myActivitiesRaw],
+  const activityItems = useMemo<ActivityListItem[]>(() => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const items: ActivityListItem[] = myActivitiesRaw.map((raw) => ({
+      key: String(raw.id),
+      raw,
+      activity: mapActivityToTrip(raw),
+      timing: getActivityTiming(raw, today),
+      isSynthetic: false,
+    }));
+
+    const rockfishItems = items.filter((item) => ROCKFISH_ACTIVITY_PATTERN.test(item.raw.Name || ""));
+    const hasUpcomingRockfish = rockfishItems.some((item) => item.timing === "upcoming");
+    const latestPastRockfish = rockfishItems
+      .filter((item) => item.timing === "past")
+      .sort((a, b) => (b.raw.Starting_Day || "").localeCompare(a.raw.Starting_Day || ""))[0];
+
+    // Rockfish is weekly. Show the next occurrence until its new Xano record exists.
+    if (!hasUpcomingRockfish && latestPastRockfish?.raw.Starting_Day) {
+      const upcomingStart = shiftActivityDate(latestPastRockfish.raw.Starting_Day, 7);
+      const upcomingEnd = shiftActivityDate(latestPastRockfish.raw.Return, 7);
+      const upcomingDate = parseActivityDate(upcomingEnd) ?? parseActivityDate(upcomingStart);
+
+      if (upcomingDate && upcomingDate >= today) {
+        const upcomingRaw: Activity = {
+          ...latestPastRockfish.raw,
+          Starting_Day: upcomingStart,
+          Return: upcomingEnd,
+          InvitedUsers: [],
+          ModelsList: [],
+          InvitedUsersExpanded: [],
+        };
+
+        items.push({
+          key: `${upcomingRaw.id}-${upcomingStart}-upcoming`,
+          raw: upcomingRaw,
+          activity: mapActivityToTrip(upcomingRaw),
+          timing: "upcoming",
+          isSynthetic: true,
+        });
+      }
+    }
+
+    return items;
+  }, [myActivitiesRaw]);
+
+  const visibleActivityItems = useMemo(
+    () => activityItems
+      .filter((item) => item.timing === activityTimingFilter)
+      .sort((a, b) => {
+        const comparison = (a.raw.Starting_Day || "").localeCompare(b.raw.Starting_Day || "");
+        return activityTimingFilter === "past" ? -comparison : comparison;
+      }),
+    [activityItems, activityTimingFilter],
   );
+
+  const activityCounts = useMemo(() => ({
+    upcoming: activityItems.filter((item) => item.timing === "upcoming").length,
+    past: activityItems.filter((item) => item.timing === "past").length,
+  }), [activityItems]);
 
   const loadActivities = useCallback(async () => {
     await queryClient.invalidateQueries({ queryKey: ["vic-activities-home"] });
@@ -313,7 +415,7 @@ export default function ActivitiesHome() {
 
       <main className="mx-auto w-full max-w-md space-y-6 px-4 pb-16 pt-5">
         {(() => {
-          const hasActivities = !myActivitiesLoading && myActivities.length > 0;
+          const hasActivities = !myActivitiesLoading && activityItems.length > 0;
 
           const upcomingSection = (
             <motion.section
@@ -323,7 +425,24 @@ export default function ActivitiesHome() {
               transition={easeOut}
             >
               <div className="mb-3 px-1">
-                <h2 className="text-sm font-semibold text-neutral-900">Your upcoming activities</h2>
+                <h2 className="text-sm font-semibold text-neutral-900">Your activities</h2>
+                <div className="mt-3 inline-flex rounded-full border border-neutral-200 bg-neutral-100 p-1" aria-label="Filter activities by date">
+                  {(["upcoming", "past"] as const).map((timing) => (
+                    <button
+                      key={timing}
+                      type="button"
+                      onClick={() => setActivityTimingFilter(timing)}
+                      aria-pressed={activityTimingFilter === timing}
+                      className={`rounded-full px-3 py-1.5 text-xs font-medium capitalize transition ${
+                        activityTimingFilter === timing
+                          ? "bg-white text-neutral-900 shadow-sm"
+                          : "text-neutral-500 hover:text-neutral-800"
+                      }`}
+                    >
+                      {timing} <span className="ml-1 text-[10px] text-neutral-400">{activityCounts[timing]}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
               {myActivitiesLoading ? (
                 <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pt-1">
@@ -331,28 +450,30 @@ export default function ActivitiesHome() {
                     <div key={item} className="h-60 w-[84%] shrink-0 animate-pulse rounded-3xl border border-neutral-200 bg-neutral-200/70" />
                   ))}
                 </div>
-              ) : myActivities.length === 0 ? (
+              ) : visibleActivityItems.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-neutral-200 bg-white px-4 py-6 text-center text-sm text-neutral-500">
-                  No activities yet
+                  No {activityTimingFilter} activities yet
                 </div>
               ) : (
                 <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pt-1">
-                  {myActivities.map((activity, index) => {
-                    const raw = myActivitiesRaw[index];
+                  {visibleActivityItems.map(({ key, activity, raw, timing, isSynthetic }) => {
                     const statusLabel =
                       raw?.statusLabel || (raw?.status ? statusLabelMap[raw.status] : "Invited");
                     const statusAccepted = raw?.status === "confirmed";
                     const statusOnReview = raw?.status === "on_review";
-                    const fetchedInvited = invitedByActivity[Number(activity.id)] || [];
+                    const fetchedInvited = isSynthetic ? [] : (invitedByActivity[Number(activity.id)] || []);
                     const previewAvatars = fetchedInvited.length > 0
                       ? fetchedInvited.slice(0, 4).map((c) => ({ id: String(c.id), creator: { name: c.name, avatarUrl: c.avatarUrl, ig: "" }, status: "invited" as const }))
                       : activity.invites;
-                    const totalInvited = fetchedInvited.length > 0 ? fetchedInvited.length : (raw?.InvitedUsers?.length ?? 0);
+                    const totalInvited = isSynthetic
+                      ? 0
+                      : fetchedInvited.length > 0 ? fetchedInvited.length : (raw?.InvitedUsers?.length ?? 0);
+                    const dateLabel = formatActivityDateLabel(raw.Starting_Day);
 
 
                     return (
                       <button
-                        key={activity.id}
+                        key={key}
                         type="button"
                         onClick={() =>
                           navigate(
@@ -376,6 +497,15 @@ export default function ActivitiesHome() {
                             }`}
                           >
                             {statusLabel}
+                          </span>
+                        </div>
+                        <div className="absolute right-4 top-4">
+                          <span className={`inline-flex rounded-full border px-2.5 py-1 text-[10px] font-semibold tracking-wide ${
+                            timing === "past"
+                              ? "border-neutral-700 bg-neutral-900/85 text-white"
+                              : "border-white/60 bg-white/90 text-neutral-800"
+                          }`}>
+                            {timing === "past" ? "Past" : "Upcoming"}{dateLabel ? ` · ${dateLabel}` : ""}
                           </span>
                         </div>
                         <div className="absolute bottom-4 left-4 right-4 space-y-2.5">
