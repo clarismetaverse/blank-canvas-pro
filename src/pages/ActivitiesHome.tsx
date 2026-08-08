@@ -39,7 +39,6 @@ type ActivityListItem = {
   raw: Activity;
   activity: TripActivity;
   timing: ActivityTimingFilter;
-  isSynthetic: boolean;
 };
 
 const emptyCreateForm: CreateActivityFormState = {
@@ -90,7 +89,6 @@ const cinematicTemplates: ActivitySeed[] = [
 const easeOut = { duration: 0.35, ease: "easeOut" as const };
 const ACTIVITY_PLACEHOLDER_COVER =
   "https://images.unsplash.com/photo-1519677100203-a0e668c92439?auto=format&fit=crop&w=1200&q=80";
-const ROCKFISH_ACTIVITY_PATTERN = /rockfish/i;
 
 const statusLabelMap: Record<ActivityStatus, string> = {
   draft: "Draft",
@@ -143,19 +141,6 @@ const parseActivityDate = (value?: string | null): Date | null => {
 
   const date = new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
   return Number.isNaN(date.getTime()) ? null : date;
-};
-
-const formatActivityDateValue = (date: Date): string => [
-  date.getFullYear(),
-  String(date.getMonth() + 1).padStart(2, "0"),
-  String(date.getDate()).padStart(2, "0"),
-].join("-");
-
-const shiftActivityDate = (value: string | null, days: number): string | null => {
-  const date = parseActivityDate(value);
-  if (!date) return value;
-  date.setDate(date.getDate() + days);
-  return formatActivityDateValue(date);
 };
 
 const getActivityTiming = (activity: Activity, today: Date): ActivityTimingFilter => {
@@ -235,40 +220,7 @@ export default function ActivitiesHome() {
       raw,
       activity: mapActivityToTrip(raw),
       timing: getActivityTiming(raw, today),
-      isSynthetic: false,
     }));
-
-    const rockfishItems = items.filter((item) => ROCKFISH_ACTIVITY_PATTERN.test(item.raw.Name || ""));
-    const hasUpcomingRockfish = rockfishItems.some((item) => item.timing === "upcoming");
-    const latestPastRockfish = rockfishItems
-      .filter((item) => item.timing === "past")
-      .sort((a, b) => (b.raw.Starting_Day || "").localeCompare(a.raw.Starting_Day || ""))[0];
-
-    // Rockfish is weekly. Show the next occurrence until its new Xano record exists.
-    if (!hasUpcomingRockfish && latestPastRockfish?.raw.Starting_Day) {
-      const upcomingStart = shiftActivityDate(latestPastRockfish.raw.Starting_Day, 7);
-      const upcomingEnd = shiftActivityDate(latestPastRockfish.raw.Return, 7);
-      const upcomingDate = parseActivityDate(upcomingEnd) ?? parseActivityDate(upcomingStart);
-
-      if (upcomingDate && upcomingDate >= today) {
-        const upcomingRaw: Activity = {
-          ...latestPastRockfish.raw,
-          Starting_Day: upcomingStart,
-          Return: upcomingEnd,
-          InvitedUsers: [],
-          ModelsList: [],
-          InvitedUsersExpanded: [],
-        };
-
-        items.push({
-          key: `${upcomingRaw.id}-${upcomingStart}-upcoming`,
-          raw: upcomingRaw,
-          activity: mapActivityToTrip(upcomingRaw),
-          timing: "upcoming",
-          isSynthetic: true,
-        });
-      }
-    }
 
     return items;
   }, [myActivitiesRaw]);
@@ -456,18 +408,18 @@ export default function ActivitiesHome() {
                 </div>
               ) : (
                 <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 pt-1">
-                  {visibleActivityItems.map(({ key, activity, raw, timing, isSynthetic }) => {
+                  {visibleActivityItems.map(({ key, activity, raw, timing }) => {
                     const statusLabel =
                       raw?.statusLabel || (raw?.status ? statusLabelMap[raw.status] : "Invited");
                     const statusAccepted = raw?.status === "confirmed";
                     const statusOnReview = raw?.status === "on_review";
-                    const fetchedInvited = isSynthetic ? [] : (invitedByActivity[Number(activity.id)] || []);
+                    const fetchedInvited = invitedByActivity[Number(activity.id)] || [];
                     const previewAvatars = fetchedInvited.length > 0
                       ? fetchedInvited.slice(0, 4).map((c) => ({ id: String(c.id), creator: { name: c.name, avatarUrl: c.avatarUrl, ig: "" }, status: "invited" as const }))
                       : activity.invites;
-                    const totalInvited = isSynthetic
-                      ? 0
-                      : fetchedInvited.length > 0 ? fetchedInvited.length : (raw?.InvitedUsers?.length ?? 0);
+                    const totalInvited = fetchedInvited.length > 0
+                      ? fetchedInvited.length
+                      : (raw?.InvitedUsers?.length ?? 0);
                     const dateLabel = formatActivityDateLabel(raw.Starting_Day);
 
 
