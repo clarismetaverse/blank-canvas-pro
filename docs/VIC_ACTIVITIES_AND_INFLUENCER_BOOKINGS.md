@@ -106,6 +106,9 @@ Run again with `dry_run:=false` after reviewing the result.
 - `Past` contains activities whose end date is before today.
 - Cards are sorted by their real backend date.
 - Clicking a card opens its real `VICMemberActivities.id`.
+- The invited carousel is populated from `/activity_invited` and may contain Claris bookings.
+- The Participants strip is populated only from the activity's real `Participants` relation.
+- `VICMemberActivities.user_turbo_id` and `InvitedUsers` must not be rendered as participants. If `Participants` is empty, the section displays `No accepted members`.
 
 The frontend must not manufacture weekly occurrences or reuse a past activity ID with a future date. A missing occurrence must be fixed by projecting the real `BookingsTurbo` data in Xano.
 
@@ -132,4 +135,3 @@ For every new occurrence:
 6. Confirm `/activity_invited` returns the original `BookingsTurbo.id` values.
 7. Open the card and verify the detail date.
 8. Test one invitation decision and confirm it updates the matching `BookingsTurbo` row.
-

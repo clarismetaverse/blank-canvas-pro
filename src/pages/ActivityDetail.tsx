@@ -49,7 +49,21 @@ type PersonLite = {
 };
 
 function ParticipantsStrip({ people, onViewAll, onSelect }: { people: PersonLite[]; onViewAll: () => void; onSelect?: (person: PersonLite) => void }) {
-  if (!people.length) return null;
+  if (!people.length) {
+    return (
+      <motion.section
+        initial={{ opacity: 0, y: 10, filter: "blur(8px)" }}
+        animate={{ opacity: 1, y: 0, filter: "blur(0px)" }}
+        transition={{ ...easeOut, delay: 0.052 }}
+        className="space-y-3"
+      >
+        <h3 className="text-sm font-semibold text-neutral-900">Participants</h3>
+        <div className="rounded-2xl border border-dashed border-neutral-200 bg-white px-4 py-6 text-center text-sm text-neutral-500">
+          No accepted members
+        </div>
+      </motion.section>
+    );
+  }
 
   const statusPillStyles: Record<PersonLiteStatus, string> = {
     confirmed: "border-emerald-200 bg-emerald-50/95 text-emerald-700",
@@ -663,20 +677,6 @@ export default function ActivityDetail() {
         ig: extractIgHandle(user.IG_account, user.NickName || user.name),
         avatarUrl: user.Profile_pic?.url || FALLBACK_AVATAR,
         status: normalizeStatus(participant.statusapp),
-      });
-    }
-
-    const invitedUsers = Array.isArray(activityRaw.InvitedUsers) ? activityRaw.InvitedUsers : [];
-    for (const user of invitedUsers) {
-      const key = String((user as { user_turbo_id?: number | string }).user_turbo_id ?? user.id ?? "").trim();
-      if (!key || map.has(key)) continue;
-      const name = user.NickName || user.name || "Invited creator";
-      map.set(key, {
-        id: key,
-        name,
-        ig: extractIgHandle(user.IG_account, user.NickName),
-        avatarUrl: user.Profile_pic?.url || FALLBACK_AVATAR,
-        status: "invited",
       });
     }
 
