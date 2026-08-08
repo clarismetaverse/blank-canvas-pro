@@ -34,6 +34,7 @@ export default function CityHangoutCard({ group, variant = "default" }: Props) {
 
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-1.5 text-[10px] font-medium uppercase tracking-wide text-neutral-500">
+            {group.isPast ? <span className="rounded-full bg-neutral-900 px-1.5 py-0.5 text-white">Past</span> : null}
             <span>{formatDate(group.date)}</span>
             {group.timeframe ? <span className="text-neutral-300">·</span> : null}
             {group.timeframe ? <span>{group.timeframe}</span> : null}
@@ -88,6 +89,7 @@ export default function CityHangoutCard({ group, variant = "default" }: Props) {
         ) : null}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
         <div className="absolute left-3 top-3 inline-flex items-center gap-1 rounded-full bg-white/90 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-neutral-700 backdrop-blur">
+          {group.isPast ? <span className="rounded-full bg-neutral-900 px-1.5 py-0.5 text-white">Past</span> : null}
           {formatDate(group.date)}
           {group.timeframe ? <span className="text-neutral-400">·</span> : null}
           {group.timeframe ? <span>{group.timeframe}</span> : null}
