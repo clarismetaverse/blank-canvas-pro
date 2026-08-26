@@ -4,54 +4,54 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>VIC — Members Club App</title>
-    <meta property="og:title" content="VIC — Members Club App">
-  <meta name="twitter:title" content="VIC — Members Club App">
-  <meta name="description" content="VIC members club: curate local activities and trips, discover members and city hangouts.">
-  <meta property="og:description" content="VIC members club: curate local activities and trips, discover members and city hangouts.">
-  <meta name="twitter:description" content="VIC members club: curate local activities and trips, discover members and city hangouts.">
-  <link rel="icon" href="/favicon.png" type="image/png">
-  <link rel="manifest" href="/manifest.webmanifest">
-  <meta name="theme-color" content="#FFFFFF">
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="VIC">
-
-  <meta property="og:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ed92d7fe-3f4f-47f0-816b-007db59e6bdb/id-preview-6ff6303e--460362e6-7df0-4e06-9410-27d12776cd26.lovable.app-1772838161854.png">
-  <meta name="twitter:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ed92d7fe-3f4f-47f0-816b-007db59e6bdb/id-preview-6ff6303e--460362e6-7df0-4e06-9410-27d12776cd26.lovable.app-1772838161854.png">
-  <meta name="twitter:card" content="summary_large_image">
-  <meta property="og:type" content="website">
-  <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
-  <script>
-    window.OneSignalDeferred = window.OneSignalDeferred || [];
-    window.OneSignalDeferred.push(async function (OneSignal) {
-      try {
-        await OneSignal.init({
-          appId: "1fd29660-6397-47cd-a0e6-d9e3ffafdeb4",
-          serviceWorkerPath: "/OneSignalSDKWorker.js",
-          promptOptions: {
-            slidedown: {
-              prompts: [
-                {
-                  type: "push",
-                  autoPrompt: false,
-                  text: {
-                    actionMessage: "Get notified when a new participation request arrives.",
-                    acceptButton: "Allow",
-                    cancelButton: "Not now",
+    <meta property="og:title" content="VIC — Members Club App" />
+    <meta name="twitter:title" content="VIC — Members Club App" />
+    <meta name="description" content="VIC members club: curate local activities and trips, discover members and city hangouts." />
+    <meta property="og:description" content="VIC members club: curate local activities and trips, discover members and city hangouts." />
+    <meta name="twitter:description" content="VIC members club: curate local activities and trips, discover members and city hangouts." />
+    <link rel="icon" type="image/png" sizes="32x32" href="/icons/v3/favicon-32.png" />
+    <link rel="icon" type="image/png" sizes="64x64" href="/icons/v3/favicon-64.png" />
+    <link rel="manifest" href="/manifest.webmanifest" />
+    <link rel="apple-touch-icon" sizes="180x180" href="/icons/v3/apple-touch-icon.png" />
+    <meta name="theme-color" content="#111111" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="VIC" />
+    <meta property="og:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ed92d7fe-3f4f-47f0-816b-007db59e6bdb/id-preview-6ff6303e--460362e6-7df0-4e06-9410-27d12776cd26.lovable.app-1772838161854.png" />
+    <meta name="twitter:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ed92d7fe-3f4f-47f0-816b-007db59e6bdb/id-preview-6ff6303e--460362e6-7df0-4e06-9410-27d12776cd26.lovable.app-1772838161854.png" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta property="og:type" content="website" />
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
+    <script>
+      window.OneSignalDeferred = window.OneSignalDeferred || [];
+      window.OneSignalDeferred.push(async function (OneSignal) {
+        try {
+          await OneSignal.init({
+            appId: "1fd29660-6397-47cd-a0e6-d9e3ffafdeb4",
+            serviceWorkerPath: "/OneSignalSDKWorker.js",
+            promptOptions: {
+              slidedown: {
+                prompts: [
+                  {
+                    type: "push",
+                    autoPrompt: false,
+                    text: {
+                      actionMessage: "Get notified when a new participation request arrives.",
+                      acceptButton: "Allow",
+                      cancelButton: "Not now",
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
-          },
-        });
-      } catch (err) {
-        console.warn("[oneSignal] init failed", err);
-      }
-    });
-  </script>
-</head>
+          });
+        } catch (err) {
+          console.warn("[oneSignal] init failed", err);
+        }
+      });
+    </script>
+  </head>
   <body class="bg-background text-foreground">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>

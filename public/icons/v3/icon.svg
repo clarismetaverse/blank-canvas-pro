@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
+  <title>Claris VIC app icon</title>
+  <defs><radialGradient id="bg" cx="38%" cy="25%" r="90%"><stop stop-color="#242528"/><stop offset="0.58" stop-color="#121316"/><stop offset="1" stop-color="#08090B"/></radialGradient></defs><rect width="1024" height="1024" fill="url(#bg)"/>
+  <defs><linearGradient id="mark" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#FFE29A"/><stop offset="0.48" stop-color="#E7B74E"/><stop offset="1" stop-color="#B77A22"/></linearGradient></defs>
+  <g transform="translate(302.000 268.379) scale(1.03448276)">
+    <path d="M 383 174 L 327 174 A 136 136 0 1 0 229 328 L 257 384 L 180 384 L 144 378 L 97 471 L 41 471 L 97 358 A 192 192 0 1 1 383 174 Z M 192 174 L 255 174 L 332 327 L 378 328 L 406 384 L 362 386 L 405 471 L 349 471 L 224 223 L 192 284 L 168 282 L 143 271 Z" fill="url(#mark)" fill-rule="evenodd" clip-rule="evenodd"/>
+  </g>
+</svg>
