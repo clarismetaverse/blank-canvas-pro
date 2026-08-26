@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <defs>
+    <radialGradient id="page" cx="50%" cy="30%" r="82%">
+      <stop offset="0" stop-color="#332716"/>
+      <stop offset="0.42" stop-color="#171719"/>
+      <stop offset="1" stop-color="#07080A"/>
+    </radialGradient>
+    <radialGradient id="card" cx="38%" cy="25%" r="90%">
+      <stop stop-color="#2D2E31"/>
+      <stop offset="0.58" stop-color="#121316"/>
+      <stop offset="1" stop-color="#08090B"/>
+    </radialGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop stop-color="#FFE29A"/>
+      <stop offset="0.48" stop-color="#E7B74E"/>
+      <stop offset="1" stop-color="#B77A22"/>
+    </linearGradient>
+    <linearGradient id="word" x1="0" y1="0" x2="1" y2="0">
+      <stop stop-color="#FFF0C1"/>
+      <stop offset="0.55" stop-color="#E7B74E"/>
+      <stop offset="1" stop-color="#C68A2D"/>
+    </linearGradient>
+    <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+      <feGaussianBlur stdDeviation="36"/>
+    </filter>
+    <filter id="shadow" x="-30%" y="-30%" width="160%" height="180%">
+      <feDropShadow dx="0" dy="24" stdDeviation="24" flood-color="#000000" flood-opacity="0.55"/>
+    </filter>
+  </defs>
+  <rect width="1200" height="630" fill="url(#page)"/>
+  <ellipse cx="600" cy="260" rx="260" ry="210" fill="#E7B74E" opacity="0.12" filter="url(#glow)"/>
+  <rect x="418" y="44" width="364" height="364" rx="76" fill="url(#card)" stroke="#E7B74E" stroke-opacity="0.32" filter="url(#shadow)"/>
+  <g transform="translate(455.2 90.2) scale(0.7133)">
+    <path d="M 383 174 L 327 174 A 136 136 0 1 0 229 328 L 257 384 L 180 384 L 144 378 L 97 471 L 41 471 L 97 358 A 192 192 0 1 1 383 174 Z M 192 174 L 255 174 L 332 327 L 378 328 L 406 384 L 362 386 L 405 471 L 349 471 L 224 223 L 192 284 L 168 282 L 143 271 Z" fill="url(#gold)" fill-rule="evenodd" clip-rule="evenodd"/>
+  </g>
+  <text x="600" y="528" fill="url(#word)" font-family="Arial, Helvetica, sans-serif" font-size="92" font-weight="500" letter-spacing="30" text-anchor="middle">VIC</text>
+  <text x="600" y="580" fill="#FFF3D1" opacity="0.62" font-family="Arial, Helvetica, sans-serif" font-size="20" font-weight="500" letter-spacing="8" text-anchor="middle">PRIVATE MEMBERS CLUB</text>
+</svg>

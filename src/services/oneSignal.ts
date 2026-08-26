@@ -4,16 +4,14 @@ interface OneSignalApi {
   Notifications?: {
     permission?: boolean;
     permissionNative?: string;
-    requestPermission?: () => Promise<void> | void;
+    requestPermission?: () => Promise<boolean | void> | boolean | void;
   };
   User?: {
     PushSubscription?: {
       optedIn?: boolean;
       optIn?: () => Promise<void> | void;
+      optOut?: () => Promise<void> | void;
     };
-  };
-  Slidedown?: {
-    promptPush?: () => Promise<void> | void;
   };
 }
 
@@ -31,42 +29,48 @@ function queue(fn: OneSignalDeferredFn) {
   window.OneSignalDeferred.push(fn);
 }
 
-async function ensurePushSubscription(OneSignal: OneSignalApi, userId: string) {
-  try {
-    const granted = OneSignal.Notifications?.permission === true;
-    const subscription = OneSignal.User?.PushSubscription;
+export type PushPermissionState = "unsupported" | "default" | "denied" | "enabled" | "disabled";
 
-    if (granted) {
-      if (subscription && subscription.optedIn !== true && subscription.optIn) {
-        await subscription.optIn();
-      }
+const READY_TIMEOUT_MS = 15_000;
+
+function isSupported() {
+  return (
+    typeof window !== "undefined" &&
+    window.isSecureContext &&
+    "serviceWorker" in navigator &&
+    "PushManager" in window &&
+    "Notification" in window
+  );
+}
+
+function withOneSignal<T>(action: (oneSignal: OneSignalApi) => Promise<T>) {
+  return new Promise<T>((resolve, reject) => {
+    if (!isSupported()) {
+      reject(new Error("Push notifications are unavailable in this browser."));
       return;
     }
 
-    if (OneSignal.Slidedown?.promptPush) {
-      await OneSignal.Slidedown.promptPush();
+    let settled = false;
+    const timeout = window.setTimeout(() => {
+      if (settled) return;
+      settled = true;
+      reject(new Error("The notification service did not become ready."));
+    }, READY_TIMEOUT_MS);
 
-      // Re-attach the newly created browser push subscription to the VIC external ID.
+    queue(async (oneSignal) => {
+      if (settled) return;
       try {
-        await OneSignal.login(userId);
-      } catch (err) {
-        console.warn("[oneSignal] re-login after prompt failed", err);
+        const value = await action(oneSignal);
+        settled = true;
+        window.clearTimeout(timeout);
+        resolve(value);
+      } catch (error) {
+        settled = true;
+        window.clearTimeout(timeout);
+        reject(error);
       }
-
-      const grantedAfterPrompt = OneSignal.Notifications?.permission === true;
-      const subscriptionAfterPrompt = OneSignal.User?.PushSubscription;
-      if (
-        grantedAfterPrompt &&
-        subscriptionAfterPrompt &&
-        subscriptionAfterPrompt.optedIn !== true &&
-        subscriptionAfterPrompt.optIn
-      ) {
-        await subscriptionAfterPrompt.optIn();
-      }
-    }
-  } catch (err) {
-    console.warn("[oneSignal] push subscription setup failed", err);
-  }
+    });
+  });
 }
 
 export function identifyOneSignalUser(userId: string | number | null | undefined) {
@@ -75,10 +79,47 @@ export function identifyOneSignalUser(userId: string | number | null | undefined
   queue(async (OneSignal) => {
     try {
       await OneSignal.login(externalId);
+      const subscription = OneSignal.User?.PushSubscription;
+      if (OneSignal.Notifications?.permission === true && subscription?.optedIn !== true) {
+        await subscription?.optIn?.();
+      }
     } catch (err) {
       console.warn("[oneSignal] login failed", err);
     }
-    await ensurePushSubscription(OneSignal, externalId);
+  });
+}
+
+export async function readPushPermission(
+  userId: string | number,
+): Promise<PushPermissionState> {
+  if (!isSupported()) return "unsupported";
+  if (Notification.permission === "denied") return "denied";
+  if (Notification.permission === "default") return "default";
+
+  return withOneSignal(async (oneSignal) => {
+    await oneSignal.login(String(userId));
+    return oneSignal.User?.PushSubscription?.optedIn ? "enabled" : "disabled";
+  });
+}
+
+export async function enablePushNotifications(userId: string | number) {
+  return withOneSignal(async (oneSignal) => {
+    await oneSignal.login(String(userId));
+    const permission = await oneSignal.Notifications?.requestPermission?.();
+    if (permission === false || Notification.permission === "denied") {
+      throw new Error("Notifications were blocked in your browser settings.");
+    }
+    await oneSignal.User?.PushSubscription?.optIn?.();
+    return Boolean(oneSignal.User?.PushSubscription?.optedIn);
+  });
+}
+
+export async function disablePushNotifications(userId: string | number) {
+  return withOneSignal(async (oneSignal) => {
+    await oneSignal.login(String(userId));
+    const subscription = oneSignal.User?.PushSubscription;
+    await subscription?.optOut?.();
+    return !subscription?.optedIn;
   });
 }
 

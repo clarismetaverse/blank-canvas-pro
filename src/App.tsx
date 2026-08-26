@@ -14,6 +14,8 @@ import Apply from "@/pages/Apply";
 import ApplyThanks from "@/pages/ApplyThanks";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import { BottomNavigation } from "@/components/layout/BottomNavigation";
+import { PwaInstallPrompt } from "@/components/pwa/PwaInstallPrompt";
+import { PushPermissionPrompt } from "@/components/pwa/PushPermissionPrompt";
 
 function ProtectedLayout({ children }: { children: React.ReactNode }) {
   return (
@@ -27,8 +29,10 @@ function ProtectedLayout({ children }: { children: React.ReactNode }) {
 export default function App() {
   return (
     <>
-    <Toaster position="top-center" />
-    <Routes>
+      <Toaster position="top-center" />
+      <PwaInstallPrompt />
+      <PushPermissionPrompt />
+      <Routes>
       <Route path="/login" element={<Login />} />
 
       <Route path="/apply" element={<Apply />} />
@@ -96,8 +100,7 @@ export default function App() {
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+      </Routes>
     </>
-
   );
 }

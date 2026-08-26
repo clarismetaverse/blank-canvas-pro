@@ -1,8 +1,27 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { CalendarDays, ChevronLeft, Diamond, Images, LogOut, Mail, Pencil, Sparkles } from "lucide-react";
+import {
+  BellOff,
+  BellRing,
+  CalendarDays,
+  ChevronLeft,
+  Diamond,
+  Images,
+  LoaderCircle,
+  LogOut,
+  Mail,
+  Pencil,
+  Sparkles,
+} from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
+import {
+  disablePushNotifications,
+  enablePushNotifications,
+  readPushPermission,
+  type PushPermissionState,
+} from "@/services/oneSignal";
+import { toast } from "sonner";
 
 const easeOut = { duration: 0.35, ease: [0.22, 0.61, 0.36, 1] };
 
@@ -18,6 +37,8 @@ function initials(name: string) {
 export default function VicProfile() {
   const navigate = useNavigate();
   const { user, isLoading, logout } = useAuth();
+  const [pushState, setPushState] = useState<PushPermissionState>("default");
+  const [updatingPush, setUpdatingPush] = useState(false);
 
   const avatarUrl = user?.Picture?.url ?? "";
   const displayName = user?.Name?.trim() || "VIC Member";
@@ -31,6 +52,51 @@ export default function VicProfile() {
     if (!user) return "VIC";
     return "VIC Member";
   }, [user]);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    let active = true;
+    void readPushPermission(user.id)
+      .then((state) => {
+        if (active) setPushState(state);
+      })
+      .catch(() => undefined);
+    return () => {
+      active = false;
+    };
+  }, [user?.id]);
+
+  const togglePush = async () => {
+    if (!user?.id || updatingPush) return;
+    setUpdatingPush(true);
+    try {
+      if (pushState === "enabled") {
+        await disablePushNotifications(user.id);
+        setPushState("disabled");
+        toast.success("VIC notifications disabled.");
+      } else {
+        const enabled = await enablePushNotifications(user.id);
+        if (!enabled) throw new Error("Push notifications were not enabled.");
+        setPushState("enabled");
+        toast.success("VIC notifications enabled.");
+      }
+    } catch (error) {
+      toast.error(
+        error instanceof Error ? error.message : "Push notifications could not be updated.",
+      );
+    } finally {
+      setUpdatingPush(false);
+    }
+  };
+
+  const pushLabel =
+    pushState === "enabled"
+      ? "Enabled"
+      : pushState === "denied"
+        ? "Blocked in browser"
+        : pushState === "unsupported"
+          ? "Unavailable"
+          : "Off";
 
   return (
     <div className="min-h-screen bg-[#FAFAFA] text-[#0B0B0F]">
@@ -172,6 +238,31 @@ export default function VicProfile() {
                     <p className="text-xs font-semibold text-neutral-600">Email</p>
                     <p className="truncate text-sm text-neutral-900">{email}</p>
                   </div>
+                </div>
+
+                <div className="mt-3 flex items-center gap-3 rounded-2xl border border-neutral-200 bg-[#FAFAFA] px-4 py-3">
+                  {pushState === "enabled" ? (
+                    <BellRing className="h-4 w-4 text-[#B77A22]" />
+                  ) : (
+                    <BellOff className="h-4 w-4 text-neutral-500" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-semibold text-neutral-600">Push notifications</p>
+                    <p className="text-sm text-neutral-900">{pushLabel}</p>
+                  </div>
+                  <button
+                    type="button"
+                    disabled={
+                      updatingPush || pushState === "denied" || pushState === "unsupported"
+                    }
+                    onClick={() => void togglePush()}
+                    className="inline-flex min-w-20 items-center justify-center gap-1.5 rounded-xl bg-neutral-900 px-3 py-2 text-xs font-semibold text-white transition-opacity hover:opacity-85 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    {updatingPush ? (
+                      <LoaderCircle className="h-3.5 w-3.5 animate-spin" aria-hidden="true" />
+                    ) : null}
+                    {pushState === "enabled" ? "Disable" : "Enable"}
+                  </button>
                 </div>
 
                 <button

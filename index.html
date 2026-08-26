@@ -9,6 +9,7 @@
     <meta name="description" content="VIC members club: curate local activities and trips, discover members and city hangouts." />
     <meta property="og:description" content="VIC members club: curate local activities and trips, discover members and city hangouts." />
     <meta name="twitter:description" content="VIC members club: curate local activities and trips, discover members and city hangouts." />
+    <meta property="og:url" content="https://vicpage.lovable.app/" />
     <link rel="icon" type="image/png" sizes="32x32" href="/icons/v3/favicon-32.png" />
     <link rel="icon" type="image/png" sizes="64x64" href="/icons/v3/favicon-64.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -18,8 +19,14 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
     <meta name="apple-mobile-web-app-title" content="VIC" />
-    <meta property="og:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ed92d7fe-3f4f-47f0-816b-007db59e6bdb/id-preview-6ff6303e--460362e6-7df0-4e06-9410-27d12776cd26.lovable.app-1772838161854.png" />
-    <meta name="twitter:image" content="https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/ed92d7fe-3f4f-47f0-816b-007db59e6bdb/id-preview-6ff6303e--460362e6-7df0-4e06-9410-27d12776cd26.lovable.app-1772838161854.png" />
+    <meta property="og:image" content="https://vicpage.lovable.app/social/vic-social-preview-1200x630.png" />
+    <meta property="og:image:secure_url" content="https://vicpage.lovable.app/social/vic-social-preview-1200x630.png" />
+    <meta property="og:image:type" content="image/png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="VIC private members club" />
+    <meta name="twitter:image" content="https://vicpage.lovable.app/social/vic-social-preview-1200x630.png" />
+    <meta name="twitter:image:alt" content="VIC private members club" />
     <meta name="twitter:card" content="summary_large_image" />
     <meta property="og:type" content="website" />
     <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
@@ -30,21 +37,8 @@
           await OneSignal.init({
             appId: "1fd29660-6397-47cd-a0e6-d9e3ffafdeb4",
             serviceWorkerPath: "/OneSignalSDKWorker.js",
-            promptOptions: {
-              slidedown: {
-                prompts: [
-                  {
-                    type: "push",
-                    autoPrompt: false,
-                    text: {
-                      actionMessage: "Get notified when a new participation request arrives.",
-                      acceptButton: "Allow",
-                      cancelButton: "Not now",
-                    },
-                  },
-                ],
-              },
-            },
+            serviceWorkerParam: { scope: "/" },
+            allowLocalhostAsSecureOrigin: true,
           });
         } catch (err) {
           console.warn("[oneSignal] init failed", err);
