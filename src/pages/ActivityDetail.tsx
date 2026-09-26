@@ -2,7 +2,7 @@
 // Notes:
 // - Keeps your existing Edit modal + View all modal.
 // - Adds: InvitedSummaryRow (top) + AcceptedVerticalCarousel.
-// - Adds Chat overlay button (currently stubbed: console.log)
+// - Chat overlay button opens the VIC <-> model Stream conversation (see services/vicChat.ts)
 
 import { useEffect, useMemo, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
@@ -18,6 +18,7 @@ import LocalActivityInviteModelsModal from "@/features/activities/LocalActivityI
 import PendingModelsSheet from "@/components/vic/PendingModelsSheet";
 import InvitesSentPopup from "@/components/vic/InvitesSentPopup";
 import { useAuth } from "@/hooks/useAuth";
+import { isInvitationChatEnabled, openVicActivityChat } from "@/services/vicChat";
 
 const easeOut = { duration: 0.3, ease: "easeOut" };
 
@@ -431,6 +432,7 @@ export default function ActivityDetail() {
   const [invitedRaw, setInvitedRaw] = useState<ActivityInvitedItem[]>([]);
   const [pendingModelsOpen, setPendingModelsOpen] = useState(false);
   const [decisionPending, setDecisionPending] = useState(false);
+  const [chatPending, setChatPending] = useState(false);
   const [invitedReloadKey, setInvitedReloadKey] = useState(0);
   const [invitesSentPopup, setInvitesSentPopup] = useState<{ open: boolean; tripName: string; cityName?: string; total: number; delta: number; avatars: Array<{ id: number; name: string; url: string | null }>; hostAvatarUrl?: string | null }>({
     open: false,
@@ -501,6 +503,7 @@ export default function ActivityDetail() {
           return {
             id: String(it.id),
             status: statusMap[it.status] ?? "invited",
+            source: it.source === "claris" ? "claris" : "vic",
             creator: {
               name,
               avatarUrl: u?.Profile_pic?.url || FALLBACK_AVATAR,
@@ -590,6 +593,36 @@ export default function ActivityDetail() {
     }
   };
 
+
+  const findRawInvitation = (invite: InviteLite) =>
+    invitedRaw.find(
+      (item) =>
+        String(item.id) === String(invite.id) &&
+        (!invite.source || (item.source === "claris" ? "claris" : "vic") === invite.source)
+    ) ?? null;
+
+  // Chat opens once the model answered (pending request) or was approved. Xano re-checks both
+  // the organizer and the invitation status before creating/repairing the Stream channel.
+  const openChatForInvitation = async (invitation: ActivityInvitedItem | null) => {
+    if (!activityId || !invitation) {
+      toast.error("Could not find this invitation");
+      return;
+    }
+    if (!isInvitationChatEnabled(invitation)) {
+      toast.info("Chat opens when the model answers your invitation");
+      return;
+    }
+    setChatPending(true);
+    try {
+      const { channel_id } = await openVicActivityChat({ activityId, invitation });
+      navigate(`/chat/${encodeURIComponent(channel_id)}`);
+    } catch (error) {
+      console.error("[ActivityDetail] chat open failed", error);
+      toast.error(error instanceof Error ? `Could not open chat: ${error.message}` : "Could not open chat");
+    } finally {
+      setChatPending(false);
+    }
+  };
 
   const groupedInvites = useMemo(() => {
     if (!activity) return { accepted: [], invited: [], rejected: [] } as Record<InviteStatus, InviteLite[]>;
@@ -831,9 +864,9 @@ export default function ActivityDetail() {
             setPendingModelsOpen(true);
           }}
           onSelect={(invite) => {
-            // Resolve the raw invitation: primary by invitation id, fallback by user/vic identity.
+            // Resolve the raw invitation: primary by invitation id + source, fallback by user/vic identity.
             const raw =
-              invitedRaw.find((item) => String(item.id) === String(invite.id)) ??
+              findRawInvitation(invite) ??
               invitedRaw.find(
                 (item) =>
                   item.type !== "organizer" &&
@@ -906,8 +939,8 @@ export default function ActivityDetail() {
               setInviteModelsOpen(true);
             }}
             onChat={(invite) => {
-              // Hook this to your chat route/modal
-              console.log("[ActivityDetail] chat with", invite.creator);
+              if (chatPending) return;
+              void openChatForInvitation(findRawInvitation(invite));
             }}
           />
         )}
@@ -1181,6 +1214,12 @@ export default function ActivityDetail() {
         invitationStatus={profileSheetStatus}
         onDecision={selectedInvitation ? (decision) => void handleInvitationDecision(decision) : undefined}
         decisionPending={decisionPending}
+        onChat={
+          selectedInvitation && isInvitationChatEnabled(selectedInvitation)
+            ? () => void openChatForInvitation(selectedInvitation)
+            : undefined
+        }
+        chatPending={chatPending}
       />
     </div>
   );

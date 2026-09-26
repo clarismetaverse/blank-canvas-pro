@@ -34,3 +34,14 @@
 body {
   @apply min-h-screen bg-background text-foreground antialiased;
 }
+
+/* VIC <-> model chat (Stream Chat UI) */
+.vic-stream-chat .str-chat,
+.vic-stream-chat .str-chat__channel,
+.vic-stream-chat .str-chat__container {
+  height: 100%;
+}
+
+.vic-stream-chat .str-chat__message-composer {
+  padding-bottom: max(env(safe-area-inset-bottom), 8px);
+}

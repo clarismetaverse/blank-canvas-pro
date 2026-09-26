@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from "framer-motion";
-import { Bookmark, Gift, Heart, Instagram, Lock, Music2, Share2, Ticket, X } from "lucide-react";
+import { Bookmark, Gift, Heart, Instagram, Lock, MessageCircle, Music2, Share2, Ticket, X } from "lucide-react";
 import { useState } from "react";
 import type { CreatorLite } from "@/services/creatorSearch";
 import InviteExperienceSheet from "@/components/vic/InviteExperienceSheet";
@@ -48,6 +48,9 @@ type CreatorProfileSheetProps = {
   invitationStatus?: "accepted" | "invited" | "pending" | "rejected" | null;
   onDecision?: (decision: "approve" | "reject") => void;
   decisionPending?: boolean;
+  /** Opens the VIC <-> model conversation (only passed once the model answered or was approved). */
+  onChat?: () => void;
+  chatPending?: boolean;
   onClose: () => void;
   onEndorsed?: () => void;
 };
@@ -67,6 +70,8 @@ export default function CreatorProfileSheet({
   invitationStatus = null,
   onDecision,
   decisionPending = false,
+  onChat,
+  chatPending = false,
   onClose,
   onEndorsed,
 }: CreatorProfileSheetProps) {
@@ -423,6 +428,17 @@ export default function CreatorProfileSheet({
                 )}
                 {invitationStatus && (
                   <div className="border-t border-neutral-200 bg-white px-5 py-4">
+                    {onChat ? (
+                      <button
+                        type="button"
+                        disabled={chatPending || decisionPending}
+                        onClick={onChat}
+                        className="mb-3 flex w-full items-center justify-center gap-2 rounded-full border border-neutral-200 bg-white px-4 py-3 text-sm font-semibold text-neutral-900 transition-colors disabled:opacity-50"
+                      >
+                        <MessageCircle className="h-4 w-4" />
+                        {chatPending ? "Opening chat…" : "Message"}
+                      </button>
+                    ) : null}
                     {isPendingInvitation && onDecision ? (
                       <div className="flex gap-3">
                         <button

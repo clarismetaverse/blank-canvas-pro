@@ -4,6 +4,7 @@ import type { AuthContextType, User } from "./AuthContext";
 import { UNAUTHORIZED_EVENT, apiFetch, getAuthToken, setAuthToken } from "@/services";
 import { fetchVicProfile } from "@/services/vic";
 import { clearOneSignalUser, identifyOneSignalUser } from "@/services/oneSignal";
+import { disconnectVicChat } from "@/services/vicChat";
 import { clearQueryCache } from "@/lib/queryClient";
 
 interface AuthResponse {
@@ -39,6 +40,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setAuthToken(null);
     setUser(null);
     clearOneSignalUser();
+    void disconnectVicChat();
     clearQueryCache();
     navigate("/login", { replace: true });
   }, [navigate]);
@@ -69,6 +71,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const onUnauthorized = () => {
       setUser(null);
       clearOneSignalUser();
+      void disconnectVicChat();
       clearQueryCache();
       navigate("/login", { replace: true });
     };

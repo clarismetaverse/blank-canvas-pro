@@ -1,3 +1,4 @@
+import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { Toaster } from "sonner";
 import MemberspassVICHome from "@/pages/memberspass/MemberspassVICHome";
@@ -8,6 +9,7 @@ import ActivitiesHome from "@/pages/ActivitiesHome";
 import ActivityDetail from "@/pages/ActivityDetail";
 import ActivitiesInvite from "@/pages/ActivitiesInvite";
 import VicProfile from "@/pages/VicProfile";
+const VicChat = lazy(() => import("@/pages/VicChat"));
 import Login from "@/pages/Login";
 import RegisterVIC from "@/pages/RegisterVIC";
 import Apply from "@/pages/Apply";
@@ -86,6 +88,26 @@ export default function App() {
           element={
             <ProtectedLayout>
               <ActivitiesInvite />
+            </ProtectedLayout>
+          }
+        />
+        <Route
+          path="/chat"
+          element={
+            <ProtectedLayout>
+              <Suspense fallback={null}>
+                <VicChat />
+              </Suspense>
+            </ProtectedLayout>
+          }
+        />
+        <Route
+          path="/chat/:channelId"
+          element={
+            <ProtectedLayout>
+              <Suspense fallback={null}>
+                <VicChat />
+              </Suspense>
             </ProtectedLayout>
           }
         />

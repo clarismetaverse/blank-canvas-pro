@@ -7,6 +7,8 @@ export type InviteStatus = "invited" | "accepted" | "rejected";
 export type InviteLite = {
   id: string;
   status: InviteStatus;
+  /** Origin of the invitation row returned by /activity_invited ("claris" booking or native "vic"). */
+  source?: "claris" | "vic";
   creator: {
     name: string;
     avatarUrl: string;
