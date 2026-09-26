@@ -40,7 +40,7 @@ export async function submitActivityInvitationDecision(params: {
   };
   if (token) headers.Authorization = `Bearer ${token}`;
 
-  const res = await fetch(`${API}/activity_invitation_decision`, {
+  const res = await fetch(`${API}/vic/activity_invitation_decision`, {
     method: "PATCH",
     headers,
     body: JSON.stringify({

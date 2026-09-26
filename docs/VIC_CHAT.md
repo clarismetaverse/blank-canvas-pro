@@ -52,8 +52,16 @@ Sources are checked in under `backend/xano/vic-chat/`.
 - `POST /vic/chat/open` (auth VIC, id 2138): `{vicmembersactivity_id, item_id, source}`. Checks that the
   VIC organizes the activity, that the invitation belongs to it and is in a chat-enabled state, then
   calls `vic_chat/ensure_channel`. Returns `{cid, channel_id, members}`.
-- Proposed, not yet applied: open the chat automatically on approval inside
-  `PATCH /activity_invitation_decision` (see `activity-invitation-decision.patch.md`).
+- `PATCH /vic/activity_invitation_decision` (auth VIC, id 2139): **VIC-only clone** of the shared
+  `activity_invitation_decision` (id 2063, left unchanged). Same decision logic; on approve it also calls
+  `vic_chat/ensure_channel` inside `try_catch`, so a chat failure never undoes the decision. The VIC app
+  now calls this clone.
+- Table trigger `open_vic_chat_on_invitation_answer` (id 2, table `invitebyVIC`, insert/update): when a
+  native invitation becomes `pending request` or `approved`, it opens the chat immediately so the model
+  can write first. Errors are caught and logged; the invitation write is never blocked.
+
+Rule for this project: never edit production endpoints shared with other apps. Change only VIC-exclusive
+endpoints, or create a VIC clone and point the VIC app at it.
 
 ## Frontend
 
